@@ -14,6 +14,14 @@
     <name>pinpoint-plugins-assembly</name>
     <packaging>pom</packaging>
 
+    <properties>
+        <!-- http://openclover.org/ -->
+        <!-- https://bitbucket.org/openclover/clover/issues/61/430-support-java-9 -->
+        <!-- 4.3 will support java9 -->
+        <plugin.clover.skip>true</plugin.clover.skip>
+        <plugin.animal-sniffer.skip>true</plugin.animal-sniffer.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.navercorp.pinpoint</groupId>
@@ -350,6 +358,10 @@
             <artifactId>pinpoint-jdk-completable-future-plugin</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.navercorp.pinpoint</groupId>
+            <artifactId>pinpoint-jdk-httpclient-plugin</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
-
 </project>

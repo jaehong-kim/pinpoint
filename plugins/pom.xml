@@ -99,6 +99,7 @@
         <module>reactor</module>
         <module>reactor-netty</module>
         <module>jdk-completable-future</module>
+        <module>jdk-httpclient</module>
     </modules>
 
     <dependencyManagement>

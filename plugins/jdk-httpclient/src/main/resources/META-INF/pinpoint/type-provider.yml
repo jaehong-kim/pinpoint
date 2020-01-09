@@ -1,0 +1,7 @@
+serviceTypes:
+    - code: 9040
+      name: 'JDK_HTTP_CLIENT'
+      desc: 'JAVA'
+      matcher:
+            type: 'exact'
+            code: 40 # http.url

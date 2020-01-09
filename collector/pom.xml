@@ -32,6 +32,7 @@
         <jdk.version>1.8</jdk.version>
         <jdk.home>${env.JAVA_8_HOME}</jdk.home>
         <sniffer.artifactid>java18</sniffer.artifactid>
+        <plugin.animal-sniffer.skip>true</plugin.animal-sniffer.skip>
     </properties>
 
     <dependencies>

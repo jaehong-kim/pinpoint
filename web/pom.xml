@@ -37,6 +37,7 @@
         <!-- java back-end development option -->
         <pinpoint.web.frontend.build.skip>false</pinpoint.web.frontend.build.skip>
         <node.force.clean.skip>true</node.force.clean.skip>
+        <plugin.animal-sniffer.skip>true</plugin.animal-sniffer.skip>
     </properties>
 
     <dependencies>
