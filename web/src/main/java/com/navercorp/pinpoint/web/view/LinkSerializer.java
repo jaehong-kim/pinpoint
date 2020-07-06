@@ -16,6 +16,7 @@
 
 package com.navercorp.pinpoint.web.view;
 
+import com.navercorp.pinpoint.web.applicationmap.histogram.LoadHistogramFormat;
 import com.navercorp.pinpoint.web.applicationmap.link.Link;
 import com.navercorp.pinpoint.web.applicationmap.link.LinkType;
 import com.navercorp.pinpoint.web.applicationmap.nodes.Node;
@@ -119,10 +120,15 @@ public class LinkSerializer extends JsonSerializer<Link> {
 
 
     private void writeTimeSeriesHistogram(Link link, JsonGenerator jgen) throws IOException {
-        List<ResponseTimeViewModel> sourceApplicationTimeSeriesHistogram = link.getLinkApplicationTimeSeriesHistogram();
-
-        jgen.writeFieldName("timeSeriesHistogram");
-        jgen.writeObject(sourceApplicationTimeSeriesHistogram);
+        if(link.getLoadHistogramFormat() == LoadHistogramFormat.V2) {
+            List<LoadTimeViewModel> loadTimeViewModelList = link.getLinkApplicationLoadHistogram();
+            jgen.writeFieldName("loadHistogram");
+            jgen.writeObject(loadTimeViewModelList);
+        } else {
+            List<ResponseTimeViewModel> sourceApplicationTimeSeriesHistogram = link.getLinkApplicationTimeSeriesHistogram();
+            jgen.writeFieldName("timeSeriesHistogram");
+            jgen.writeObject(sourceApplicationTimeSeriesHistogram);
+        }
     }
 
 

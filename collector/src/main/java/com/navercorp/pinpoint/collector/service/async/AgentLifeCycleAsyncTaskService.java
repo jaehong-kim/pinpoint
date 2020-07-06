@@ -16,13 +16,16 @@
 
 package com.navercorp.pinpoint.collector.service.async;
 
+import com.navercorp.pinpoint.collector.config.CollectorConfiguration;
 import com.navercorp.pinpoint.collector.service.AgentLifeCycleService;
+import com.navercorp.pinpoint.collector.service.StatisticsService;
 import com.navercorp.pinpoint.common.server.bo.AgentLifeCycleBo;
 import com.navercorp.pinpoint.common.server.util.AgentLifeCycleState;
+import com.navercorp.pinpoint.common.trace.ServiceType;
 import com.navercorp.pinpoint.common.util.BytesUtils;
+import com.navercorp.pinpoint.loader.service.ServiceTypeRegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -30,31 +33,64 @@ import java.util.Objects;
 
 /**
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 @Service
 public class AgentLifeCycleAsyncTaskService {
-
     private static final int INTEGER_BIT_COUNT = BytesUtils.INT_BYTE_LENGTH * 8;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final AgentLifeCycleService agentLifeCycleService;
+    private final ServiceTypeRegistryService serviceTypeRegistryService;
+    private final StatisticsService statisticsService;
+    private final CollectorConfiguration collectorConfiguration;
 
-    @Autowired
-    private AgentLifeCycleService agentLifeCycleService;
+    public AgentLifeCycleAsyncTaskService(AgentLifeCycleService agentLifeCycleService,
+                                          ServiceTypeRegistryService serviceTypeRegistryService,
+                                          StatisticsService statisticsService,
+                                          CollectorConfiguration collectorConfiguration) {
+        this.agentLifeCycleService = Objects.requireNonNull(agentLifeCycleService, "agentLifeCycleService");
+        this.serviceTypeRegistryService = Objects.requireNonNull(serviceTypeRegistryService, "serviceTypeRegistryService");
+        this.statisticsService = Objects.requireNonNull(statisticsService, "statisticsService");
+        this.collectorConfiguration = Objects.requireNonNull(collectorConfiguration, "collectorConfiguration");
+    }
 
     @Async("agentEventWorker")
     public void handleLifeCycleEvent(AgentProperty agentProperty, long eventTimestamp, AgentLifeCycleState agentLifeCycleState, long eventIdentifier) {
         Objects.requireNonNull(agentProperty, "agentProperty");
         Objects.requireNonNull(agentLifeCycleState, "agentLifeCycleState");
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Handle lifecycle event - pinpointServer:{}, state:{}", agentProperty, agentLifeCycleState);
+        final String agentId = agentProperty.getAgentId();
+        if (agentId == null) {
+            logger.warn("Failed to handle event of agent life cycle, agentId is null. agentProperty={}", agentProperty);
+            return;
         }
 
-        final String agentId = agentProperty.getAgentId();
         final long startTimestamp = agentProperty.getStartTime();
         final AgentLifeCycleBo agentLifeCycleBo = new AgentLifeCycleBo(agentId, startTimestamp, eventTimestamp, eventIdentifier, agentLifeCycleState);
-
         agentLifeCycleService.insert(agentLifeCycleBo);
+
+        final String applicationName = agentProperty.getApplicationName();
+        if (applicationName == null) {
+            logger.warn("Failed to handle event of agent life cycle, applicationName is null. agentProperty={}", agentProperty);
+            return;
+        }
+
+        final ServiceType serviceType = this.serviceTypeRegistryService.findServiceType(agentProperty.getServiceTypeCode());
+        if (isUpdateAgentState(serviceType)) {
+            statisticsService.updateAgentState(applicationName, serviceType, agentId);
+        }
+    }
+
+    private boolean isUpdateAgentState(ServiceType serviceType) {
+        if (!collectorConfiguration.isStatisticsAgentStateEnable()) {
+            return false;
+        }
+        if (serviceType == null || serviceType == ServiceType.UNDEFINED) {
+            return false;
+        }
+
+        return true;
     }
 
     public static long createEventIdentifier(int socketId, int eventCounter) {
@@ -64,6 +100,7 @@ public class AgentLifeCycleAsyncTaskService {
         if (eventCounter < 0) {
             throw new IllegalArgumentException("eventCounter may not be less than 0");
         }
+
         return ((long) socketId << INTEGER_BIT_COUNT) | eventCounter;
     }
 }

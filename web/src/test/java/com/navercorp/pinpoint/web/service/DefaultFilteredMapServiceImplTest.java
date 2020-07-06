@@ -73,7 +73,7 @@ import static org.mockito.Mockito.when;
  * @author HyunGil Jeong
  */
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class FilteredMapServiceImplTest {
+public class DefaultFilteredMapServiceImplTest {
 
     private static final Random RANDOM = new Random();
 
@@ -119,7 +119,7 @@ public class FilteredMapServiceImplTest {
             ServiceType serviceType = registry.findServiceTypeByName(invocation.getArgument(1));
             return new Application(applicationName, serviceType);
         });
-        filteredMapService = new FilteredMapServiceImpl(agentInfoService, traceDao, applicationTraceIndexDao, registry, applicationFactory, Optional.empty(), applicationMapBuilderFactory);
+        filteredMapService = new DefaultFilteredMapServiceImpl(agentInfoService, traceDao, applicationTraceIndexDao, registry, applicationFactory, Optional.empty(), applicationMapBuilderFactory);
     }
 
     @After

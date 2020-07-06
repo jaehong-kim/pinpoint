@@ -28,6 +28,7 @@ import java.util.Objects;
 /**
  * @author emeroad
  * @author netspider
+ * @author jaehong.kim
  */
 @JsonSerialize(using = HistogramSerializer.class)
 public class Histogram {
@@ -43,6 +44,7 @@ public class Histogram {
     private long normalErrorCount;
     private long slowErrorCount;
     private long verySlowErrorCount;
+    private long pingCount;
 
     public Histogram(ServiceType serviceType) {
         Objects.requireNonNull(serviceType, "serviceType");
@@ -73,7 +75,6 @@ public class Histogram {
             return;
         }
 
-
         if (slotTime <= schema.getNormalErrorSlot().getSlotTime()) {
             this.normalErrorCount += count;
             return;
@@ -81,6 +82,11 @@ public class Histogram {
 
         if (slotTime <= schema.getFastErrorSlot().getSlotTime()) {
             this.fastErrorCount += count;
+            return;
+        }
+
+        if (slotTime <= schema.getPingSlot().getSlotTime()) {
+            this.pingCount += count;
             return;
         }
 
@@ -156,7 +162,12 @@ public class Histogram {
         return verySlowErrorCount;
     }
 
+    public long getPingCount() {
+        return pingCount;
+    }
+
     public long getTotalCount() {
+        // Skip ping count
         return errorCount + fastCount + fastErrorCount + normalCount + normalErrorCount + slowCount + slowErrorCount + verySlowCount + verySlowErrorCount;
     }
 
@@ -189,6 +200,8 @@ public class Histogram {
             case ERROR:
                 // for backward compatibility.
                 return errorCount + fastErrorCount + normalErrorCount + slowErrorCount + verySlowErrorCount;
+            case PING:
+                return pingCount;
         }
         throw new IllegalArgumentException("slotType:" + slotType);
     }
@@ -210,6 +223,7 @@ public class Histogram {
         this.slowErrorCount += histogram.getSlowErrorCount();
         this.verySlowCount += histogram.getVerySlowCount();
         this.verySlowErrorCount += histogram.getVerySlowErrorCount();
+        this.pingCount += histogram.getPingCount();
     }
 
     @Override
@@ -242,6 +256,7 @@ public class Histogram {
         sb.append(", normalErrorCount=").append(normalErrorCount);
         sb.append(", slowErrorCount=").append(slowErrorCount);
         sb.append(", verySlowErrorCount=").append(verySlowErrorCount);
+        sb.append(", pingCount=").append(pingCount);
         sb.append('}');
         return sb.toString();
     }

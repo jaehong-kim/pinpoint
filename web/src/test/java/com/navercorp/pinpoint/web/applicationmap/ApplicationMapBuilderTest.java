@@ -26,8 +26,8 @@ import com.navercorp.pinpoint.web.applicationmap.appender.server.DefaultServerIn
 import com.navercorp.pinpoint.web.applicationmap.appender.server.ServerInstanceListFactory;
 import com.navercorp.pinpoint.web.applicationmap.appender.server.datasource.AgentInfoServerInstanceListDataSource;
 import com.navercorp.pinpoint.web.applicationmap.rawdata.LinkDataDuplexMap;
-import com.navercorp.pinpoint.web.dao.MapResponseDao;
 import com.navercorp.pinpoint.web.service.AgentInfoService;
+import com.navercorp.pinpoint.web.service.MapResponseService;
 import com.navercorp.pinpoint.web.vo.AgentInfo;
 import com.navercorp.pinpoint.web.vo.AgentStatus;
 import com.navercorp.pinpoint.web.vo.Application;
@@ -75,8 +75,8 @@ public class ApplicationMapBuilderTest {
 
     @Before
     public void setUp() {
-        MapResponseDao mapResponseDao = mock(MapResponseDao.class);
-        mapResponseNodeHistogramDataSource = new MapResponseNodeHistogramDataSource(mapResponseDao);
+        MapResponseService mapResponseService = mock(MapResponseService.class);
+        mapResponseNodeHistogramDataSource = new MapResponseNodeHistogramDataSource(mapResponseService);
 
         ResponseHistograms responseHistograms = mock(ResponseHistograms.class);
         responseHistogramBuilderNodeHistogramDataSource = new ResponseHistogramsNodeHistogramDataSource(responseHistograms);
@@ -97,7 +97,7 @@ public class ApplicationMapBuilderTest {
                 return Collections.singletonList(responseTime);
             }
         };
-        when(mapResponseDao.selectResponseTime(any(Application.class), any(Range.class))).thenAnswer(responseTimeAnswer);
+        when(mapResponseService.selectResponseTime(any(Application.class), any(Range.class))).thenAnswer(responseTimeAnswer);
         when(responseHistograms.getResponseTimeList(any(Application.class))).thenAnswer(responseTimeAnswer);
 
         when(agentInfoService.getAgentsByApplicationName(anyString(), anyLong())).thenAnswer(new Answer<Set<AgentInfo>>() {

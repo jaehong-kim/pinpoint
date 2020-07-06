@@ -18,6 +18,7 @@ package com.navercorp.pinpoint.web.applicationmap.appender.server.datasource;
 
 import com.navercorp.pinpoint.web.applicationmap.nodes.Node;
 import com.navercorp.pinpoint.web.applicationmap.nodes.ServerInstanceList;
+import com.navercorp.pinpoint.web.vo.Range;
 
 /**
  * @author emeroad
@@ -26,5 +27,5 @@ import com.navercorp.pinpoint.web.applicationmap.nodes.ServerInstanceList;
  */
 public interface ServerInstanceListDataSource {
 
-    ServerInstanceList createServerInstanceList(Node node, long timestamp);
+    ServerInstanceList createServerInstanceList(Node node, Range range);
 }

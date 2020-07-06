@@ -137,7 +137,7 @@ public class AgentInfoServiceImpl implements AgentInfoService {
         int startIndex = offset - 1;
         int endIndex = Math.min(startIndex + limit, applicationNameList.size());
         ApplicationAgentHostList applicationAgentHostList = new ApplicationAgentHostList(offset, endIndex, applicationNameList.size());
-        for (int i = startIndex ; i < endIndex; i++) {
+        for (int i = startIndex; i < endIndex; i++) {
             String applicationName = applicationNameList.get(i);
 
             List<String> agentIds = this.applicationIndexDao.selectAgentIds(applicationName);
@@ -183,6 +183,7 @@ public class AgentInfoServiceImpl implements AgentInfoService {
         }
         return new HashSet<>(agentInfos);
     }
+
 
     @Override
     public Set<AgentInfo> getRecentAgentsByApplicationName(String applicationName, long timestamp, long timeDiff) {

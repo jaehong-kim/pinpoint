@@ -24,6 +24,7 @@ import java.util.Objects;
 
 /**
  * @author Taejin Koo
+ * @author jaehong.kim
  */
 public class HbaseColumnFamily {
 
@@ -111,6 +112,7 @@ public class HbaseColumnFamily {
         }
     }
 
+
     public static final CallerStatMap MAP_STATISTICS_CALLER_VER2_COUNTER = new CallerStatMap(HbaseTable.MAP_STATISTICS_CALLER_VER2, Bytes.toBytes("C"));
     public static class CallerStatMap extends HbaseColumnFamily {
         private CallerStatMap(HbaseTable hBaseTable, byte[] columnFamilyName) {
@@ -125,6 +127,28 @@ public class HbaseColumnFamily {
         }
     }
 
+    public static final CalleeStatMapCompact MAP_STATISTICS_CALLEE_COMPACT_COUNTER = new CalleeStatMapCompact(HbaseTable.MAP_STATISTICS_CALLEE_COMPACT, Bytes.toBytes("C"));
+    public static class CalleeStatMapCompact extends HbaseColumnFamily {
+        private CalleeStatMapCompact(HbaseTable hBaseTable, byte[] columnFamilyName) {
+            super(hBaseTable, columnFamilyName);
+        }
+    }
+
+    public static final CallerStatMapCompact MAP_STATISTICS_CALLER_COMPACT_COUNTER = new CallerStatMapCompact(HbaseTable.MAP_STATISTICS_CALLER_COMPACT, Bytes.toBytes("C"));
+    public static class CallerStatMapCompact extends HbaseColumnFamily {
+        private CallerStatMapCompact(HbaseTable hBaseTable, byte[] columnFamilyName) {
+            super(hBaseTable, columnFamilyName);
+        }
+    }
+
+    public static final SelfStatMapCompact MAP_STATISTICS_SELF_COMPACT_COUNTER = new SelfStatMapCompact(HbaseTable.MAP_STATISTICS_SELF_COMPACT, Bytes.toBytes("C"));
+    public static class SelfStatMapCompact extends HbaseColumnFamily {
+        public static byte QUALIFIER_PING = 'p';
+        public static byte QUALIFIER_RESPONSE = 'r';
+        private SelfStatMapCompact(HbaseTable hBaseTable, byte[] columnFamilyName) {
+            super(hBaseTable, columnFamilyName);
+        }
+    }
 
     public static final SqlMetadataV2 SQL_METADATA_VER2_SQL = new SqlMetadataV2(HbaseTable.SQL_METADATA_VER2, Bytes.toBytes("Sql"));
     public static class SqlMetadataV2 extends HbaseColumnFamily {
@@ -150,8 +174,6 @@ public class HbaseColumnFamily {
             super(hBaseTable, columnFamilyName);
         }
     }
-
-
 
     private final HbaseTable hBaseTable;
     private final byte[] columnFamilyName;

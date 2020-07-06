@@ -65,9 +65,10 @@ public abstract class LinkSelectorTestBase {
 
     protected final Range range = Range.newRange(0, 100);
 
+
     protected LinkDataMapService linkDataMapService;
     protected HostApplicationMapDao hostApplicationMapDao;
-    protected LinkSelectorFactory linkSelectorFactory;
+    protected DefaultLinkSelectorFactory linkSelectorFactory;
 
     protected abstract LinkSelectorType getLinkSelectorType();
 
@@ -75,7 +76,7 @@ public abstract class LinkSelectorTestBase {
     public void setUp() throws Exception {
         this.linkDataMapService = mock(LinkDataMapService.class);
         this.hostApplicationMapDao = mock(HostApplicationMapDao.class);
-        this.linkSelectorFactory = new LinkSelectorFactory(linkDataMapService, applicationsMapCreatorFactory, hostApplicationMapDao);
+        this.linkSelectorFactory = new DefaultLinkSelectorFactory(linkDataMapService, applicationsMapCreatorFactory, hostApplicationMapDao);
     }
 
     @After

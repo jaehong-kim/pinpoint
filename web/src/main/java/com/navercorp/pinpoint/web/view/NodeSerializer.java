@@ -17,6 +17,7 @@
 package com.navercorp.pinpoint.web.view;
 
 import com.navercorp.pinpoint.common.trace.ServiceType;
+import com.navercorp.pinpoint.web.applicationmap.histogram.LoadHistogramFormat;
 import com.navercorp.pinpoint.web.applicationmap.nodes.Node;
 import com.navercorp.pinpoint.web.applicationmap.nodes.NodeType;
 import com.navercorp.pinpoint.web.applicationmap.nodes.ServerInstanceList;
@@ -35,8 +36,9 @@ import java.util.Map;
  * @author emeroad
  * @author minwoo.jung
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
-public class NodeSerializer extends JsonSerializer<Node>  {
+public class NodeSerializer extends JsonSerializer<Node> {
     @Override
     public void serialize(Node node, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
         jgen.writeStartObject();
@@ -86,7 +88,7 @@ public class NodeSerializer extends JsonSerializer<Node>  {
             jgen.writeNumberField("instanceCount", serverInstanceList.getInstanceCount());
             long instanceErrorCount = 0;
             NodeHistogram nodeHistogram = node.getNodeHistogram();
-            if (nodeHistogram!= null) {
+            if (nodeHistogram != null) {
                 Map<String, Histogram> agentHistogramMap = node.getNodeHistogram().getAgentHistogramMap();
                 if (agentHistogramMap != null) {
                     instanceErrorCount = agentHistogramMap.values().stream()
@@ -149,12 +151,18 @@ public class NodeSerializer extends JsonSerializer<Node>  {
         }
         // FIXME isn't this all ServiceTypes that can be a node?
         if (serviceType.isWas() || serviceType.isUser() || serviceType.isTerminal() || serviceType.isUnknown() || serviceType.isQueue() || serviceType.isAlias()) {
-            List<ResponseTimeViewModel> applicationTimeSeriesHistogram = nodeHistogram.getApplicationTimeHistogram();
-            if (applicationTimeSeriesHistogram == null) {
-                writeEmptyArray(jgen, "timeSeriesHistogram");
+            if (node.getLoadHistogramFormat() == LoadHistogramFormat.V2) {
+                final List<LoadTimeViewModel> loadTimeViewModelList = nodeHistogram.getLoadHistogram();
+                jgen.writeObjectField("loadHistogram", loadTimeViewModelList);
             } else {
-                jgen.writeObjectField("timeSeriesHistogram", applicationTimeSeriesHistogram);
+                List<ResponseTimeViewModel> applicationTimeSeriesHistogram = nodeHistogram.getApplicationTimeHistogram();
+                if (applicationTimeSeriesHistogram == null) {
+                    writeEmptyArray(jgen, "timeSeriesHistogram");
+                } else {
+                    jgen.writeObjectField("timeSeriesHistogram", applicationTimeSeriesHistogram);
+                }
             }
+
             if (NodeType.DETAILED == node.getNodeType()) {
                 AgentResponseTimeViewModelList agentTimeSeriesHistogram = nodeHistogram.getAgentTimeHistogram();
                 jgen.writeObject(agentTimeSeriesHistogram);

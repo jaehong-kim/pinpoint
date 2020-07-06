@@ -22,8 +22,6 @@ import com.navercorp.pinpoint.web.applicationmap.nodes.NodeList;
 import com.navercorp.pinpoint.web.applicationmap.nodes.ServerInstanceList;
 import com.navercorp.pinpoint.web.applicationmap.rawdata.LinkDataDuplexMap;
 import com.navercorp.pinpoint.web.vo.Range;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -36,13 +34,10 @@ import java.util.function.Supplier;
 
 /**
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 public class DefaultServerInfoAppender implements ServerInfoAppender {
-
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private final ServerInstanceListFactory serverInstanceListFactory;
-
     private final Executor executor;
 
     public DefaultServerInfoAppender(ServerInstanceListFactory serverInstanceListFactory, Executor executor) {
@@ -80,11 +75,10 @@ public class DefaultServerInfoAppender implements ServerInfoAppender {
         CompletableFuture<ServerInstanceList> serverInstanceListFuture;
         ServiceType nodeServiceType = node.getServiceType();
         if (nodeServiceType.isWas()) {
-            final long to = range.getTo();
             serverInstanceListFuture = CompletableFuture.supplyAsync(new Supplier<ServerInstanceList>() {
                 @Override
                 public ServerInstanceList get() {
-                    return serverInstanceListFactory.createWasNodeInstanceList(node, to);
+                    return serverInstanceListFactory.createWasNodeInstanceList(node, range);
                 }
             }, executor);
         } else if (nodeServiceType.isTerminal() || nodeServiceType.isAlias()) {

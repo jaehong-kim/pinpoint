@@ -64,6 +64,9 @@
         <beans:ref bean="hbaseMapStatisticsCallerDao"/>
         <beans:ref bean="hbaseMapStatisticsCalleeDao"/>
         <beans:ref bean="hbaseMapResponseTimeDao"/>
+        <beans:ref bean="hbaseMapStatisticsCallerCompactDao"/>
+        <beans:ref bean="hbaseMapStatisticsCalleeCompactDao"/>
+        <beans:ref bean="hbaseMapResponseTimeCompactDao"/>
     </util:list>
     <bean id="statisticsScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
         <property name="poolSize" value="#{cachedStatisticsDaoList.size()}"/>
@@ -76,6 +79,9 @@
         <task:scheduled ref="hbaseMapStatisticsCallerDao" method="flushAll" fixed-rate="1000"/>
         <task:scheduled ref="hbaseMapStatisticsCalleeDao" method="flushAll" fixed-rate="1000"/>
         <task:scheduled ref="hbaseMapResponseTimeDao" method="flushAll" fixed-rate="1000"/>
+        <task:scheduled ref="hbaseMapStatisticsCallerCompactDao" method="flushAll" fixed-rate="1000"/>
+        <task:scheduled ref="hbaseMapStatisticsCalleeCompactDao" method="flushAll" fixed-rate="1000"/>
+        <task:scheduled ref="hbaseMapResponseTimeCompactDao" method="flushAll" fixed-rate="1000"/>
     </task:scheduled-tasks>
 
 
@@ -420,6 +426,36 @@
 
     <bean id="selfBulkIncrementer" class="com.navercorp.pinpoint.collector.dao.hbase.statistics.BulkIncrementer">
         <constructor-arg ref="selfMerge"/>
+    </bean>
+
+    <bean id="callerCompactMerge" class="com.navercorp.pinpoint.collector.dao.hbase.statistics.RowKeyMerge">
+        <constructor-arg index="0">
+            <util:constant static-field="com.navercorp.pinpoint.common.hbase.HbaseColumnFamily.MAP_STATISTICS_CALLER_COMPACT_COUNTER"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="callerCompactBulkIncrementer" class="com.navercorp.pinpoint.collector.dao.hbase.statistics.BulkIncrementer">
+        <constructor-arg ref="callerCompactMerge"/>
+    </bean>
+
+    <bean id="calleeCompactMerge" class="com.navercorp.pinpoint.collector.dao.hbase.statistics.RowKeyMerge">
+        <constructor-arg index="0">
+            <util:constant static-field="com.navercorp.pinpoint.common.hbase.HbaseColumnFamily.MAP_STATISTICS_CALLEE_COMPACT_COUNTER"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="calleeCompactBulkIncrementer" class="com.navercorp.pinpoint.collector.dao.hbase.statistics.BulkIncrementer">
+        <constructor-arg ref="calleeCompactMerge"/>
+    </bean>
+
+    <bean id="selfCompactMerge" class="com.navercorp.pinpoint.collector.dao.hbase.statistics.RowKeyMerge">
+        <constructor-arg index="0">
+            <util:constant static-field="com.navercorp.pinpoint.common.hbase.HbaseColumnFamily.MAP_STATISTICS_SELF_COMPACT_COUNTER"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="selfCompactBulkIncrementer" class="com.navercorp.pinpoint.collector.dao.hbase.statistics.BulkIncrementer">
+        <constructor-arg ref="selfCompactMerge"/>
     </bean>
 
     <bean id="timeSlot" class="com.navercorp.pinpoint.common.server.util.DefaultTimeSlot">

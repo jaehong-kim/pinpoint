@@ -19,13 +19,15 @@ package com.navercorp.pinpoint.web.applicationmap.appender.server;
 import com.navercorp.pinpoint.web.applicationmap.nodes.Node;
 import com.navercorp.pinpoint.web.applicationmap.nodes.ServerInstanceList;
 import com.navercorp.pinpoint.web.applicationmap.rawdata.LinkDataDuplexMap;
+import com.navercorp.pinpoint.web.vo.Range;
 
 /**
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 public interface ServerInstanceListFactory {
 
-    ServerInstanceList createWasNodeInstanceList(Node wasNode, long timestamp);
+    ServerInstanceList createWasNodeInstanceList(Node wasNode, Range range);
 
     ServerInstanceList createTerminalNodeInstanceList(Node terminalNode, LinkDataDuplexMap linkDataDuplexMap);
 

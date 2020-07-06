@@ -45,31 +45,22 @@ import java.util.Objects;
 
 /**
  * Save response time data of WAS
- * 
+ *
  * @author netspider
  * @author emeroad
  * @author jaehong.kim
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 @Repository
 public class HbaseMapResponseTimeDao implements MapResponseTimeDao {
-
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private final HbaseOperations2 hbaseTemplate;
-
     private final RowKeyDistributorByHashPrefix rowKeyDistributorByHashPrefix;
-
     private final AcceptedTimeService acceptedTimeService;
-
     private final TimeSlot timeSlot;
-
     private final BulkIncrementer bulkIncrementer;
-
     private final boolean useBulk;
-
     private final TableDescriptor<HbaseColumnFamily.SelfStatMap> descriptor;
-
 
     @Autowired
     public HbaseMapResponseTimeDao(HbaseOperations2 hbaseTemplate,
@@ -98,10 +89,6 @@ public class HbaseMapResponseTimeDao implements MapResponseTimeDao {
     public void received(String applicationName, ServiceType applicationServiceType, String agentId, int elapsed, boolean isError) {
         Objects.requireNonNull(applicationName, "applicationName");
         Objects.requireNonNull(agentId, "agentId");
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("[Received] {} ({})[{}]", applicationName, applicationServiceType, agentId);
-        }
 
         // make row key. rowkey is me
         final long acceptedTime = acceptedTimeService.getAcceptedTime();
@@ -143,9 +130,6 @@ public class HbaseMapResponseTimeDao implements MapResponseTimeDao {
         for (Map.Entry<TableName, List<Increment>> e : incrementMap.entrySet()) {
             TableName tableName = e.getKey();
             List<Increment> increments = e.getValue();
-            if (logger.isDebugEnabled()) {
-                logger.debug("flush {} to [{}] Increment:{}", this.getClass().getSimpleName(), tableName.getNameAsString(), increments.size());
-            }
             hbaseTemplate.increment(tableName, increments);
         }
     }

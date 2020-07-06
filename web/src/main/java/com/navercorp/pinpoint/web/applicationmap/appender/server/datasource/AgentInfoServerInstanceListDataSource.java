@@ -26,6 +26,7 @@ import com.navercorp.pinpoint.web.service.AgentInfoService;
 import com.navercorp.pinpoint.web.vo.AgentInfo;
 import com.navercorp.pinpoint.web.vo.AgentStatus;
 import com.navercorp.pinpoint.web.vo.Application;
+import com.navercorp.pinpoint.web.vo.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -42,17 +43,16 @@ import java.util.Set;
  * @author HyunGil Jeong
  */
 public class AgentInfoServerInstanceListDataSource implements ServerInstanceListDataSource {
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private final AgentInfoService agentInfoService;
 
     public AgentInfoServerInstanceListDataSource(AgentInfoService agentInfoService) {
         this.agentInfoService = Objects.requireNonNull(agentInfoService, "agentInfoService");
     }
 
-    public ServerInstanceList createServerInstanceList(Node node, long timestamp) {
+    public ServerInstanceList createServerInstanceList(Node node, Range range) {
         Objects.requireNonNull(node, "node");
+        final long timestamp = range.getTo();
         if (timestamp < 0) {
             return new ServerInstanceList();
         }

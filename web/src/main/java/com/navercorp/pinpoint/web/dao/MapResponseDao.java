@@ -29,5 +29,4 @@ import java.util.List;
  */
 public interface MapResponseDao {
     List<ResponseTime> selectResponseTime(Application application, Range range);
-
 }

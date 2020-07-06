@@ -21,6 +21,7 @@ import java.util.Objects;
 
 /**
  * @author Woonduk Kang(emeroad)
+ * @author jaehong.kim
  */
 public class TableDescriptors {
     private final TableNameProvider tableNameProvider;
@@ -65,7 +66,6 @@ public class TableDescriptors {
         return new DefaultTableDescriptor<>(tableNameProvider, HbaseColumnFamily.HOST_APPLICATION_MAP_VER2_MAP);
     }
 
-
     public TableDescriptor<HbaseColumnFamily.CalleeStatMap> getCalleeStatMap() {
         return new DefaultTableDescriptor<>(tableNameProvider, HbaseColumnFamily.MAP_STATISTICS_CALLEE_VER2_COUNTER);
     }
@@ -76,6 +76,18 @@ public class TableDescriptors {
 
     public TableDescriptor<HbaseColumnFamily.SelfStatMap> getSelfStatMap() {
         return new DefaultTableDescriptor<>(tableNameProvider, HbaseColumnFamily.MAP_STATISTICS_SELF_VER2_COUNTER);
+    }
+
+    public TableDescriptor<HbaseColumnFamily.CalleeStatMapCompact> getCalleeStatMapCompact() {
+        return new DefaultTableDescriptor<>(tableNameProvider, HbaseColumnFamily.MAP_STATISTICS_CALLEE_COMPACT_COUNTER);
+    }
+
+    public TableDescriptor<HbaseColumnFamily.CallerStatMapCompact> getCallerStatMapCompact() {
+        return new DefaultTableDescriptor<>(tableNameProvider, HbaseColumnFamily.MAP_STATISTICS_CALLER_COMPACT_COUNTER);
+    }
+
+    public TableDescriptor<HbaseColumnFamily.SelfStatMapCompact> getSelfStatMapCompact() {
+        return new DefaultTableDescriptor<>(tableNameProvider, HbaseColumnFamily.MAP_STATISTICS_SELF_COMPACT_COUNTER);
     }
 
     public TableDescriptor<HbaseColumnFamily.SqlMetadataV2> getSqlMetadataV2() {
@@ -89,5 +101,4 @@ public class TableDescriptors {
     public TableDescriptor<HbaseColumnFamily.Trace> getTrace() {
         return new DefaultTableDescriptor<>(tableNameProvider, HbaseColumnFamily.TRACE_V2_SPAN);
     }
-
 }

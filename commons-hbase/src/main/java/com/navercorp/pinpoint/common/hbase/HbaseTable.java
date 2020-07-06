@@ -19,6 +19,7 @@ package com.navercorp.pinpoint.common.hbase;
 /**
  * @author emeroad
  * @author Taejin Koo
+ * @author jaehong.kim
  */
 public enum HbaseTable {
 
@@ -34,6 +35,9 @@ public enum HbaseTable {
     MAP_STATISTICS_CALLEE_VER2("ApplicationMapStatisticsCallee_Ver2"),
     MAP_STATISTICS_CALLER_VER2("ApplicationMapStatisticsCaller_Ver2"),
     MAP_STATISTICS_SELF_VER2("ApplicationMapStatisticsSelf_Ver2"),
+    MAP_STATISTICS_CALLEE_COMPACT("ApplicationMapStatisticsCalleeCompact"),
+    MAP_STATISTICS_CALLER_COMPACT("ApplicationMapStatisticsCallerCompact"),
+    MAP_STATISTICS_SELF_COMPACT("ApplicationMapStatisticsSelfCompact"),
     SQL_METADATA_VER2("SqlMetaData_Ver2"),
     STRING_METADATA("StringMetaData"),
     TRACE_V2("TraceV2");

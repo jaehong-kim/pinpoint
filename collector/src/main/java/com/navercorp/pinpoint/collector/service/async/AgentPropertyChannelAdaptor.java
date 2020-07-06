@@ -32,6 +32,16 @@ public class AgentPropertyChannelAdaptor implements AgentProperty {
     }
 
     @Override
+    public String getApplicationName() {
+        return channelProperties.getApplicationName();
+    }
+
+    @Override
+    public short getServiceTypeCode() {
+        return (short) channelProperties.getServiceType();
+    }
+
+    @Override
     public String getAgentId() {
         return channelProperties.getAgentId();
     }

@@ -22,6 +22,7 @@ import com.navercorp.pinpoint.common.profiler.sql.SqlParser;
 import com.navercorp.pinpoint.common.profiler.util.TransactionId;
 import com.navercorp.pinpoint.common.profiler.util.TransactionIdUtils;
 import com.navercorp.pinpoint.web.applicationmap.ApplicationMap;
+import com.navercorp.pinpoint.web.applicationmap.histogram.LoadHistogramFormat;
 import com.navercorp.pinpoint.web.calltree.span.CallTreeIterator;
 import com.navercorp.pinpoint.web.config.LogConfiguration;
 import com.navercorp.pinpoint.web.service.FilteredMapService;
@@ -37,6 +38,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -51,24 +53,22 @@ import java.util.List;
  */
 @Controller
 public class BusinessTransactionController {
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private SpanService spanService;
-
     @Autowired
     private TransactionInfoService transactionInfoService;
-
     @Autowired
-    private FilteredMapService filteredMapService;
-
+    @Qualifier("defaultFilteredMapServiceImpl")
+    private FilteredMapService defaultFilteredMapService;
+    @Autowired
+    @Qualifier("compactFilteredMapServiceImpl")
+    private FilteredMapService compactFilteredMapService;
     @Autowired
     private LogConfiguration logConfiguration;
-
     private final SqlParser sqlParser = new DefaultSqlParser();
     private final OutputParameterParser parameterParser = new OutputParameterParser();
-
     private final MongoJsonParser mongoJsonParser = new DefaultMongoJsonParser();
     private final OutputParameterMongoJsonParser parameterJsonParser = new OutputParameterMongoJsonParser();
 
@@ -95,10 +95,39 @@ public class BusinessTransactionController {
         final CallTreeIterator callTreeIterator = spanResult.getCallTree();
 
         // application map
-        ApplicationMap map = filteredMapService.selectApplicationMap(transactionId, viewVersion);
+        ApplicationMap map = defaultFilteredMapService.selectApplicationMap(transactionId, viewVersion);
         RecordSet recordSet = this.transactionInfoService.createRecordSet(callTreeIterator, focusTimestamp, agentId, spanId);
 
         TransactionInfoViewModel result = new TransactionInfoViewModel(transactionId, spanId, map.getNodes(), map.getLinks(), recordSet, spanResult.getTraceState(), logConfiguration);
+        return result;
+    }
+
+    /**
+     * info lookup for a selected transaction
+     *
+     * @param traceIdParam
+     * @param focusTimestamp
+     * @return
+     */
+    @RequestMapping(value = "/transactionInfoV2", method = RequestMethod.GET)
+    @ResponseBody
+    public TransactionInfoViewModel transactionInfoV2(@RequestParam("traceId") String traceIdParam,
+                                                    @RequestParam(value = "focusTimestamp", required = false, defaultValue = "0") long focusTimestamp,
+                                                    @RequestParam(value = "agentId", required = false) String agentId,
+                                                    @RequestParam(value = "spanId", required = false, defaultValue = "-1") long spanId,
+                                                    @RequestParam(value = "v", required = false, defaultValue = "0") int viewVersion) {
+        logger.debug("GET /transactionInfo params {traceId={}, focusTimestamp={}, agentId={}, spanId={}, v={}}", traceIdParam, focusTimestamp, agentId, spanId, viewVersion);
+
+        final TransactionId transactionId = TransactionIdUtils.parseTransactionId(traceIdParam);
+        // select spans
+        final SpanResult spanResult = this.spanService.selectSpan(transactionId, focusTimestamp);
+        final CallTreeIterator callTreeIterator = spanResult.getCallTree();
+        // application map
+        ApplicationMap map = compactFilteredMapService.selectApplicationMap(transactionId, viewVersion);
+        RecordSet recordSet = this.transactionInfoService.createRecordSet(callTreeIterator, focusTimestamp, agentId, spanId);
+        TransactionInfoViewModel result = new TransactionInfoViewModel(transactionId, spanId, map.getNodes(), map.getLinks(), recordSet, spanResult.getTraceState(), logConfiguration);
+        result.setLoadHistogramFormat(LoadHistogramFormat.V2);
+
         return result;
     }
 

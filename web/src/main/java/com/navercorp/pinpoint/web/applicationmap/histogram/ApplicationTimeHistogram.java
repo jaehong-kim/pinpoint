@@ -19,6 +19,7 @@ package com.navercorp.pinpoint.web.applicationmap.histogram;
 import com.navercorp.pinpoint.common.trace.HistogramSchema;
 import com.navercorp.pinpoint.common.trace.ServiceType;
 import com.navercorp.pinpoint.common.trace.SlotType;
+import com.navercorp.pinpoint.web.view.LoadTimeViewModel;
 import com.navercorp.pinpoint.web.view.ResponseTimeViewModel;
 import com.navercorp.pinpoint.web.vo.Application;
 import com.navercorp.pinpoint.web.vo.Range;
@@ -27,17 +28,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author emeroad
+ * @author jaehong.kim
  */
 public class ApplicationTimeHistogram {
+    private static final long HOUR = TimeUnit.HOURS.toMillis(1);
+    private static final long SIX_HOURS = TimeUnit.HOURS.toMillis(6);
+    private static final long TWELVE_HOURS = TimeUnit.HOURS.toMillis(12);
+    private static final long DAY = TimeUnit.DAYS.toMillis(1);
+    private static final long TWO_DAYS = TimeUnit.DAYS.toMillis(2);
+    private static final long MINUTE = TimeUnit.MINUTES.toMillis(1);
+    private static final long FIVE_MINUTES = TimeUnit.MINUTES.toMillis(5);
+    private static final long TEN_MINUTES = TimeUnit.MINUTES.toMillis(10);
+    private static final long TWENTY_MINUTES = TimeUnit.MINUTES.toMillis(20);
+    private static final long THIRTY_MINUTES = TimeUnit.MINUTES.toMillis(30);
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private final Application application;
     private final Range range;
-
     private final List<TimeHistogram> histogramList;
 
     public ApplicationTimeHistogram(Application application, Range range) {
@@ -83,5 +94,55 @@ public class ApplicationTimeHistogram {
         return timeHistogram.getCount(slotType);
     }
 
+    public List<LoadTimeViewModel> createLoadTimeViewModel() {
+        final List<LoadTimeViewModel> loadTimeViewModelList = newLoadHistogramList();
+        for (TimeHistogram timeHistogram : histogramList) {
+            final long timestamp = timeHistogram.getTimeStamp();
+            for (LoadTimeViewModel loadHistogram : loadTimeViewModelList) {
+                if (timestamp <= loadHistogram.getTimestamp()) {
+                    loadHistogram.addHistogram(timeHistogram);
+                    break;
+                }
+            }
+        }
 
+        return loadTimeViewModelList;
+    }
+
+    private List<LoadTimeViewModel> newLoadHistogramList() {
+        long termMillis = range.getTo() - range.getFrom();
+        long intervalMillis;
+        if (termMillis <= HOUR) {
+            intervalMillis = MINUTE;
+        } else if (termMillis <= SIX_HOURS) {
+            intervalMillis = FIVE_MINUTES;
+        } else if (termMillis <= TWELVE_HOURS) {
+            intervalMillis = TEN_MINUTES;
+        } else if (termMillis <= DAY) {
+            intervalMillis = TWENTY_MINUTES;
+        } else if (termMillis <= TWO_DAYS) {
+            intervalMillis = THIRTY_MINUTES;
+        } else {
+            return Collections.emptyList();
+        }
+
+        if (termMillis < intervalMillis) {
+            return Collections.emptyList();
+        }
+
+        final int count = (int) (termMillis / intervalMillis) + 1;
+        final List<LoadTimeViewModel> loadTimeViewModelList = new ArrayList<>(count);
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(range.getFrom());
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long timestamp = calendar.getTimeInMillis();
+        for (int i = 0; i < count; i++) {
+            final Histogram histogram = new Histogram(this.application.getServiceType());
+            loadTimeViewModelList.add(new LoadTimeViewModel(timestamp, new LoadHistogram(histogram)));
+            timestamp += intervalMillis;
+        }
+
+        return loadTimeViewModelList;
+    }
 }

@@ -18,6 +18,9 @@ package com.navercorp.pinpoint.web.applicationmap;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.navercorp.pinpoint.web.applicationmap.histogram.LoadHistogramFormat;
+import com.navercorp.pinpoint.web.applicationmap.link.Link;
+import com.navercorp.pinpoint.web.applicationmap.nodes.Node;
 
 /**
  * @author emeroad
@@ -27,7 +30,19 @@ public class MapWrap {
     private final ApplicationMap applicationMap;
 
     public MapWrap(ApplicationMap applicationMap) {
+        this(applicationMap, LoadHistogramFormat.V1);
+    }
+
+    public MapWrap(ApplicationMap applicationMap, final LoadHistogramFormat loadHistogramFormat) {
         this.applicationMap = applicationMap;
+        if (loadHistogramFormat == LoadHistogramFormat.V2) {
+            for (Node node : applicationMap.getNodes()) {
+                node.setLoadHistogramFormat(loadHistogramFormat);
+            }
+            for (Link link : applicationMap.getLinks()) {
+                link.setLoadHistogramFormat(loadHistogramFormat);
+            }
+        }
     }
 
     @JsonProperty("applicationMapData")

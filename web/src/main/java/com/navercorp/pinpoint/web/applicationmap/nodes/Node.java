@@ -17,6 +17,7 @@
 package com.navercorp.pinpoint.web.applicationmap.nodes;
 
 import com.navercorp.pinpoint.common.trace.ServiceType;
+import com.navercorp.pinpoint.web.applicationmap.histogram.LoadHistogramFormat;
 import com.navercorp.pinpoint.web.applicationmap.histogram.NodeHistogram;
 import com.navercorp.pinpoint.web.view.NodeSerializer;
 import com.navercorp.pinpoint.web.vo.Application;
@@ -51,6 +52,7 @@ public class Node {
     private NodeHistogram nodeHistogram;
     
     private boolean authorized = true;
+    private LoadHistogramFormat loadHistogramFormat = LoadHistogramFormat.V1;
 
     public Node(Application application) {
         this(NodeType.DETAILED, application);
@@ -123,7 +125,15 @@ public class Node {
     public void setAuthorized(boolean authorized) {
         this.authorized = authorized;
     }
-    
+
+    public LoadHistogramFormat getLoadHistogramFormat() {
+        return loadHistogramFormat;
+    }
+
+    public void setLoadHistogramFormat(LoadHistogramFormat loadHistogramFormat) {
+        this.loadHistogramFormat = loadHistogramFormat;
+    }
+
     @Override
     public String toString() {
         return "Node [" + application + "]";

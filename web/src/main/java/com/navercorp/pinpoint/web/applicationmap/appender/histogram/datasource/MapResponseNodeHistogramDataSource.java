@@ -17,7 +17,7 @@
 package com.navercorp.pinpoint.web.applicationmap.appender.histogram.datasource;
 
 import com.navercorp.pinpoint.web.applicationmap.histogram.NodeHistogram;
-import com.navercorp.pinpoint.web.dao.MapResponseDao;
+import com.navercorp.pinpoint.web.service.MapResponseService;
 import com.navercorp.pinpoint.web.vo.Application;
 import com.navercorp.pinpoint.web.vo.Range;
 import com.navercorp.pinpoint.web.vo.ResponseTime;
@@ -27,18 +27,19 @@ import java.util.Objects;
 
 /**
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 public class MapResponseNodeHistogramDataSource implements WasNodeHistogramDataSource {
 
-    private final MapResponseDao mapResponseDao;
+    private final MapResponseService mapResponseService;
 
-    public MapResponseNodeHistogramDataSource(MapResponseDao mapResponseDao) {
-        this.mapResponseDao = Objects.requireNonNull(mapResponseDao, "mapResponseDao");
+    public MapResponseNodeHistogramDataSource(MapResponseService mapResponseService) {
+        this.mapResponseService = Objects.requireNonNull(mapResponseService, "mapResponseService");
     }
 
     @Override
     public NodeHistogram createNodeHistogram(Application application, Range range) {
-        List<ResponseTime> responseTimes = mapResponseDao.selectResponseTime(application, range);
+        List<ResponseTime> responseTimes = mapResponseService.selectResponseTime(application, range);
         final NodeHistogram nodeHistogram = new NodeHistogram(application, range, responseTimes);
         return nodeHistogram;
     }

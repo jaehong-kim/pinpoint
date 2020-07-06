@@ -19,6 +19,7 @@ package com.navercorp.pinpoint.web.applicationmap.link;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.navercorp.pinpoint.common.trace.ServiceType;
+import com.navercorp.pinpoint.web.applicationmap.histogram.LoadHistogramFormat;
 import com.navercorp.pinpoint.web.applicationmap.nodes.Node;
 import com.navercorp.pinpoint.web.applicationmap.histogram.AgentTimeHistogram;
 import com.navercorp.pinpoint.web.applicationmap.histogram.AgentTimeHistogramBuilder;
@@ -30,6 +31,7 @@ import com.navercorp.pinpoint.web.applicationmap.rawdata.LinkCallData;
 import com.navercorp.pinpoint.web.applicationmap.rawdata.LinkCallDataMap;
 import com.navercorp.pinpoint.web.view.AgentResponseTimeViewModelList;
 import com.navercorp.pinpoint.web.view.LinkSerializer;
+import com.navercorp.pinpoint.web.view.LoadTimeViewModel;
 import com.navercorp.pinpoint.web.view.ResponseTimeViewModel;
 import com.navercorp.pinpoint.web.vo.Application;
 import com.navercorp.pinpoint.web.vo.LinkKey;
@@ -71,6 +73,7 @@ public class Link {
     private final LinkCallDataMap targetLinkCallDataMap = new LinkCallDataMap();
 
     private Histogram linkHistogram;
+    private LoadHistogramFormat loadHistogramFormat = LoadHistogramFormat.V1;
 
     public Link(CreateType createType, Node fromNode, Node toNode, Range range) {
         this(LinkType.DETAILED, createType, fromNode, toNode, range);
@@ -119,6 +122,14 @@ public class Link {
 
     public String getLinkName() {
         return createLinkName(fromNode, toNode);
+    }
+
+    public LoadHistogramFormat getLoadHistogramFormat() {
+        return loadHistogramFormat;
+    }
+
+    public void setLoadHistogramFormat(LoadHistogramFormat loadHistogramFormat) {
+        this.loadHistogramFormat = loadHistogramFormat;
     }
 
     public static String createLinkName(Node fromNode, Node toNode) {
@@ -180,10 +191,20 @@ public class Link {
     }
 
     public List<ResponseTimeViewModel> getLinkApplicationTimeSeriesHistogram() {
-        if (createType == CreateType.Source)  {
+        if (createType == CreateType.Source) {
             return getSourceApplicationTimeSeriesHistogram();
         } else {
             return getTargetApplicationTimeSeriesHistogram();
+        }
+    }
+
+    public List<LoadTimeViewModel> getLinkApplicationLoadHistogram() {
+        if (createType == CreateType.Source) {
+            ApplicationTimeHistogram histogramData = getSourceApplicationTimeSeriesHistogramData();
+            return histogramData.createLoadTimeViewModel();
+        } else {
+            ApplicationTimeHistogram targetApplicationTimeHistogramData = getTargetApplicationTimeSeriesHistogramData();
+            return targetApplicationTimeHistogramData.createLoadTimeViewModel();
         }
     }
 

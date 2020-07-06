@@ -23,14 +23,15 @@ import com.navercorp.pinpoint.web.applicationmap.appender.server.datasource.Serv
 import com.navercorp.pinpoint.web.applicationmap.rawdata.LinkData;
 import com.navercorp.pinpoint.web.applicationmap.rawdata.LinkDataDuplexMap;
 import com.navercorp.pinpoint.web.vo.Application;
+import com.navercorp.pinpoint.web.vo.Range;
 
 import java.util.Objects;
 
 /**
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 public class DefaultServerInstanceListFactory implements ServerInstanceListFactory {
-
     private final ServerInstanceListDataSource serverInstanceListDataSource;
 
     public DefaultServerInstanceListFactory(ServerInstanceListDataSource serverInstanceListDataSource) {
@@ -38,8 +39,8 @@ public class DefaultServerInstanceListFactory implements ServerInstanceListFacto
     }
 
     @Override
-    public ServerInstanceList createWasNodeInstanceList(Node wasNode, long timestamp) {
-        return serverInstanceListDataSource.createServerInstanceList(wasNode, timestamp);
+    public ServerInstanceList createWasNodeInstanceList(Node wasNode, Range range) {
+        return serverInstanceListDataSource.createServerInstanceList(wasNode, range);
     }
 
     @Override

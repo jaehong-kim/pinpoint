@@ -44,13 +44,11 @@ import java.util.Objects;
  * @author emeroad
  * @author minwoo.jung
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 public class ApplicationMapBuilder {
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private final Range range;
-
     private final NodeHistogramAppenderFactory nodeHistogramAppenderFactory;
     private final ServerInfoAppenderFactory serverInfoAppenderFactory;
 
@@ -98,7 +96,7 @@ public class ApplicationMapBuilder {
 
         Node node = new Node(nodeType, application);
         if (serverInstanceListFactory != null) {
-            ServerInstanceList runningInstances = serverInstanceListFactory.createWasNodeInstanceList(node, range.getTo());
+            ServerInstanceList runningInstances = serverInstanceListFactory.createWasNodeInstanceList(node, range);
             if (runningInstances.getInstanceCount() > 0) {
                 node.setServerInstanceList(runningInstances);
                 nodeList.addNode(node);

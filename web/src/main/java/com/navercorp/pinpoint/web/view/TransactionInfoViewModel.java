@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.navercorp.pinpoint.common.profiler.util.TransactionId;
 import com.navercorp.pinpoint.common.profiler.util.TransactionIdUtils;
 import com.navercorp.pinpoint.common.server.util.DateTimeFormatUtils;
+import com.navercorp.pinpoint.web.applicationmap.histogram.LoadHistogramFormat;
 import com.navercorp.pinpoint.web.applicationmap.link.Link;
 import com.navercorp.pinpoint.web.applicationmap.nodes.Node;
 import com.navercorp.pinpoint.web.calltree.span.TraceState;
@@ -40,15 +41,14 @@ import java.util.Objects;
  * @author minwoo.jung
  */
 public class TransactionInfoViewModel {
-
     private final TransactionId transactionId;
     private final long spanId;
     private final Collection<Node> nodes;
     private final Collection<Link> links;
     private final RecordSet recordSet;
     private final TraceState.State completeState;
-
     private final LogConfiguration logConfiguration;
+    private LoadHistogramFormat loadHistogramFormat = LoadHistogramFormat.V1;
 
     public TransactionInfoViewModel(TransactionId transactionId, long spanId, Collection<Node> nodes, Collection<Link> links, RecordSet recordSet, TraceState.State state, LogConfiguration logConfiguration) {
         this.transactionId = transactionId;
@@ -58,6 +58,10 @@ public class TransactionInfoViewModel {
         this.recordSet = recordSet;
         this.completeState = state;
         this.logConfiguration = Objects.requireNonNull(logConfiguration, "logConfiguration");
+    }
+
+    public void setLoadHistogramFormat(LoadHistogramFormat loadHistogramFormat) {
+        this.loadHistogramFormat = loadHistogramFormat;
     }
 
     @JsonProperty("applicationName")
@@ -147,16 +151,15 @@ public class TransactionInfoViewModel {
 
     @JsonProperty("callStack")
     public List<CallStack> getCallStack() {
-
         List<CallStack> list = new ArrayList<CallStack>();
         boolean first = true;
         long barRatio = 0;
-        for(Record record : recordSet.getRecordList()) {
-            if(first) {
-                if(record.isMethod()) {
+        for (Record record : recordSet.getRecordList()) {
+            if (first) {
+                if (record.isMethod()) {
                     long begin = record.getBegin();
                     long end = record.getBegin() + record.getElapsed();
-                    if(end  - begin > 0) {
+                    if (end - begin > 0) {
                         barRatio = 100 / (end - begin);
                     }
                 }
@@ -175,17 +178,24 @@ public class TransactionInfoViewModel {
     @JsonProperty("applicationMapData")
     public Map<String, List<Object>> getApplicationMapData() {
         Map<String, List<Object>> result = new HashMap<String, List<Object>>();
+        if (loadHistogramFormat == LoadHistogramFormat.V2) {
+            for (Node node : nodes) {
+                node.setLoadHistogramFormat(loadHistogramFormat);
+            }
+            for (Link link : links) {
+                link.setLoadHistogramFormat(loadHistogramFormat);
+            }
+        }
 
         List<Object> nodeDataArray = new ArrayList<>(nodes);
         result.put("nodeDataArray", nodeDataArray);
-
         List<Object> linkDataArray = new ArrayList<>(links);
         result.put("linkDataArray", linkDataArray);
 
         return result;
     }
 
-    @JsonSerialize(using=TransactionInfoCallStackSerializer.class)
+    @JsonSerialize(using = TransactionInfoCallStackSerializer.class)
     public static class CallStack {
         static final String[] INDEX = {"depth",
                 "begin",

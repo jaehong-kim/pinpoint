@@ -16,23 +16,29 @@
 
 package com.navercorp.pinpoint.collector.receiver.thrift.tcp;
 
+import com.navercorp.pinpoint.collector.config.CollectorConfiguration;
 import com.navercorp.pinpoint.collector.handler.DirectExecutor;
 import com.navercorp.pinpoint.collector.service.AgentLifeCycleService;
+import com.navercorp.pinpoint.collector.service.StatisticsService;
+import com.navercorp.pinpoint.collector.service.async.AgentEventAsyncTaskService;
 import com.navercorp.pinpoint.collector.service.async.AgentLifeCycleAsyncTaskService;
 import com.navercorp.pinpoint.collector.service.async.AgentProperty;
 import com.navercorp.pinpoint.collector.service.async.AgentPropertyChannelAdaptor;
 import com.navercorp.pinpoint.collector.util.ManagedAgentLifeCycle;
 import com.navercorp.pinpoint.common.server.bo.AgentLifeCycleBo;
 import com.navercorp.pinpoint.common.server.util.AgentLifeCycleState;
+import com.navercorp.pinpoint.loader.service.ServiceTypeRegistryService;
 import com.navercorp.pinpoint.rpc.client.HandshakerFactory;
 import com.navercorp.pinpoint.rpc.packet.HandshakePropertyType;
 import com.navercorp.pinpoint.rpc.server.ChannelProperties;
 import com.navercorp.pinpoint.rpc.server.ChannelPropertiesFactory;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -55,12 +61,16 @@ public class AgentLifeCycleAsyncTaskServiceTest {
     @Spy
     private Executor executor = new DirectExecutor();
 
-
     @Mock
     private AgentLifeCycleService agentLifeCycleService;
+    @Mock
+    ServiceTypeRegistryService serviceTypeRegistryService;
+    @Mock
+    private StatisticsService statisticsService;
+    @Mock
+    private CollectorConfiguration collectorConfiguration;
 
-    @InjectMocks
-    private AgentLifeCycleAsyncTaskService agentLifeCycleAsyncTaskService = new AgentLifeCycleAsyncTaskService();
+    private AgentLifeCycleAsyncTaskService agentLifeCycleAsyncTaskService;
 
     private static final String TEST_APP_ID = "TEST_APP_ID";
     private static final String TEST_AGENT_ID = "TEST_AGENT";
@@ -69,6 +79,11 @@ public class AgentLifeCycleAsyncTaskServiceTest {
     private static final int TEST_SOCKET_ID = 999;
     private static final Map<Object, Object> TEST_CHANNEL_PROPERTIES = createTestChannelProperties();
 
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        this.agentLifeCycleAsyncTaskService = new AgentLifeCycleAsyncTaskService(agentLifeCycleService, serviceTypeRegistryService, statisticsService, collectorConfiguration);
+    }
 
     @Test
     public void runningStateShouldBeInserted() {

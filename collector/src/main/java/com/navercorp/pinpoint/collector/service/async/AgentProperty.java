@@ -20,6 +20,8 @@ package com.navercorp.pinpoint.collector.service.async;
  * @author Woonduk Kang(emeroad)
  */
 public interface AgentProperty {
+    String getApplicationName();
+    short getServiceTypeCode();
     String getAgentId();
     long getStartTime();
     Object get(String key);

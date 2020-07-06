@@ -17,10 +17,14 @@
 package com.navercorp.pinpoint.web.applicationmap;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.navercorp.pinpoint.web.applicationmap.histogram.LoadHistogramFormat;
+import com.navercorp.pinpoint.web.applicationmap.link.Link;
+import com.navercorp.pinpoint.web.applicationmap.nodes.Node;
 import com.navercorp.pinpoint.web.view.FilterMapWrapSerializer;
 
 /**
  * @author emeroad
+ * @author jaehong.kim
  */
 @JsonSerialize(using = FilterMapWrapSerializer.class)
 public class FilterMapWrap {
@@ -28,9 +32,20 @@ public class FilterMapWrap {
     private Long lastFetchedTimestamp;
 
     public FilterMapWrap(ApplicationMap applicationMap) {
-        this.applicationMap = applicationMap;
+        this(applicationMap, LoadHistogramFormat.V1);
     }
 
+    public FilterMapWrap(ApplicationMap applicationMap, LoadHistogramFormat loadHistogramFormat) {
+        this.applicationMap = applicationMap;
+        if (loadHistogramFormat == LoadHistogramFormat.V2) {
+            for (Node node : this.applicationMap.getNodes()) {
+                node.setLoadHistogramFormat(loadHistogramFormat);
+            }
+            for (Link link : this.applicationMap.getLinks()) {
+                link.setLoadHistogramFormat(loadHistogramFormat);
+            }
+        }
+    }
 
     public void setLastFetchedTimestamp(Long lastFetchedTimestamp) {
         this.lastFetchedTimestamp = lastFetchedTimestamp;
@@ -43,5 +58,4 @@ public class FilterMapWrap {
     public Long getLastFetchedTimestamp() {
         return lastFetchedTimestamp;
     }
-
 }

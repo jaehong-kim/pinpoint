@@ -36,6 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,7 +61,8 @@ public class ScatterChartController {
     private ScatterChartService scatter;
 
     @Autowired
-    private FilteredMapService flow;
+    @Qualifier("defaultFilteredMapServiceImpl")
+    private FilteredMapService filteredMapService;
 
     @Autowired
     private FilterBuilder<List<SpanBo>> filterBuilder;
@@ -148,7 +150,7 @@ public class ScatterChartController {
     }
 
     private ScatterView.DotView selectFilterScatterData(String applicationName, Range range, int xGroupUnit, int yGroupUnit, int limit, boolean backwardDirection, String filterText) {
-        final LimitedScanResult<List<TransactionId>> limitedScanResult = flow.selectTraceIdsFromApplicationTraceIndex(applicationName, range, limit, backwardDirection);
+        final LimitedScanResult<List<TransactionId>> limitedScanResult = filteredMapService.selectTraceIdsFromApplicationTraceIndex(applicationName, range, limit, backwardDirection);
 
         final List<TransactionId> transactionIdList = limitedScanResult.getScanData();
         if (logger.isTraceEnabled()) {

@@ -19,6 +19,7 @@ package com.navercorp.pinpoint.web.applicationmap.histogram;
 import com.navercorp.pinpoint.common.trace.ServiceType;
 import com.navercorp.pinpoint.web.applicationmap.histogram.ApplicationTimeHistogram;
 import com.navercorp.pinpoint.web.applicationmap.histogram.ApplicationTimeHistogramBuilder;
+import com.navercorp.pinpoint.web.view.LoadTimeViewModel;
 import com.navercorp.pinpoint.web.view.ResponseTimeViewModel;
 import com.navercorp.pinpoint.web.vo.Application;
 import com.navercorp.pinpoint.web.vo.Range;
@@ -70,5 +71,24 @@ public class ApplicationTimeHistogramTest {
         two .addResponseTime("test", (short) 3000, 1);
         responseTimeList.add(two);
         return responseTimeList;
+    }
+
+    @Test
+    public void testLoadViewModel() throws Exception {
+        Application app = new Application("test", ServiceType.STAND_ALONE);
+        final long timestamp = System.currentTimeMillis();
+        Range range = Range.newRange(timestamp, timestamp + 60000);
+
+        ApplicationTimeHistogramBuilder builder = new ApplicationTimeHistogramBuilder(app, range);
+
+        List<ResponseTime> responseHistogramList = new ArrayList<>();
+        ResponseTime responseTime = new ResponseTime(app.getName(), app.getServiceType(), timestamp);
+        responseTime.addResponseTime("test", (short) 1000, 1);
+        responseHistogramList.add(responseTime);
+
+        ApplicationTimeHistogram histogram = builder.build(responseHistogramList);
+
+        List<LoadTimeViewModel> viewModelList = histogram.createLoadTimeViewModel();
+        logger.debug("{}", viewModelList);
     }
 }

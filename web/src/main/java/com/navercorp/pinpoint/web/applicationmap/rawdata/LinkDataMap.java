@@ -22,6 +22,9 @@ import com.navercorp.pinpoint.web.util.TimeWindow;
 import com.navercorp.pinpoint.web.vo.Application;
 import com.navercorp.pinpoint.web.vo.LinkKey;
 
+/**
+ * @author jaehong.kim
+ */
 public class LinkDataMap {
     private final Map<LinkKey, LinkData> linkDataMap = new HashMap<>();
     private TimeWindow timeWindow;
@@ -42,6 +45,11 @@ public class LinkDataMap {
     public void addLinkData(Application sourceApplication, String sourceAgentId, Application destinationApplication, String destinationAgentId, long timestamp, short slotTime, long count) {
         final LinkData linkData = getLinkData(sourceApplication, destinationApplication);
         linkData.addLinkData(sourceAgentId, sourceApplication.getServiceType(), destinationAgentId, destinationApplication.getServiceType(), timestamp, slotTime, count);
+    }
+
+    public void addLinkData(Application sourceApplication, Application destinationApplication, String destinationAgentId, long timestamp, short slotTime, long count) {
+        final LinkData linkData = getLinkData(sourceApplication, destinationApplication);
+        linkData.addLinkData(sourceApplication.getName(), sourceApplication.getServiceType(), destinationAgentId, destinationApplication.getServiceType(), timestamp, slotTime, count);
     }
 
     @Override

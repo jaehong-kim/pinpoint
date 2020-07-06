@@ -16,8 +16,11 @@
 
 package com.navercorp.pinpoint.collector.service;
 
+import com.navercorp.pinpoint.collector.dao.MapResponseTimeCompactDao;
 import com.navercorp.pinpoint.collector.dao.MapResponseTimeDao;
+import com.navercorp.pinpoint.collector.dao.MapStatisticsCalleeCompactDao;
 import com.navercorp.pinpoint.collector.dao.MapStatisticsCalleeDao;
+import com.navercorp.pinpoint.collector.dao.MapStatisticsCallerCompactDao;
 import com.navercorp.pinpoint.collector.dao.MapStatisticsCallerDao;
 import com.navercorp.pinpoint.common.trace.ServiceType;
 
@@ -26,23 +29,26 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 /**
- * 
  * @author netspider
- * 
+ * @author jaehong.kim
  */
 @Service
 public class StatisticsService {
-
     private final MapStatisticsCalleeDao mapStatisticsCalleeDao;
-
     private final MapStatisticsCallerDao mapStatisticsCallerDao;
-
+    private final MapStatisticsCalleeCompactDao mapStatisticsCalleeCompactDao;
+    private final MapStatisticsCallerCompactDao mapStatisticsCallerCompactDao;
     private final MapResponseTimeDao mapResponseTimeDao;
+    private final MapResponseTimeCompactDao mapResponseTimeCompactDao;
 
-    public StatisticsService(MapStatisticsCalleeDao mapStatisticsCalleeDao, MapStatisticsCallerDao mapStatisticsCallerDao, MapResponseTimeDao mapResponseTimeDao) {
+    public StatisticsService(MapStatisticsCalleeDao mapStatisticsCalleeDao, MapStatisticsCallerDao mapStatisticsCallerDao, MapResponseTimeDao mapResponseTimeDao,
+                             MapStatisticsCalleeCompactDao mapStatisticsCalleeCompactDao, MapStatisticsCallerCompactDao mapStatisticsCallerCompactDao, MapResponseTimeCompactDao mapResponseTimeCompactDao) {
         this.mapStatisticsCalleeDao = Objects.requireNonNull(mapStatisticsCalleeDao, "mapStatisticsCalleeDao");
         this.mapStatisticsCallerDao = Objects.requireNonNull(mapStatisticsCallerDao, "mapStatisticsCallerDao");
         this.mapResponseTimeDao = Objects.requireNonNull(mapResponseTimeDao, "mapResponseTimeDao");
+        this.mapStatisticsCalleeCompactDao = Objects.requireNonNull(mapStatisticsCalleeCompactDao, "mapStatisticsCalleeCompactDao");
+        this.mapStatisticsCallerCompactDao = Objects.requireNonNull(mapStatisticsCallerCompactDao, "mapStatisticsCallerCompactDao");
+        this.mapResponseTimeCompactDao = Objects.requireNonNull(mapResponseTimeCompactDao, "mapResponseTimeCompactDao");
     }
 
     /**
@@ -51,6 +57,7 @@ public class StatisticsService {
      * <br/>
      * The following message is generated for the callee(MySQL) :<br/>
      * MySQL (MYSQL) <- emeroad-app (TOMCAT)[localhost:8080]
+     *
      * @param callerApplicationName
      * @param callerServiceType
      * @param calleeApplicationName
@@ -61,6 +68,7 @@ public class StatisticsService {
      */
     public void updateCaller(String callerApplicationName, ServiceType callerServiceType, String callerAgentId, String calleeApplicationName, ServiceType calleeServiceType, String calleeHost, int elapsed, boolean isError) {
         mapStatisticsCallerDao.update(callerApplicationName, callerServiceType, callerAgentId, calleeApplicationName, calleeServiceType, calleeHost, elapsed, isError);
+        mapStatisticsCallerCompactDao.update(callerApplicationName, callerServiceType, calleeApplicationName, calleeServiceType, calleeHost, elapsed, isError);
     }
 
     /**
@@ -69,6 +77,7 @@ public class StatisticsService {
      * <br/><br/>
      * The following message is generated for the caller(Tomcat) :<br/>
      * emeroad-app (TOMCAT) -> MySQL (MYSQL)[10.25.141.69:3306]
+     *
      * @param callerApplicationName
      * @param callerServiceType
      * @param calleeApplicationName
@@ -79,9 +88,15 @@ public class StatisticsService {
      */
     public void updateCallee(String calleeApplicationName, ServiceType calleeServiceType, String callerApplicationName, ServiceType callerServiceType, String callerHost, int elapsed, boolean isError) {
         mapStatisticsCalleeDao.update(calleeApplicationName, calleeServiceType, callerApplicationName, callerServiceType, callerHost, elapsed, isError);
+        mapStatisticsCalleeCompactDao.update(calleeApplicationName, calleeServiceType, callerApplicationName, callerServiceType, elapsed, isError);
     }
 
     public void updateResponseTime(String applicationName, ServiceType serviceType, String agentId, int elapsed, boolean isError) {
         mapResponseTimeDao.received(applicationName, serviceType, agentId, elapsed, isError);
+        mapResponseTimeCompactDao.received(applicationName, serviceType, elapsed, isError);
+    }
+
+    public void updateAgentState(String applicationName, ServiceType serviceType, String agentId) {
+        mapResponseTimeCompactDao.ping(applicationName, serviceType, agentId);
     }
 }

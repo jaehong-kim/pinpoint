@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Woonduk Kang(emeroad)
+ * @author jaehong.kim
  */
 public class DefaultPingEventHandler implements PingEventHandler {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -40,22 +41,20 @@ public class DefaultPingEventHandler implements PingEventHandler {
     public void connect() {
         final TransportMetadata transportMetadata = ServerContext.getTransportMetadata();
         if (transportMetadata == null) {
-            logger.info("TransportMetadata not found");
+            logger.info("Skip connect event handle of ping, not found TransportMetadata. header={}", ServerContext.getAgentInfo());
             return;
         }
 
         final Long transportId = transportMetadata.getTransportId();
         final Header header = ServerContext.getAgentInfo();
         final PingSession pingSession = new PingSession(transportId, header);
-
         final PingSession oldSession = pingSessionRegistry.add(pingSession.getId(), pingSession);
         if (oldSession != null) {
-            logger.warn("PingSession duplicated:{}", oldSession);
+            logger.warn("Duplicated ping session old={}, new={}", oldSession, pingSession);
 //                    cleanup old session
 //                    oldSession.forceClose();
         }
         lifecycleListener.connect(pingSession);
-
     }
 
     @Override
@@ -67,7 +66,7 @@ public class DefaultPingEventHandler implements PingEventHandler {
     public void close() {
         final TransportMetadata transportMetadata = ServerContext.getTransportMetadata();
         if (transportMetadata == null) {
-            logger.info("TransportMetadata not found");
+            logger.info("Skip close event handle of ping, not found TransportMetadata. header={}", ServerContext.getAgentInfo());
             return;
         }
 
@@ -75,9 +74,29 @@ public class DefaultPingEventHandler implements PingEventHandler {
         if (removedSession == null) {
             return;
         }
-        logger.debug("remove PingSession:{}", removedSession);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Remove ping session. pingSession={}", removedSession);
+        }
         lifecycleListener.close(removedSession);
     }
 
+    @Override
+    public void update(final short serviceType) {
+        final TransportMetadata transportMetadata = ServerContext.getTransportMetadata();
+        if (transportMetadata == null) {
+            logger.info("Skip update event handle of ping, not found TransportMetadata. header={}", ServerContext.getAgentInfo());
+            return;
+        }
 
+        final PingSession pingSession = pingSessionRegistry.get(transportMetadata.getTransportId());
+        if (pingSession == null) {
+            logger.info("Skip update event handle of ping, not found ping session. transportMetadata={}", transportMetadata);
+            return;
+        }
+        pingSession.setServiceType(serviceType);
+        if (!pingSession.isUpdated()) {
+            lifecycleListener.connect(pingSession);
+            pingSession.setUpdated(true);
+        }
+    }
 }

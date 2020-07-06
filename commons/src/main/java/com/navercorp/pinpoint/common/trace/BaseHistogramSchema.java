@@ -6,9 +6,9 @@ import com.navercorp.pinpoint.common.util.apache.IntHashMap;
  * @author jaehong.kim
  */
 public class BaseHistogramSchema implements HistogramSchema {
-
     public static final HistogramSchema FAST_SCHEMA = new BaseHistogramSchema(1, (short) 100, "100ms", (short) 300, "300ms", (short) 500, "500ms", "Slow", "Error", (short) -100, "100ms", (short) -300, "300ms", (short) -500, "500ms", (short) -999, "Slow");
     public static final HistogramSchema NORMAL_SCHEMA = new BaseHistogramSchema(2, (short) 1000, "1s", (short) 3000, "3s", (short) 5000, "5s", "Slow", "Error", (short) -1000, "1s", (short) -3000, "3s", (short) -5000, "5s", (short) -9999, "Slow");
+    public static final short PING_SLOT_TIME = -2;
 
     private static final IntHashMap<HistogramSchema> DEFAULT_HISTOGRAM_SCHEMA_MAP = new IntHashMap<HistogramSchema>();
 
@@ -19,6 +19,7 @@ public class BaseHistogramSchema implements HistogramSchema {
 
     private static final short VERY_SLOW_SLOT_TIME = 0;
     private static final short ERROR_SLOT_TIME = -1;
+    private static final String PING_SLOT_NAME = "ping";
 
     private final int typeCode;
 
@@ -32,6 +33,7 @@ public class BaseHistogramSchema implements HistogramSchema {
     private final HistogramSlot normalErrorSlot;
     private final HistogramSlot slowErrorSlot;
     private final HistogramSlot verySlowErrorSlot;
+    private final HistogramSlot pingSlot;
 
     private BaseHistogramSchema(int typeCode, short fast, String fastName, short normal, String normalName, short slow, String slowName, String verySlowName, String errorName, short fastError, String fastErrorName, short normalError, String normalErrorName, short slowError, String slowErrorName, short verySlowError, String verySlowErrorName) {
         this.typeCode = typeCode;
@@ -45,6 +47,7 @@ public class BaseHistogramSchema implements HistogramSchema {
         this.slowErrorSlot = new HistogramSlot(slowError, SlotType.SLOW_ERROR, slowErrorName);
         this.verySlowSlot = new HistogramSlot(VERY_SLOW_SLOT_TIME, SlotType.VERY_SLOW, verySlowName);
         this.verySlowErrorSlot = new HistogramSlot(verySlowError, SlotType.VERY_SLOW_ERROR, verySlowErrorName);
+        this.pingSlot = new HistogramSlot(PING_SLOT_TIME, SlotType.PING, PING_SLOT_NAME);
     }
 
     public int getTypeCode() {
@@ -101,6 +104,11 @@ public class BaseHistogramSchema implements HistogramSchema {
     }
 
     @Override
+    public HistogramSlot getPingSlot() {
+        return pingSlot;
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -135,6 +143,7 @@ public class BaseHistogramSchema implements HistogramSchema {
         sb.append(", normalErrorSlot=").append(normalErrorSlot);
         sb.append(", slowErrorSlot=").append(slowErrorSlot);
         sb.append(", verySlowErrorSlot=").append(verySlowErrorSlot);
+        sb.append(", pingSlot=").append(pingSlot);
         sb.append('}');
         return sb.toString();
     }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 NAVER Corp.
+ * Copyright 2020 NAVER Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,9 @@
 package com.navercorp.pinpoint.web.service;
 
 import com.google.common.collect.Lists;
+import com.navercorp.pinpoint.common.profiler.util.TransactionId;
 import com.navercorp.pinpoint.common.server.bo.SpanBo;
 import com.navercorp.pinpoint.loader.service.ServiceTypeRegistryService;
-import com.navercorp.pinpoint.common.profiler.util.TransactionId;
 import com.navercorp.pinpoint.web.applicationmap.ApplicationMap;
 import com.navercorp.pinpoint.web.applicationmap.ApplicationMapBuilder;
 import com.navercorp.pinpoint.web.applicationmap.ApplicationMapBuilderFactory;
@@ -30,7 +30,6 @@ import com.navercorp.pinpoint.web.applicationmap.appender.histogram.datasource.R
 import com.navercorp.pinpoint.web.applicationmap.appender.histogram.datasource.WasNodeHistogramDataSource;
 import com.navercorp.pinpoint.web.applicationmap.appender.server.DefaultServerInstanceListFactory;
 import com.navercorp.pinpoint.web.applicationmap.appender.server.ServerInstanceListFactory;
-import com.navercorp.pinpoint.web.applicationmap.appender.server.datasource.AgentInfoServerInstanceListDataSource;
 import com.navercorp.pinpoint.web.applicationmap.appender.server.datasource.ServerInstanceListDataSource;
 import com.navercorp.pinpoint.web.applicationmap.link.LinkType;
 import com.navercorp.pinpoint.web.dao.ApplicationTraceIndexDao;
@@ -45,8 +44,6 @@ import com.navercorp.pinpoint.web.vo.LimitedScanResult;
 import com.navercorp.pinpoint.web.vo.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
 import java.util.ArrayList;
@@ -62,33 +59,27 @@ import java.util.Set;
  * @author netspider
  * @author emeroad
  * @author minwoo.jung
+ * @author jaehong.kim
  */
-@Service
-public class FilteredMapServiceImpl implements FilteredMapService {
-
+public abstract class BaseFilteredMapServiceImpl implements FilteredMapService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    private final AgentInfoService agentInfoService;
-
+    private final ServerInstanceListDataSource serverInstanceListDataSource;
     private final TraceDao traceDao;
-
     private final ApplicationTraceIndexDao applicationTraceIndexDao;
-
     private final ServiceTypeRegistryService registry;
-
     private final ApplicationFactory applicationFactory;
-
     private final ServerMapDataFilter serverMapDataFilter;
-
     private final ApplicationMapBuilderFactory applicationMapBuilderFactory;
-
     private static final Object V = new Object();
 
-    public FilteredMapServiceImpl(AgentInfoService agentInfoService,
-                                  @Qualifier("hbaseTraceDaoFactory") TraceDao traceDao, ApplicationTraceIndexDao applicationTraceIndexDao,
-                                  ServiceTypeRegistryService registry, ApplicationFactory applicationFactory,
-                                  Optional<ServerMapDataFilter> serverMapDataFilter, ApplicationMapBuilderFactory applicationMapBuilderFactory) {
-        this.agentInfoService = Objects.requireNonNull(agentInfoService, "agentInfoService");
+    public BaseFilteredMapServiceImpl(ServerInstanceListDataSource serverInstanceListDataSource,
+                                      TraceDao traceDao,
+                                      ApplicationTraceIndexDao applicationTraceIndexDao,
+                                      ServiceTypeRegistryService registry,
+                                      ApplicationFactory applicationFactory,
+                                      Optional<ServerMapDataFilter> serverMapDataFilter,
+                                      ApplicationMapBuilderFactory applicationMapBuilderFactory) {
+        this.serverInstanceListDataSource = Objects.requireNonNull(serverInstanceListDataSource, "serverInstanceListDataSource");
         this.traceDao = Objects.requireNonNull(traceDao, "traceDao");
         this.applicationTraceIndexDao = Objects.requireNonNull(applicationTraceIndexDao, "applicationTraceIndexDao");
         this.registry = Objects.requireNonNull(registry, "registry");
@@ -113,7 +104,6 @@ public class FilteredMapServiceImpl implements FilteredMapService {
 
         return this.applicationTraceIndexDao.scanTraceIndex(applicationName, range, limit, backwardDirection);
     }
-
 
     private List<List<SpanBo>> filterList2(List<List<SpanBo>> transactionList, Filter<List<SpanBo>> filter) {
         final List<List<SpanBo>> filteredResult = new ArrayList<>();
@@ -172,7 +162,7 @@ public class FilteredMapServiceImpl implements FilteredMapService {
 
     private List<List<SpanBo>> selectFilteredSpan(List<TransactionId> transactionIdList, Filter<List<SpanBo>> filter) {
         // filters out recursive calls by looking at each objects
-        // do not filter here if we change to a tree-based collision check in the future. 
+        // do not filter here if we change to a tree-based collision check in the future.
         final List<TransactionId> recursiveFilterList = recursiveCallFilter(transactionIdList);
 
         // FIXME might be better to simply traverse the List<Span> and create a process chain for execution
@@ -185,7 +175,6 @@ public class FilteredMapServiceImpl implements FilteredMapService {
         WasNodeHistogramDataSource wasNodeHistogramDataSource = new ResponseHistogramsNodeHistogramDataSource(filteredMap.getResponseHistograms());
         NodeHistogramFactory nodeHistogramFactory = new DefaultNodeHistogramFactory(wasNodeHistogramDataSource);
 
-        ServerInstanceListDataSource serverInstanceListDataSource = new AgentInfoServerInstanceListDataSource(agentInfoService);
         ServerInstanceListFactory serverInstanceListFactory = new DefaultServerInstanceListFactory(serverInstanceListDataSource);
 
         ApplicationMapBuilder applicationMapBuilder = applicationMapBuilderFactory.createApplicationMapBuilder(range);

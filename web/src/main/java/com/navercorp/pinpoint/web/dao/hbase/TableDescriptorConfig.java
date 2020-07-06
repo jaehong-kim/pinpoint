@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Woonduk Kang(emeroad)
+ * @author jaehong.kim
  */
 @Configuration()
 //@Import(TableDescriptors.class)
@@ -105,6 +106,26 @@ public class TableDescriptorConfig extends TableDescriptors {
     public TableDescriptor<HbaseColumnFamily.SelfStatMap> getSelfStatMap() {
         return super.getSelfStatMap();
     }
+
+    // Compact
+    @Bean
+    @Override
+    public TableDescriptor<HbaseColumnFamily.CalleeStatMapCompact> getCalleeStatMapCompact() {
+        return super.getCalleeStatMapCompact();
+    }
+
+    @Bean
+    @Override
+    public TableDescriptor<HbaseColumnFamily.CallerStatMapCompact> getCallerStatMapCompact() {
+        return super.getCallerStatMapCompact();
+    }
+
+    @Bean
+    @Override
+    public TableDescriptor<HbaseColumnFamily.SelfStatMapCompact> getSelfStatMapCompact() {
+        return super.getSelfStatMapCompact();
+    }
+
 
     @Bean
     @Override

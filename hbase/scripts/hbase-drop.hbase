@@ -40,6 +40,10 @@ drop 'ApplicationMapStatisticsCaller_Ver2'
 drop 'ApplicationMapStatisticsCallee_Ver2'
 drop 'ApplicationMapStatisticsSelf_Ver2'
 
+drop 'ApplicationMapStatisticsCallerCompact'
+drop 'ApplicationMapStatisticsCalleeCompact'
+drop 'ApplicationMapStatisticsSelfCompact'
+
 drop 'HostApplicationMap_Ver2'
 
 exit

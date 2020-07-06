@@ -17,6 +17,7 @@
 package com.navercorp.pinpoint.web.applicationmap.histogram;
 
 import com.navercorp.pinpoint.web.view.AgentResponseTimeViewModelList;
+import com.navercorp.pinpoint.web.view.LoadTimeViewModel;
 import com.navercorp.pinpoint.web.view.ResponseTimeViewModel;
 import com.navercorp.pinpoint.web.vo.*;
 
@@ -102,6 +103,9 @@ public class NodeHistogram {
         return applicationTimeHistogram.createViewModel();
     }
 
+    public List<LoadTimeViewModel> getLoadHistogram() {
+        return applicationTimeHistogram.createLoadTimeViewModel();
+    }
 
     public AgentResponseTimeViewModelList getAgentTimeHistogram() {
         return new AgentResponseTimeViewModelList(agentTimeHistogram.createViewModel());
