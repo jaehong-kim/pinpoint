@@ -32,6 +32,7 @@ import java.util.Map;
 
 /**
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 public class NodeHistogramSummarySerializer extends JsonSerializer<NodeHistogramSummary> {
 
@@ -42,7 +43,6 @@ public class NodeHistogramSummarySerializer extends JsonSerializer<NodeHistogram
 
         ServerInstanceList serverInstanceList = nodeHistogramSummary.getServerInstanceList();
         jgen.writeObjectField("serverList", serverInstanceList);
-
 
         writeHistogram(jgen, nodeHistogramSummary);
 

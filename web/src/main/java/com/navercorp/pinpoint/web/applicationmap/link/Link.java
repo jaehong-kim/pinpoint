@@ -49,27 +49,21 @@ import java.util.Set;
  * @author netspider
  * @author emeroad
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 @JsonSerialize(using = LinkSerializer.class)
 public class Link {
-
     private static final String LINK_DELIMITER = "~";
 
     private final LinkType linkType;
-
     // specifies who created the link.
     // indicates whether it was automatically created by the source, or if it was manually created by the target.
     private final CreateType createType;
-
     private final Node fromNode;
     private final Node toNode;
-
     private final Range range;
-
     private final LinkStateResolver linkStateResolver = LinkStateResolver.DEFAULT_LINK_STATE_RESOLVER;
-
     private final LinkCallDataMap sourceLinkCallDataMap = new LinkCallDataMap();
-
     private final LinkCallDataMap targetLinkCallDataMap = new LinkCallDataMap();
 
     private Histogram linkHistogram;

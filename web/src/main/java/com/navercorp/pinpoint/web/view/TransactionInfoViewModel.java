@@ -48,6 +48,7 @@ public class TransactionInfoViewModel {
     private final RecordSet recordSet;
     private final TraceState.State completeState;
     private final LogConfiguration logConfiguration;
+
     private LoadHistogramFormat loadHistogramFormat = LoadHistogramFormat.V1;
 
     public TransactionInfoViewModel(TransactionId transactionId, long spanId, Collection<Node> nodes, Collection<Link> links, RecordSet recordSet, TraceState.State state, LogConfiguration logConfiguration) {

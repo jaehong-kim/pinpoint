@@ -42,32 +42,17 @@ public class NodeSerializer extends JsonSerializer<Node> {
     @Override
     public void serialize(Node node, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
         jgen.writeStartObject();
-//        jgen.writeStringField("id", node.getNodeName());serverInstanceList
         jgen.writeStringField("key", node.getNodeName()); // necessary for go.js
-
         jgen.writeStringField("applicationName", node.getApplicationTextName()); // for go.js
-
         jgen.writeStringField("category", node.getServiceType().toString());  // necessary for go.js
         jgen.writeStringField("serviceType", node.getServiceType().toString());
-
         final ServiceType serviceType = node.getApplication().getServiceType();
-//        if (serviceType.isUser()) {
-//            jgen.writeStringField("fig", "Ellipse");
-//        } else if(serviceType.isWas()) {
-//            jgen.writeStringField("fig", "RoundedRectangle");
-//        } else {
-//            jgen.writeStringField("fig", "Rectangle");
-//        }
-
         jgen.writeStringField("serviceTypeCode", Short.toString(serviceType.getCode()));
-//        jgen.writeStringField("terminal", Boolean.toString(serviceType.isTerminal()));
         jgen.writeBooleanField("isWas", serviceType.isWas());  // for go.js
         jgen.writeBooleanField("isQueue", serviceType.isQueue());
         jgen.writeBooleanField("isAuthorized", node.isAuthorized());
-
         writeHistogram(jgen, node);
         writeServerInstanceList(jgen, node);
-
         jgen.writeEndObject();
     }
 

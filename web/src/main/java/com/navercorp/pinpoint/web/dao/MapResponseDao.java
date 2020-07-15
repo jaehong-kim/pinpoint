@@ -23,9 +23,7 @@ import com.navercorp.pinpoint.web.vo.ResponseTime;
 import java.util.List;
 
 /**
- * 
  * @author netspider
- * 
  */
 public interface MapResponseDao {
     List<ResponseTime> selectResponseTime(Application application, Range range);

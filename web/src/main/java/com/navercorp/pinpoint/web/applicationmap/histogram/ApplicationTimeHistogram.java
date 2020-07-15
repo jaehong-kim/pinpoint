@@ -27,7 +27,11 @@ import com.navercorp.pinpoint.web.vo.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,7 +50,6 @@ public class ApplicationTimeHistogram {
     private static final long TWENTY_MINUTES = TimeUnit.MINUTES.toMillis(20);
     private static final long THIRTY_MINUTES = TimeUnit.MINUTES.toMillis(30);
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final Application application;
     private final Range range;
     private final List<TimeHistogram> histogramList;
@@ -66,13 +69,9 @@ public class ApplicationTimeHistogram {
         ServiceType serviceType = application.getServiceType();
         HistogramSchema schema = serviceType.getHistogramSchema();
         value.add(new ResponseTimeViewModel(schema.getFastSlot().getSlotName(), getColumnValue(SlotType.FAST)));
-//        value.add(new ResponseTimeViewModel(schema.getFastErrorSlot().getSlotName(), getColumnValue(SlotType.FAST_ERROR)));
         value.add(new ResponseTimeViewModel(schema.getNormalSlot().getSlotName(), getColumnValue(SlotType.NORMAL)));
-//        value.add(new ResponseTimeViewModel(schema.getNormalErrorSlot().getSlotName(), getColumnValue(SlotType.NORMAL_ERROR)));
         value.add(new ResponseTimeViewModel(schema.getSlowSlot().getSlotName(), getColumnValue(SlotType.SLOW)));
-//        value.add(new ResponseTimeViewModel(schema.getSlowErrorSlot().getSlotName(), getColumnValue(SlotType.SLOW_ERROR)));
         value.add(new ResponseTimeViewModel(schema.getVerySlowSlot().getSlotName(), getColumnValue(SlotType.VERY_SLOW)));
-//        value.add(new ResponseTimeViewModel(schema.getVerySlowErrorSlot().getSlotName(), getColumnValue(SlotType.VERY_SLOW_ERROR)));
         value.add(new ResponseTimeViewModel(schema.getErrorSlot().getSlotName(), getColumnValue(SlotType.ERROR)));
 
         return value;
@@ -88,7 +87,6 @@ public class ApplicationTimeHistogram {
         }
         return result;
     }
-
 
     public long getCount(TimeHistogram timeHistogram, SlotType slotType) {
         return timeHistogram.getCount(slotType);

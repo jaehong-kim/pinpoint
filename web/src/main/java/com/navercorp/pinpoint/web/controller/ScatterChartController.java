@@ -54,21 +54,16 @@ import java.util.Map;
  */
 @Controller
 public class ScatterChartController {
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final GetTraceInfoParser getTraceInfoParser = new GetTraceInfoParser();
 
     @Autowired
     private ScatterChartService scatter;
-
     @Autowired
     @Qualifier("defaultFilteredMapServiceImpl")
     private FilteredMapService filteredMapService;
-
     @Autowired
     private FilterBuilder<List<SpanBo>> filterBuilder;
-
-    private final GetTraceInfoParser getTraceInfoParser = new GetTraceInfoParser();
-
 
     /**
      * selected points from scatter chart data query

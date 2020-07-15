@@ -60,6 +60,9 @@ import java.util.Objects;
  */
 @Controller
 public class MapController {
+    private static final String DEFAULT_SEARCH_DEPTH = "8";
+    private static final int DEFAULT_MAX_SEARCH_DEPTH = 8;
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
@@ -80,9 +83,6 @@ public class MapController {
     private ServiceTypeRegistryService registry;
     @Autowired
     private ApplicationFactory applicationFactory;
-
-    private static final String DEFAULT_SEARCH_DEPTH = "8";
-    private static final int DEFAULT_MAX_SEARCH_DEPTH = 8;
 
     /**
      * Server map data query within from ~ to timeframe

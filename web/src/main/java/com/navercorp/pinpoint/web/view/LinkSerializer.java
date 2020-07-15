@@ -38,6 +38,7 @@ import java.util.List;
  * @author emeroad
  * @author netspider
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 public class LinkSerializer extends JsonSerializer<Link> {
 
@@ -93,7 +94,7 @@ public class LinkSerializer extends JsonSerializer<Link> {
             jgen.writeFieldName(fieldName);
             jgen.writeStartArray();
             ServerInstanceList serverInstanceList = node.getServerInstanceList();
-            if (serverInstanceList!= null) {
+            if (serverInstanceList != null) {
                 for (String agentId : serverInstanceList.getAgentIdList()) {
                     jgen.writeObject(agentId);
                 }
@@ -117,10 +118,8 @@ public class LinkSerializer extends JsonSerializer<Link> {
 
     }
 
-
-
     private void writeTimeSeriesHistogram(Link link, JsonGenerator jgen) throws IOException {
-        if(link.getLoadHistogramFormat() == LoadHistogramFormat.V2) {
+        if (link.getLoadHistogramFormat() == LoadHistogramFormat.V2) {
             List<LoadTimeViewModel> loadTimeViewModelList = link.getLinkApplicationLoadHistogram();
             jgen.writeFieldName("loadHistogram");
             jgen.writeObject(loadTimeViewModelList);
@@ -130,7 +129,6 @@ public class LinkSerializer extends JsonSerializer<Link> {
             jgen.writeObject(sourceApplicationTimeSeriesHistogram);
         }
     }
-
 
     private void writeAgentHistogram(String fieldName, AgentHistogramList agentHistogramList, JsonGenerator jgen) throws IOException {
         jgen.writeFieldName(fieldName);

@@ -28,30 +28,24 @@ import java.util.*;
 
 /**
  * this class is a collection of
- * applicationHistogram
- * agentHistogram
- * applicationTimeHistogram
- * agentTimeHistogram
+ * - applicationHistogram
+ * - agentHistogram
+ * - applicationTimeHistogram
+ * - agentTimeHistogram
+ *
  * @author emeroad
+ * @author jaehong.kim
  */
 public class NodeHistogram {
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private final Application application;
-
     private final Range range;
-
     // ApplicationLevelHistogram
     private Histogram applicationHistogram;
-
     // key is agentId
     private Map<String, Histogram> agentHistogramMap;
-
     private ApplicationTimeHistogram applicationTimeHistogram;
-
     private AgentTimeHistogram agentTimeHistogram;
-
 
     public NodeHistogram(Application application, Range range) {
         this.application = Objects.requireNonNull(application, "application");
@@ -59,7 +53,6 @@ public class NodeHistogram {
 
         this.applicationHistogram = new Histogram(this.application.getServiceType());
         this.agentHistogramMap = new HashMap<>();
-
         this.applicationTimeHistogram = new ApplicationTimeHistogram(this.application, this.range);
         this.agentTimeHistogram = new AgentTimeHistogram(this.application, this.range);
     }
@@ -67,17 +60,13 @@ public class NodeHistogram {
     public NodeHistogram(Application application, Range range, List<ResponseTime> responseHistogramList) {
         this.application = Objects.requireNonNull(application, "application");
         this.range = Objects.requireNonNull(range, "range");
-
         Objects.requireNonNull(responseHistogramList, "responseHistogramList");
 
         this.agentTimeHistogram = createAgentLevelTimeSeriesResponseTime(responseHistogramList);
         this.applicationTimeHistogram = createApplicationLevelTimeSeriesResponseTime(responseHistogramList);
-
         this.agentHistogramMap = createAgentLevelResponseTime(responseHistogramList);
         this.applicationHistogram = createApplicationLevelResponseTime(responseHistogramList);
-
     }
-
 
     public Histogram getApplicationHistogram() {
         return applicationHistogram;
@@ -157,7 +146,7 @@ public class NodeHistogram {
         }
         return applicationHistogram;
     }
-    
+
     public Range getRange() {
         return range;
     }

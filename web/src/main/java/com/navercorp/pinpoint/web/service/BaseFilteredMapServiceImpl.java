@@ -62,6 +62,8 @@ import java.util.Set;
  * @author jaehong.kim
  */
 public abstract class BaseFilteredMapServiceImpl implements FilteredMapService {
+    private static final Object V = new Object();
+
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final ServerInstanceListDataSource serverInstanceListDataSource;
     private final TraceDao traceDao;
@@ -70,7 +72,6 @@ public abstract class BaseFilteredMapServiceImpl implements FilteredMapService {
     private final ApplicationFactory applicationFactory;
     private final ServerMapDataFilter serverMapDataFilter;
     private final ApplicationMapBuilderFactory applicationMapBuilderFactory;
-    private static final Object V = new Object();
 
     public BaseFilteredMapServiceImpl(ServerInstanceListDataSource serverInstanceListDataSource,
                                       TraceDao traceDao,

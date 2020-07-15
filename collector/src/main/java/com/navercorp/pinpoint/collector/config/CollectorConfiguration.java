@@ -29,39 +29,26 @@ import java.util.Objects;
 
 /**
  * @author emeroad
+ * @author jaehong.kim
  */
 public class CollectorConfiguration {
-
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Value("${collector.agentEventWorker.threadSize:32}")
     private int agentEventWorkerThreadSize;
-
     @Value("${collector.agentEventWorker.queueSize:5120}")
     private int agentEventWorkerQueueSize;
-
-//    @Value("#{'${collector.l4.ip:}'.split(',')}")
-//    private List<String> l4IpList = Collections.emptyList();
     @Value("${collector.l4.ip:}")
     private String[] l4IpList = new String[0];
-
     @Value("${cluster.enable}")
     private boolean clusterEnable;
-
     @Value("${cluster.zookeeper.address:}")
     private String clusterAddress;
-
     @Value("${cluster.zookeeper.sessiontimeout:-1}")
     private int clusterSessionTimeout;
-
-
     @Value("${cluster.listen.ip:}")
     private String clusterListenIp;
-
-
     @Value("${cluster.listen.port:-1}")
     private int clusterListenPort;
-
     @Value("${collector.statistics.agent-state.enable:false}")
     private boolean statisticsAgentStateEnable;
 
@@ -145,7 +132,6 @@ public class CollectorConfiguration {
         visitor.visit(this, new LoggingEvent(logger));
     }
 
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CollectorConfiguration{");
@@ -161,5 +147,4 @@ public class CollectorConfiguration {
         sb.append('}');
         return sb.toString();
     }
-
 }

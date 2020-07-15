@@ -54,6 +54,10 @@ import java.util.List;
 @Controller
 public class BusinessTransactionController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final SqlParser sqlParser = new DefaultSqlParser();
+    private final OutputParameterParser parameterParser = new OutputParameterParser();
+    private final MongoJsonParser mongoJsonParser = new DefaultMongoJsonParser();
+    private final OutputParameterMongoJsonParser parameterJsonParser = new OutputParameterMongoJsonParser();
 
     @Autowired
     private SpanService spanService;
@@ -67,10 +71,6 @@ public class BusinessTransactionController {
     private FilteredMapService compactFilteredMapService;
     @Autowired
     private LogConfiguration logConfiguration;
-    private final SqlParser sqlParser = new DefaultSqlParser();
-    private final OutputParameterParser parameterParser = new OutputParameterParser();
-    private final MongoJsonParser mongoJsonParser = new DefaultMongoJsonParser();
-    private final OutputParameterMongoJsonParser parameterJsonParser = new OutputParameterMongoJsonParser();
 
     /**
      * info lookup for a selected transaction
@@ -123,9 +123,9 @@ public class BusinessTransactionController {
         final SpanResult spanResult = this.spanService.selectSpan(transactionId, focusTimestamp);
         final CallTreeIterator callTreeIterator = spanResult.getCallTree();
         // application map
-        ApplicationMap map = compactFilteredMapService.selectApplicationMap(transactionId, viewVersion);
-        RecordSet recordSet = this.transactionInfoService.createRecordSet(callTreeIterator, focusTimestamp, agentId, spanId);
-        TransactionInfoViewModel result = new TransactionInfoViewModel(transactionId, spanId, map.getNodes(), map.getLinks(), recordSet, spanResult.getTraceState(), logConfiguration);
+        final ApplicationMap map = compactFilteredMapService.selectApplicationMap(transactionId, viewVersion);
+        final RecordSet recordSet = this.transactionInfoService.createRecordSet(callTreeIterator, focusTimestamp, agentId, spanId);
+        final TransactionInfoViewModel result = new TransactionInfoViewModel(transactionId, spanId, map.getNodes(), map.getLinks(), recordSet, spanResult.getTraceState(), logConfiguration);
         result.setLoadHistogramFormat(LoadHistogramFormat.V2);
 
         return result;

@@ -26,7 +26,6 @@ import java.util.Objects;
  * @author jaehong.kim
  */
 public class LoadTimeViewModel {
-
     private final long timestamp;
     private final LoadHistogram histogram;
 

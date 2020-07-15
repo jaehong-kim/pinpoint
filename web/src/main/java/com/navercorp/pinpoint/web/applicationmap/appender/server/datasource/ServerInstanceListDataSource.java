@@ -24,6 +24,7 @@ import com.navercorp.pinpoint.web.vo.Range;
  * @author emeroad
  * @author minwoo.jung
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 public interface ServerInstanceListDataSource {
 

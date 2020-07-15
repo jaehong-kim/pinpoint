@@ -37,20 +37,14 @@ import java.util.Objects;
  */
 @JsonSerialize(using = NodeSerializer.class)
 public class Node {
-
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     private static final String NODE_DELIMITER = "^";
 
     private final NodeType nodeType;
-
     private final Application application;
 
     // avoid NPE
     private ServerInstanceList serverInstanceList = new ServerInstanceList();
-
     private NodeHistogram nodeHistogram;
-    
     private boolean authorized = true;
     private LoadHistogramFormat loadHistogramFormat = LoadHistogramFormat.V1;
 

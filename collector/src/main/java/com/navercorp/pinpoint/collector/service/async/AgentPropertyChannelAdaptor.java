@@ -22,9 +22,9 @@ import java.util.Objects;
 
 /**
  * @author Woonduk Kang(emeroad)
+ * @author jaehong.kim
  */
 public class AgentPropertyChannelAdaptor implements AgentProperty {
-
     private final ChannelProperties channelProperties;
 
     public AgentPropertyChannelAdaptor(ChannelProperties channelProperties) {

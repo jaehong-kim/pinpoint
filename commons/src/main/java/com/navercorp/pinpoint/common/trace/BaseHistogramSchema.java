@@ -22,13 +22,11 @@ public class BaseHistogramSchema implements HistogramSchema {
     private static final String PING_SLOT_NAME = "ping";
 
     private final int typeCode;
-
     private final HistogramSlot fastSlot;
     private final HistogramSlot normalSlot;
     private final HistogramSlot slowSlot;
     private final HistogramSlot verySlowSlot;
     private final HistogramSlot errorSlot;
-
     private final HistogramSlot fastErrorSlot;
     private final HistogramSlot normalErrorSlot;
     private final HistogramSlot slowErrorSlot;
@@ -41,7 +39,6 @@ public class BaseHistogramSchema implements HistogramSchema {
         this.fastErrorSlot = new HistogramSlot(fastError, SlotType.FAST_ERROR, fastErrorName);
         this.normalSlot = new HistogramSlot(normal, SlotType.NORMAL, normalName);
         this.errorSlot = new HistogramSlot(ERROR_SLOT_TIME, SlotType.ERROR, errorName);
-
         this.normalErrorSlot = new HistogramSlot(normalError, SlotType.NORMAL_ERROR, normalErrorName);
         this.slowSlot = new HistogramSlot(slow, SlotType.SLOW, slowName);
         this.slowErrorSlot = new HistogramSlot(slowError, SlotType.SLOW_ERROR, slowErrorName);

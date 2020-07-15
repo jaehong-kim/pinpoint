@@ -23,6 +23,7 @@ import com.navercorp.pinpoint.collector.util.ObjectPool;
 import com.navercorp.pinpoint.collector.util.ObjectPoolFactory;
 import com.navercorp.pinpoint.common.util.IOUtils;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;

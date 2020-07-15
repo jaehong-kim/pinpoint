@@ -25,12 +25,13 @@ import java.util.Objects;
 
 /**
  * @author HyunGil Jeong
+ * @author jaehong.kim
  */
 @JsonSerialize(using = NodeHistogramSummarySerializer.class)
 public class NodeHistogramSummary {
-
     private final ServerInstanceList serverInstanceList;
     private final NodeHistogram nodeHistogram;
+
     private LoadHistogramFormat loadHistogramFormat = LoadHistogramFormat.V1;
 
     public NodeHistogramSummary(ServerInstanceList serverInstanceList, NodeHistogram nodeHistogram) {
@@ -59,6 +60,7 @@ public class NodeHistogramSummary {
         final StringBuilder sb = new StringBuilder("NodeHistogramSummary{");
         sb.append("serverInstanceList=").append(serverInstanceList);
         sb.append(", nodeHistogram=").append(nodeHistogram);
+        sb.append(", loadHistogramFormat=").append(loadHistogramFormat);
         sb.append('}');
         return sb.toString();
     }

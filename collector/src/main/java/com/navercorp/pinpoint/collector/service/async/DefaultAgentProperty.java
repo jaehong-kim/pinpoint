@@ -21,6 +21,7 @@ import java.util.Objects;
 
 /**
  * @author Woonduk Kang(emeroad)
+ * @author jaehong.kim
  */
 public class DefaultAgentProperty implements AgentProperty {
     private final String applicationName;

@@ -29,6 +29,7 @@ import com.navercorp.pinpoint.web.view.FilterMapWrapSerializer;
 @JsonSerialize(using = FilterMapWrapSerializer.class)
 public class FilterMapWrap {
     private final ApplicationMap applicationMap;
+
     private Long lastFetchedTimestamp;
 
     public FilterMapWrap(ApplicationMap applicationMap) {

@@ -42,30 +42,26 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 
 /**
- *
  * @author emeroad
  * @author netspider
+ * @author jaehong.kim
  */
 @Controller
 public class FilteredMapController {
-
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     @Qualifier("defaultFilteredMapServiceImpl")
     private FilteredMapService defaultFilteredMapService;
-
     @Autowired
     @Qualifier("compactFilteredMapServiceImpl")
     private FilteredMapService compactFilteredMapService;
-
     @Autowired
     private FilterBuilder<List<SpanBo>> filterBuilder;
-
     @Autowired
     private ServiceTypeRegistryService registry;
 
-    @RequestMapping(value = "/getFilteredServerMapDataMadeOfDotGroup", method = RequestMethod.GET, params="serviceTypeCode")
+    @RequestMapping(value = "/getFilteredServerMapDataMadeOfDotGroup", method = RequestMethod.GET, params = "serviceTypeCode")
     @ResponseBody
     public FilterMapWrap getFilteredServerMapDataMadeOfDotGroup(
             @RequestParam("applicationName") String applicationName,
@@ -84,7 +80,7 @@ public class FilteredMapController {
     }
 
 
-    @RequestMapping(value = "/getFilteredServerMapDataMadeOfDotGroup", method = RequestMethod.GET, params="serviceTypeName")
+    @RequestMapping(value = "/getFilteredServerMapDataMadeOfDotGroup", method = RequestMethod.GET, params = "serviceTypeName")
     @ResponseBody
     public FilterMapWrap getFilteredServerMapDataMadeOfDotGroup(
             @RequestParam("applicationName") String applicationName,
@@ -127,7 +123,7 @@ public class FilteredMapController {
         return mapWrap;
     }
 
-    @RequestMapping(value = "/getFilteredServerMapDataMadeOfDotGroupV2", method = RequestMethod.GET, params="serviceTypeCode")
+    @RequestMapping(value = "/getFilteredServerMapDataMadeOfDotGroupV2", method = RequestMethod.GET, params = "serviceTypeCode")
     @ResponseBody
     public FilterMapWrap getFilteredServerMapDataMadeOfDotGroupV2(
             @RequestParam("applicationName") String applicationName,
@@ -145,7 +141,7 @@ public class FilteredMapController {
         return getFilteredServerMapDataMadeOfDotGroupV2(applicationName, serviceTypeName, from, to, originTo, xGroupUnit, yGroupUnit, filterText, filterHint, limit, viewVersion);
     }
 
-    @RequestMapping(value = "/getFilteredServerMapDataMadeOfDotGroupV2", method = RequestMethod.GET, params="serviceTypeName")
+    @RequestMapping(value = "/getFilteredServerMapDataMadeOfDotGroupV2", method = RequestMethod.GET, params = "serviceTypeName")
     @ResponseBody
     public FilterMapWrap getFilteredServerMapDataMadeOfDotGroupV2(
             @RequestParam("applicationName") String applicationName,
@@ -176,8 +172,7 @@ public class FilteredMapController {
         final Range originalRange = Range.newRange(from, originTo);
         // needed to figure out already scanned ranged
         final Range scannerRange = Range.newRange(lastScanTime, to);
-        logger.debug("originalRange:{} scannerRange:{} ", originalRange, scannerRange);
-        ApplicationMap map = compactFilteredMapService.selectApplicationMapWithScatterData(limitedScanResult.getScanData(), originalRange, scannerRange, xGroupUnit, yGroupUnit, filter, viewVersion);
+        final ApplicationMap map = compactFilteredMapService.selectApplicationMapWithScatterData(limitedScanResult.getScanData(), originalRange, scannerRange, xGroupUnit, yGroupUnit, filter, viewVersion);
 
         if (logger.isDebugEnabled()) {
             logger.debug("getFilteredServerMapData range scan(limit:{}) range:{} lastFetchedTimestamp:{}", limit, range.prettyToString(), DateTimeFormatUtils.format(lastScanTime));
