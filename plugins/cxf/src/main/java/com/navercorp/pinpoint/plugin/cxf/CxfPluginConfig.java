@@ -28,6 +28,7 @@ import java.util.List;
  */
 public class CxfPluginConfig {
 
+    private final boolean enable;
     private final boolean serviceProfile;
 
     private final boolean loggingProfile;
@@ -45,10 +46,15 @@ public class CxfPluginConfig {
      * @param src the src
      */
     public CxfPluginConfig(ProfilerConfig src) {
+        this.enable = src.readBoolean("profiler.cxf.enable", true);
         this.serviceProfile = src.readBoolean("profiler.cxf.service.enable", false);
         this.loggingProfile = src.readBoolean("profiler.cxf.logging.enable", false);
         this.clientProfile = src.readBoolean("profiler.cxf.client", false);
         this.clientHiddenParams = getStringArray(src.readString("profiler.cxf.client.hiddenParams", ""));
+    }
+
+    public boolean isEnable() {
+        return enable;
     }
 
     public boolean isServiceProfile() {

@@ -24,11 +24,13 @@ import com.navercorp.pinpoint.bootstrap.config.ProfilerConfig;
  */
 public class HttpClient3PluginConfig {
 
+    private final boolean enable;
     private final boolean param;
     private final boolean io;
     private final HttpDumpConfig httpDumpConfig;
 
     public HttpClient3PluginConfig(ProfilerConfig src) {
+        this.enable = src.readBoolean("profiler.apache.httpclient3.enable", true);
         this.param = src.readBoolean("profiler.apache.httpclient3.param", true);
 
         boolean cookie = src.readBoolean("profiler.apache.httpclient3.cookie", false);
@@ -43,6 +45,10 @@ public class HttpClient3PluginConfig {
         this.httpDumpConfig = HttpDumpConfig.get(cookie, cookieDumpType, cookieSamplingRate, cookieDumpSize, entity, entityDumpType, entitySamplingRate, entityDumpSize);
 
         this.io = src.readBoolean("profiler.apache.httpclient3.io", true);
+    }
+
+    public boolean isEnable() {
+        return enable;
     }
 
     public boolean isParam() {
