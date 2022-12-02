@@ -58,16 +58,18 @@ public class CassandraPlugin implements ProfilerPlugin, TransformTemplateAware {
 
         // 4.x
         transformTemplate.transform("com.datastax.oss.driver.internal.core.session.DefaultSession", DefaultSessionTransformer.class);
-        // Statement
-        transformTemplate.transform("com.datastax.oss.driver.internal.core.cql.DefaultSimpleStatement", DefaultSimpleStatementTransformer.class);
-        transformTemplate.transform("com.datastax.oss.driver.internal.core.cql.DefaultPreparedStatement", DefaultPreparedStatementTransformer.class);
-        transformTemplate.transform("com.datastax.oss.driver.internal.core.cql.DefaultBoundStatement", StatementTransformer.class);
-        transformTemplate.transform("com.datastax.oss.driver.api.core.data.SettableByIndex", SettableByIndexTransformer.class);
-        transformTemplate.transform("com.datastax.oss.driver.internal.core.cql.DefaultBatchStatement", StatementTransformer.class);
-        transformTemplate.transform("com.datastax.dse.driver.internal.core.graph.BytecodeGraphStatement", StatementTransformer.class);
-        transformTemplate.transform("com.datastax.dse.driver.internal.core.graph.DefaultBatchGraphStatement", StatementTransformer.class);
-        transformTemplate.transform("com.datastax.dse.driver.internal.core.graph.DefaultFluentGraphStatement", StatementTransformer.class);
-        transformTemplate.transform("com.datastax.dse.driver.internal.core.graph.DefaultScriptGraphStatement", StatementTransformer.class);
+        if (config.isTraceSqlBindValue()) {
+            // Statement
+            transformTemplate.transform("com.datastax.oss.driver.internal.core.cql.DefaultSimpleStatement", DefaultSimpleStatementTransformer.class);
+            transformTemplate.transform("com.datastax.oss.driver.internal.core.cql.DefaultPreparedStatement", DefaultPreparedStatementTransformer.class);
+            transformTemplate.transform("com.datastax.oss.driver.internal.core.cql.DefaultBoundStatement", StatementTransformer.class);
+            transformTemplate.transform("com.datastax.oss.driver.api.core.data.SettableByIndex", SettableByIndexTransformer.class);
+            transformTemplate.transform("com.datastax.oss.driver.internal.core.cql.DefaultBatchStatement", StatementTransformer.class);
+            transformTemplate.transform("com.datastax.dse.driver.internal.core.graph.BytecodeGraphStatement", StatementTransformer.class);
+            transformTemplate.transform("com.datastax.dse.driver.internal.core.graph.DefaultBatchGraphStatement", StatementTransformer.class);
+            transformTemplate.transform("com.datastax.dse.driver.internal.core.graph.DefaultFluentGraphStatement", StatementTransformer.class);
+            transformTemplate.transform("com.datastax.dse.driver.internal.core.graph.DefaultScriptGraphStatement", StatementTransformer.class);
+        }
     }
 
     public static class DefaultSessionTransformer implements TransformCallback {
