@@ -75,7 +75,7 @@ public class ServerStreamCreatedInterceptor implements AroundInterceptor {
         }
 
         final Trace trace = createTrace(request);
-        if (trace == null || !trace.canSampled()) {
+        if (trace == null) {
             return;
         }
 

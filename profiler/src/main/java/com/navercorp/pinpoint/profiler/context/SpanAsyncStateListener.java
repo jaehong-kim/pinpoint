@@ -17,7 +17,9 @@
 package com.navercorp.pinpoint.profiler.context;
 
 import com.navercorp.pinpoint.common.annotations.InterfaceAudience;
+
 import java.util.Objects;
+
 import com.navercorp.pinpoint.profiler.context.id.ListenableAsyncState;
 import com.navercorp.pinpoint.profiler.context.id.TraceRoot;
 import com.navercorp.pinpoint.profiler.context.storage.Storage;
@@ -59,5 +61,12 @@ public class SpanAsyncStateListener implements ListenableAsyncState.AsyncStateLi
             storage.store(this.span);
             storage.close();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "SpanAsyncStateListener{" +
+                "closed=" + closed +
+                '}';
     }
 }

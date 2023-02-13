@@ -18,43 +18,87 @@ package com.navercorp.pinpoint.plugin.jboss.interceptor;
 
 import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
 import com.navercorp.pinpoint.bootstrap.context.SpanEventRecorder;
+import com.navercorp.pinpoint.bootstrap.context.Trace;
 import com.navercorp.pinpoint.bootstrap.context.TraceContext;
+import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor;
 import com.navercorp.pinpoint.bootstrap.interceptor.SpanEventSimpleAroundInterceptorForPlugin;
+import com.navercorp.pinpoint.bootstrap.logging.PLogger;
+import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
 import com.navercorp.pinpoint.plugin.jboss.JbossAsyncListener;
 import com.navercorp.pinpoint.plugin.jboss.JbossConstants;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 /**
  * @author jaehong.kim
  */
-public class RequestStartAsyncInterceptor extends SpanEventSimpleAroundInterceptorForPlugin {
+public class RequestStartAsyncInterceptor implements AroundInterceptor {
+    private final PLogger logger = PLoggerFactory.getLogger(getClass());
+    private final boolean isDebug = logger.isDebugEnabled();
 
-    public RequestStartAsyncInterceptor(TraceContext context, MethodDescriptor descriptor) {
-        super(context, descriptor);
+    private final MethodDescriptor methodDescriptor;
+    private final TraceContext traceContext;
+
+    public RequestStartAsyncInterceptor(TraceContext traceContext, MethodDescriptor methodDescriptor) {
+        this.traceContext = Objects.requireNonNull(traceContext, "traceContext");
+        this.methodDescriptor = Objects.requireNonNull(methodDescriptor, "methodDescriptor");
     }
 
     @Override
-    protected void doInBeforeTrace(SpanEventRecorder recorder, Object target, Object[] args) {
-    }
-
-    @Override
-    protected void doInAfterTrace(SpanEventRecorder recorder, Object target, Object[] args, Object result, Throwable throwable) {
-        if (validate(target, result, throwable)) {
-            // Add async listener. Servlet 3.0
-            final AsyncContext asyncContext = (AsyncContext) result;
-            final AsyncListener asyncListener = new JbossAsyncListener(this.traceContext, recorder.recordNextAsyncContext(true));
-            asyncContext.addListener(asyncListener);
-            if (isDebug) {
-                logger.debug("Add async listener {}", asyncListener);
-            }
+    public void before(Object target, Object[] args) {
+        if (isDebug) {
+            logger.beforeInterceptor(target, args);
         }
 
-        recorder.recordServiceType(JbossConstants.JBOSS_METHOD);
-        recorder.recordApi(methodDescriptor);
-        recorder.recordException(throwable);
+        final Trace trace = traceContext.currentRawTraceObject();
+        if (trace == null) {
+            return;
+        }
+
+        try {
+            trace.traceBlockBegin();
+        } catch (Throwable th) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("BEFORE. Caused:{}", th.getMessage(), th);
+            }
+        }
+    }
+
+    @Override
+    public void after(Object target, Object[] args, Object result, Throwable throwable) {
+        if (isDebug) {
+            logger.afterInterceptor(target, args, result, throwable);
+        }
+
+        final Trace trace = traceContext.currentRawTraceObject();
+        if (trace == null) {
+            return;
+        }
+        try {
+            final SpanEventRecorder recorder = trace.currentSpanEventRecorder();
+            if (validate(target, result, throwable)) {
+                // Add async listener. Servlet 3.0
+                final AsyncContext asyncContext = (AsyncContext) result;
+                final AsyncListener asyncListener = new JbossAsyncListener(this.traceContext, recorder.recordNextAsyncContext(true));
+                asyncContext.addListener(asyncListener);
+                if (isDebug) {
+                    logger.debug("Add async listener {}", asyncListener);
+                }
+            }
+
+            recorder.recordServiceType(JbossConstants.JBOSS_METHOD);
+            recorder.recordApi(methodDescriptor);
+            recorder.recordException(throwable);
+        } catch (Throwable th) {
+            if (logger.isWarnEnabled()) {
+                logger.warn("AFTER error. Caused:{}", th.getMessage(), th);
+            }
+        } finally {
+            trace.traceBlockEnd();
+        }
     }
 
     private boolean validate(final Object target, final Object result, final Throwable throwable) {

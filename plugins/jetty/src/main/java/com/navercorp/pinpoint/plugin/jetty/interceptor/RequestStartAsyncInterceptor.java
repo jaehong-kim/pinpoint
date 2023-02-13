@@ -51,7 +51,7 @@ public class RequestStartAsyncInterceptor implements AroundInterceptor {
             logger.beforeInterceptor(target, args);
         }
 
-        final Trace trace = traceContext.currentTraceObject();
+        final Trace trace = traceContext.currentRawTraceObject();
         if (trace == null) {
             return;
         }
@@ -64,7 +64,7 @@ public class RequestStartAsyncInterceptor implements AroundInterceptor {
             logger.afterInterceptor(target, args, result, throwable);
         }
 
-        final Trace trace = traceContext.currentTraceObject();
+        final Trace trace = traceContext.currentRawTraceObject();
         if (trace == null) {
             return;
         }

@@ -62,7 +62,7 @@ public class AsyncListenerInterceptorHelper implements AsyncListenerInterceptor 
             logger.debug("Complete async listener. throwable={}, statusCode={}", throwable, statusCode);
         }
 
-        final Trace trace = this.asyncContext.continueAsyncTraceObject();
+        final Trace trace = this.asyncContext.continueAsyncRawTraceObject();
         if (trace == null) {
             return;
         }
@@ -71,7 +71,9 @@ public class AsyncListenerInterceptorHelper implements AsyncListenerInterceptor 
             // Record http status code
             recordHttpStatusCode(trace, statusCode);
             // Record event
-            recordAsyncEvent(trace, throwable, ASYNC_LISTENER_ON_COMPLETE_METHOD_DESCRIPTOR);
+            if (trace.canSampled()) {
+                recordAsyncEvent(trace, throwable, ASYNC_LISTENER_ON_COMPLETE_METHOD_DESCRIPTOR);
+            }
         } finally {
             // Close async trace
             close(trace);
@@ -91,13 +93,15 @@ public class AsyncListenerInterceptorHelper implements AsyncListenerInterceptor 
             logger.debug("Error async listener. throwable={}", throwable);
         }
 
-        final Trace trace = this.asyncContext.continueAsyncTraceObject();
+        final Trace trace = this.asyncContext.continueAsyncRawTraceObject();
         if (trace == null) {
             return;
         }
 
         try {
-            recordAsyncEvent(trace, throwable, ASYNC_LISTENER_ON_ERROR_METHOD_DESCRIPTOR);
+            if (trace.canSampled()) {
+                recordAsyncEvent(trace, throwable, ASYNC_LISTENER_ON_ERROR_METHOD_DESCRIPTOR);
+            }
         } finally {
             close(trace);
         }
@@ -108,13 +112,15 @@ public class AsyncListenerInterceptorHelper implements AsyncListenerInterceptor 
             logger.debug("Timeout async listener. throwable={}", throwable);
         }
 
-        final Trace trace = this.asyncContext.continueAsyncTraceObject();
+        final Trace trace = this.asyncContext.continueAsyncRawTraceObject();
         if (trace == null) {
             return;
         }
 
         try {
-            recordAsyncEvent(trace, throwable, ASYNC_LISTENER_ON_TIMEOUT_METHOD_DESCRIPTOR);
+            if (trace.canSampled()) {
+                recordAsyncEvent(trace, throwable, ASYNC_LISTENER_ON_TIMEOUT_METHOD_DESCRIPTOR);
+            }
         } finally {
             close(trace);
         }

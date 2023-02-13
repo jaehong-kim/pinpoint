@@ -29,7 +29,17 @@ public class MockAsyncContext implements AsyncContext {
     }
 
     @Override
+    public Trace continueAsyncRawTraceObject() {
+        return null;
+    }
+
+    @Override
     public Trace currentAsyncTraceObject() {
+        return null;
+    }
+
+    @Override
+    public Trace currentAsyncRawTraceObject() {
         return null;
     }
 

@@ -133,7 +133,13 @@ public class DefaultBaseTraceFactory implements BaseTraceFactory {
 
     @Override
     public Trace continueDisableAsyncContextTraceObject(LocalTraceRoot traceRoot) {
-        final AsyncState asyncState = new DisableAsyncState();
+        final ActiveTraceHandle handle = registerActiveTrace(traceRoot);
+        AsyncState asyncState = new ListenableAsyncState(traceRoot,
+                ListenableAsyncState.AsyncStateListener.EMPTY,
+                handle, uriStatStorage);
+
+
+//        final AsyncState asyncState = new DisableAsyncState();
         SpanRecorder spanRecorder = recorderFactory.newDisableSpanRecorder(traceRoot);
         SpanEventRecorder spanEventRecorder = recorderFactory.newDisableSpanEventRecorder(traceRoot, asyncState);
         return new DisableAsyncChildTrace(traceRoot, spanRecorder, spanEventRecorder);

@@ -79,6 +79,16 @@ public abstract class AsyncContextSpanEventEndPointInterceptor implements Around
         }
     }
 
+    // Trace trace, AsyncContext asyncContext
+    protected void doInBeforeTrace(Trace trace, AsyncContext asyncContext, SpanEventRecorder recorder, Object target, Object[] args) {
+        doInBeforeTrace(asyncContext, recorder, target, args);
+    }
+
+    // AsyncContext asyncContext
+    protected void doInBeforeTrace(AsyncContext asyncContext, SpanEventRecorder recorder, Object target, Object[] args) {
+        doInBeforeTrace(recorder, asyncContext, target, args);
+    }
+
     protected abstract void doInBeforeTrace(SpanEventRecorder recorder, AsyncContext asyncContext, Object target, Object[] args);
 
     @Override
@@ -87,7 +97,7 @@ public abstract class AsyncContextSpanEventEndPointInterceptor implements Around
             logger.afterInterceptor(target, args, result, throwable);
         }
 
-        final AsyncContext asyncContext = getAsyncContext(target, args);
+        final AsyncContext asyncContext = getAsyncContext(target, args, result, throwable);
         if (asyncContext == null) {
             if (isDebug) {
                 logger.debug("Not found asynchronous invocation metadata");
@@ -98,7 +108,7 @@ public abstract class AsyncContextSpanEventEndPointInterceptor implements Around
             logger.debug("Asynchronous invocation. asyncContext={}", asyncContext);
         }
 
-        final Trace trace = asyncContext.currentAsyncTraceObject();
+        final Trace trace = asyncContext.currentAsyncRawTraceObject();
         if (trace == null) {
             return;
         }
@@ -118,7 +128,7 @@ public abstract class AsyncContextSpanEventEndPointInterceptor implements Around
 
         try {
             final SpanEventRecorder recorder = trace.currentSpanEventRecorder();
-            doInAfterTrace(recorder, target, args, result, throwable);
+            doInAfterTrace(trace, asyncContext, recorder, target, args, result, throwable);
         } catch (Throwable th) {
             if (logger.isWarnEnabled()) {
                 logger.warn("AFTER error. Caused:{}", th.getMessage(), th);
@@ -135,14 +145,28 @@ public abstract class AsyncContextSpanEventEndPointInterceptor implements Around
         }
     }
 
+    // Trace trace, AsyncContext asyncContext
+    protected void doInAfterTrace(Trace trace, AsyncContext asyncContext, SpanEventRecorder recorder, Object target, Object[] args, Object result, Throwable throwable) {
+        doInAfterTrace(asyncContext, recorder, target, args, result, throwable);
+    }
+
+    // AsyncContext asyncContext
+    protected void doInAfterTrace(AsyncContext asyncContext, SpanEventRecorder recorder, Object target, Object[] args, Object result, Throwable throwable) {
+        doInAfterTrace(recorder, target, args, result, throwable);
+    }
+
     protected abstract void doInAfterTrace(SpanEventRecorder recorder, Object target, Object[] args, Object result, Throwable throwable);
 
     protected AsyncContext getAsyncContext(Object target, Object[] args) {
         return AsyncContextAccessorUtils.getAsyncContext(target);
     }
 
+    protected AsyncContext getAsyncContext(Object target, Object[] args, Object result, Throwable throwable) {
+        return AsyncContextAccessorUtils.getAsyncContext(target);
+    }
+
     private Trace getAsyncTrace(AsyncContext asyncContext) {
-        final Trace trace = asyncContext.continueAsyncTraceObject();
+        final Trace trace = asyncContext.continueAsyncRawTraceObject();
         if (trace == null) {
             if (isDebug) {
                 logger.debug("Failed to continue async trace. 'result is null'");

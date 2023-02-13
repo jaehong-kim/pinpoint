@@ -63,17 +63,24 @@ public class DefaultAsyncContext implements AsyncContext {
 
     @Override
     public Trace continueAsyncTraceObject() {
-
         final Reference<Trace> reference = binder.get();
         final Trace nestedTrace = reference.get();
         if (nestedTrace != null) {
-            // return Nested Trace Object?
             if (nestedTrace.canSampled()) {
                 return nestedTrace;
             }
             return null;
         }
+        return newAsyncContextTrace(reference);
+    }
 
+    @Override
+    public Trace continueAsyncRawTraceObject() {
+        final Reference<Trace> reference = binder.get();
+        final Trace nestedTrace = reference.get();
+        if (nestedTrace != null) {
+            return nestedTrace;
+        }
         return newAsyncContextTrace(reference);
     }
 
@@ -114,12 +121,14 @@ public class DefaultAsyncContext implements AsyncContext {
     public Trace currentAsyncTraceObject() {
         final Reference<Trace> reference = binder.get();
         final Trace trace = reference.get();
-        if (trace == null) {
-            return null;
-        }
-        if (trace.canSampled()) {
+        if (trace != null && trace.canSampled()) {
             return trace;
         }
+        return null;
+    }
+
+    @Override
+    public Trace currentAsyncRawTraceObject() {
         return null;
     }
 

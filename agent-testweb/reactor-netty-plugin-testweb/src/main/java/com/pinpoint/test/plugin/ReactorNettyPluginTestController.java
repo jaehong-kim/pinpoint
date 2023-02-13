@@ -31,6 +31,8 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientResponse;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author jaehong.kim
@@ -105,5 +107,19 @@ public class ReactorNettyPluginTestController {
     @ResponseBody
     public String clientPostParam(@RequestBody String body) {
         return "OK";
+    }
+
+    @RequestMapping(value = "/async/callable")
+    public Callable<String> asyncCallable() {
+        Callable<String> callback = new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+
+                TimeUnit.SECONDS.sleep(3);
+
+                return "OK";
+            }
+        };
+        return callback;
     }
 }

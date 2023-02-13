@@ -21,6 +21,7 @@ import com.navercorp.pinpoint.bootstrap.context.SpanEventRecorder;
 import com.navercorp.pinpoint.bootstrap.context.SpanRecorder;
 import com.navercorp.pinpoint.bootstrap.context.Trace;
 import com.navercorp.pinpoint.bootstrap.context.TraceContext;
+import com.navercorp.pinpoint.bootstrap.interceptor.AsyncContextSpanEventEndPointInterceptor;
 import com.navercorp.pinpoint.bootstrap.plugin.http.HttpStatusCodeRecorder;
 import com.navercorp.pinpoint.plugin.vertx.VertxConstants;
 import io.vertx.core.http.HttpServerResponse;
@@ -43,12 +44,12 @@ public class HttpServerResponseImplInterceptor extends AsyncContextSpanEventEndP
     }
 
     @Override
-    protected void prepareAfter(Trace trace, Object target, Object[] args, Object result, Throwable throwable) {
+    public void doInAfterTrace(Trace trace, AsyncContext asynContext, SpanEventRecorder recorder, Object target, Object[] args, Object result, Throwable throwable) {
+        recorder.recordApi(methodDescriptor);
+        recorder.recordServiceType(VertxConstants.VERTX_HTTP_SERVER_INTERNAL);
+        recorder.recordException(throwable);
+
         if (target instanceof HttpServerResponse) {
-//            Trace trace = traceContext.currentRawTraceObject();
-            if (trace == null) {
-                return;
-            }
             final HttpServerResponse response = (HttpServerResponse) target;
             final SpanRecorder spanRecorder = trace.getSpanRecorder();
             this.httpStatusCodeRecorder.record(spanRecorder, response.getStatusCode());
@@ -57,8 +58,5 @@ public class HttpServerResponseImplInterceptor extends AsyncContextSpanEventEndP
 
     @Override
     public void doInAfterTrace(SpanEventRecorder recorder, Object target, Object[] args, Object result, Throwable throwable) {
-        recorder.recordApi(methodDescriptor);
-        recorder.recordServiceType(VertxConstants.VERTX_HTTP_SERVER_INTERNAL);
-        recorder.recordException(throwable);
     }
 }

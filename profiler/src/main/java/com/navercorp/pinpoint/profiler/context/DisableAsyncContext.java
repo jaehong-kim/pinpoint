@@ -29,9 +29,20 @@ public class DisableAsyncContext implements AsyncContext {
         final Reference<Trace> reference = binder.get();
         final Trace nestedTrace = reference.get();
         if (nestedTrace != null) {
+            if (nestedTrace.canSampled()) {
+                return nestedTrace;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Trace continueAsyncRawTraceObject() {
+        final Reference<Trace> reference = binder.get();
+        final Trace nestedTrace = reference.get();
+        if (nestedTrace != null) {
             return nestedTrace;
         }
-
         return newAsyncContextTrace(reference);
     }
 
@@ -59,7 +70,18 @@ public class DisableAsyncContext implements AsyncContext {
     @Override
     public Trace currentAsyncTraceObject() {
         final Reference<Trace> reference = binder.get();
-        return reference.get();
+        final Trace trace = reference.get();
+        if (trace != null && trace.canSampled()) {
+            return trace;
+        }
+        return null;
+    }
+
+    @Override
+    public Trace currentAsyncRawTraceObject() {
+        final Reference<Trace> reference = binder.get();
+        final Trace trace = reference.get();
+        return trace;
     }
 
     @Override

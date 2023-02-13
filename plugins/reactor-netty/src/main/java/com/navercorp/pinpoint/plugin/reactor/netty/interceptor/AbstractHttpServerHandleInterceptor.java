@@ -116,7 +116,7 @@ public abstract class AbstractHttpServerHandleInterceptor implements AroundInter
             this.servletResponseListener.initialized(response, ReactorNettyConstants.REACTOR_NETTY_INTERNAL, this.methodDescriptor); //must after request listener due to trace block begin
 
             // Set end-point
-            final Trace trace = this.traceContext.currentTraceObject();
+            final Trace trace = this.traceContext.currentRawTraceObject();
             if (trace == null) {
                 return;
             }

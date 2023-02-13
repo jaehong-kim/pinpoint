@@ -19,8 +19,8 @@ package com.navercorp.pinpoint.bootstrap.context;
 import com.navercorp.pinpoint.common.annotations.InterfaceStability;
 
 /**
- * @since 1.7.0
  * @author Woonduk Kang(emeroad)
+ * @since 1.7.0
  */
 @InterfaceStability.Evolving
 public interface AsyncContext {
@@ -29,7 +29,11 @@ public interface AsyncContext {
 
     Trace continueAsyncTraceObject();
 
+    Trace continueAsyncRawTraceObject();
+
     Trace currentAsyncTraceObject();
+
+    Trace currentAsyncRawTraceObject();
 
     void close();
 

@@ -40,6 +40,11 @@ public class AsyncDisableTrace extends DisableTrace {
     }
 
     @Override
+    public boolean isAsync() {
+        return true;
+    }
+
+    @Override
     public void close() {
         if (asyncState.await()) {
             // flush.

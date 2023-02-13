@@ -18,8 +18,12 @@ package com.navercorp.pinpoint.plugin.undertowservlet.interceptor;
 
 import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
 import com.navercorp.pinpoint.bootstrap.context.SpanEventRecorder;
+import com.navercorp.pinpoint.bootstrap.context.Trace;
 import com.navercorp.pinpoint.bootstrap.context.TraceContext;
+import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor;
 import com.navercorp.pinpoint.bootstrap.interceptor.SpanEventSimpleAroundInterceptorForPlugin;
+import com.navercorp.pinpoint.bootstrap.logging.PLogger;
+import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
 import com.navercorp.pinpoint.plugin.undertowservlet.UndertowAsyncListener;
 import com.navercorp.pinpoint.plugin.undertowservlet.UndertowServletConstants;
 
@@ -30,29 +34,61 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author jaehong.kim
  */
-public class HttpServletRequestImplStartAsyncInterceptor extends SpanEventSimpleAroundInterceptorForPlugin {
+public class HttpServletRequestImplStartAsyncInterceptor implements AroundInterceptor {
+    private PLogger logger = PLoggerFactory.getLogger(this.getClass());
+    private boolean isDebug = logger.isDebugEnabled();
+
+    private TraceContext traceContext;
+    private MethodDescriptor descriptor;
 
     public HttpServletRequestImplStartAsyncInterceptor(TraceContext context, MethodDescriptor descriptor) {
-        super(context, descriptor);
+        this.traceContext = context;
+        this.descriptor = descriptor;
+
     }
 
     @Override
-    protected void doInBeforeTrace(SpanEventRecorder recorder, Object target, Object[] args) {
-    }
-
-    @Override
-    protected void doInAfterTrace(SpanEventRecorder recorder, Object target, Object[] args, Object result, Throwable throwable) {
-        if (validate(target, result, throwable)) {
-            final AsyncContext asyncContext = (AsyncContext) result;
-            final AsyncListener asyncListener = new UndertowAsyncListener(this.traceContext, recorder.recordNextAsyncContext(true));
-            asyncContext.addListener(asyncListener);
-            if (isDebug) {
-                logger.debug("Add async listener {}", asyncListener);
-            }
+    public void before(Object target, Object[] args) {
+        if (isDebug) {
+            logger.beforeInterceptor(target, args);
         }
-        recorder.recordServiceType(UndertowServletConstants.UNDERTOW_SERVLET_METHOD);
-        recorder.recordApi(methodDescriptor);
-        recorder.recordException(throwable);
+
+        final Trace trace = traceContext.currentRawTraceObject();
+        if (trace == null) {
+            return;
+        }
+        trace.traceBlockBegin();
+    }
+
+    @Override
+    public void after(Object target, Object[] args, Object result, Throwable throwable) {
+        if (isDebug) {
+            logger.afterInterceptor(target, args, result, throwable);
+        }
+
+        final Trace trace = traceContext.currentRawTraceObject();
+        if (trace == null) {
+            return;
+        }
+
+        try {
+            final SpanEventRecorder recorder = trace.currentSpanEventRecorder();
+            if (validate(target, result, throwable)) {
+                final AsyncContext asyncContext = (AsyncContext) result;
+                final AsyncListener asyncListener = new UndertowAsyncListener(this.traceContext, recorder.recordNextAsyncContext(true));
+                asyncContext.addListener(asyncListener);
+                if (isDebug) {
+                    logger.debug("Add async listener {}", asyncListener);
+                }
+            }
+            recorder.recordServiceType(UndertowServletConstants.UNDERTOW_SERVLET_METHOD);
+            recorder.recordApi(descriptor);
+            recorder.recordException(throwable);
+        } catch (Throwable t) {
+            logger.warn("Failed to AFTER process. {}", t.getMessage(), t);
+        } finally {
+            trace.traceBlockEnd();
+        }
     }
 
     private boolean validate(final Object target, final Object result, final Throwable throwable) {

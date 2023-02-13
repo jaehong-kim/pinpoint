@@ -101,7 +101,7 @@ public class DirectivesInterceptor implements AroundInterceptor {
 
         akka.http.scaladsl.model.HttpRequest request = requestContext.request();
         final Trace trace = createTrace(request);
-        if (trace == null || !trace.canSampled()) {
+        if (trace == null) {
             return;
         }
 

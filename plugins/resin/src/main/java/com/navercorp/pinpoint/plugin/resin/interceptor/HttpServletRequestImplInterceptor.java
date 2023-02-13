@@ -2,8 +2,12 @@ package com.navercorp.pinpoint.plugin.resin.interceptor;
 
 import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
 import com.navercorp.pinpoint.bootstrap.context.SpanEventRecorder;
+import com.navercorp.pinpoint.bootstrap.context.Trace;
 import com.navercorp.pinpoint.bootstrap.context.TraceContext;
+import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor;
 import com.navercorp.pinpoint.bootstrap.interceptor.SpanEventSimpleAroundInterceptorForPlugin;
+import com.navercorp.pinpoint.bootstrap.logging.PLogger;
+import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
 import com.navercorp.pinpoint.plugin.resin.ResinAsyncListener;
 import com.navercorp.pinpoint.plugin.resin.ResinConstants;
 
@@ -15,29 +19,61 @@ import javax.servlet.http.HttpServletRequest;
  * @author huangpengjie@fang.com
  * @author jaehong.kim
  */
-public class HttpServletRequestImplInterceptor extends SpanEventSimpleAroundInterceptorForPlugin {
+public class HttpServletRequestImplInterceptor implements AroundInterceptor {
+    private PLogger logger = PLoggerFactory.getLogger(this.getClass());
+    private boolean isDebug = logger.isDebugEnabled();
+
+    private TraceContext traceContext;
+    private MethodDescriptor descriptor;
 
     public HttpServletRequestImplInterceptor(TraceContext context, MethodDescriptor descriptor) {
-        super(context, descriptor);
+        this.traceContext = context;
+        this.descriptor = descriptor;
+
     }
 
     @Override
-    protected void doInBeforeTrace(SpanEventRecorder recorder, Object target, Object[] args) {
-    }
-
-    @Override
-    protected void doInAfterTrace(SpanEventRecorder recorder, Object target, Object[] args, Object result, Throwable throwable) {
-        if (validate(target, result, throwable)) {
-            final AsyncContext asyncContext = (AsyncContext) result;
-            final AsyncListener asyncListener = new ResinAsyncListener(this.traceContext, recorder.recordNextAsyncContext(true));
-            asyncContext.addListener(asyncListener);
-            if (isDebug) {
-                logger.debug("Add async listener {}", asyncListener);
-            }
+    public void before(Object target, Object[] args) {
+        if (isDebug) {
+            logger.beforeInterceptor(target, args);
         }
-        recorder.recordServiceType(ResinConstants.RESIN_METHOD);
-        recorder.recordApi(methodDescriptor);
-        recorder.recordException(throwable);
+
+        final Trace trace = traceContext.currentRawTraceObject();
+        if (trace == null) {
+            return;
+        }
+        trace.traceBlockBegin();
+    }
+
+    @Override
+    public void after(Object target, Object[] args, Object result, Throwable throwable) {
+        if (isDebug) {
+            logger.afterInterceptor(target, args, result, throwable);
+        }
+
+        final Trace trace = traceContext.currentRawTraceObject();
+        if (trace == null) {
+            return;
+        }
+
+        try {
+            final SpanEventRecorder recorder = trace.currentSpanEventRecorder();
+            if (validate(target, result, throwable)) {
+                final AsyncContext asyncContext = (AsyncContext) result;
+                final AsyncListener asyncListener = new ResinAsyncListener(this.traceContext, recorder.recordNextAsyncContext(true));
+                asyncContext.addListener(asyncListener);
+                if (isDebug) {
+                    logger.debug("Add async listener {}", asyncListener);
+                }
+            }
+            recorder.recordServiceType(ResinConstants.RESIN_METHOD);
+            recorder.recordApi(descriptor);
+            recorder.recordException(throwable);
+        } catch (Throwable t) {
+            logger.warn("Failed to AFTER process. {}", t.getMessage(), t);
+        } finally {
+            trace.traceBlockEnd();
+        }
     }
 
     private boolean validate(final Object target, final Object result, final Throwable throwable) {

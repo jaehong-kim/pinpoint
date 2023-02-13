@@ -100,6 +100,7 @@ public class ServerConnectionHandleRequestInterceptor implements AroundIntercept
         }
 
         if (traceContext.currentRawTraceObject() != null) {
+            System.out.println("## Duplicated trace=" + traceContext.currentRawTraceObject());
             // duplicate trace.
             return;
         }
@@ -121,16 +122,13 @@ public class ServerConnectionHandleRequestInterceptor implements AroundIntercept
 
             // create trace for standalone entry point.
             final Trace trace = createTrace(request);
+            System.out.println("## Trace=" + trace);
             if (trace == null) {
                 return;
             }
 
             entryScope(trace);
             this.httpHeaderFilter.filter(request);
-
-            if (!trace.canSampled()) {
-                return;
-            }
 
             final SpanEventRecorder recorder = trace.traceBlockBegin();
             recorder.recordServiceType(VertxConstants.VERTX_HTTP_SERVER_INTERNAL);
@@ -139,6 +137,7 @@ public class ServerConnectionHandleRequestInterceptor implements AroundIntercept
             final AsyncContext asyncContext = recorder.recordNextAsyncContext(true);
             ((AsyncContextAccessor) request)._$PINPOINT$_setAsyncContext(asyncContext);
             ((AsyncContextAccessor) response)._$PINPOINT$_setAsyncContext(asyncContext);
+            System.out.println("## AsyncContext=" + asyncContext);
             if (isDebug) {
                 logger.debug("Set closeable-AsyncContext {}", asyncContext);
             }
@@ -184,6 +183,7 @@ public class ServerConnectionHandleRequestInterceptor implements AroundIntercept
         }
 
         final Trace trace = traceContext.currentRawTraceObject();
+        System.out.println("## Trace=" + trace);
         if (trace == null) {
             return;
         }
@@ -207,19 +207,15 @@ public class ServerConnectionHandleRequestInterceptor implements AroundIntercept
             return;
         }
 
-        final boolean validate = validate(args);
-        if (validate) {
-            final HttpServerRequest request = (HttpServerRequest) args[0];
-            HttpServerResponse response = request.response();
-            this.httpStatusCodeRecorder.record(trace.getSpanRecorder(), response.getStatusCode());
-        }
-
-        if (!trace.canSampled()) {
-            deleteTrace(trace);
-            return;
-        }
-
         try {
+            final boolean validate = validate(args);
+            if (validate) {
+                final HttpServerRequest request = (HttpServerRequest) args[0];
+                HttpServerResponse response = request.response();
+                this.httpStatusCodeRecorder.record(trace.getSpanRecorder(), response.getStatusCode());
+                System.out.println("## response=" + response.getStatusCode());
+            }
+
             final SpanEventRecorder recorder = trace.currentSpanEventRecorder();
             recorder.recordApi(descriptor);
             recorder.recordException(throwable);
