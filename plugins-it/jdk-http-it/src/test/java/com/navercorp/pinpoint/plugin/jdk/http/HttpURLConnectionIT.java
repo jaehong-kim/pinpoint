@@ -17,9 +17,9 @@ package com.navercorp.pinpoint.plugin.jdk.http;
 
 import com.navercorp.pinpoint.bootstrap.plugin.test.PluginTestVerifier;
 import com.navercorp.pinpoint.bootstrap.plugin.test.PluginTestVerifierHolder;
-import com.navercorp.pinpoint.pluginit.utils.AgentPath;
-import com.navercorp.pinpoint.pluginit.utils.PluginITConstants;
-import com.navercorp.pinpoint.pluginit.utils.WebServer;
+import com.navercorp.pinpoint.it.plugin.utils.AgentPath;
+import com.navercorp.pinpoint.it.plugin.utils.PluginITConstants;
+import com.navercorp.pinpoint.it.plugin.utils.WebServer;
 import com.navercorp.pinpoint.test.plugin.Dependency;
 import com.navercorp.pinpoint.test.plugin.JvmArgument;
 import com.navercorp.pinpoint.test.plugin.JvmVersion;

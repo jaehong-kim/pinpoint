@@ -45,7 +45,7 @@ public class DefaultPluginJunitTestInstance implements PluginJunitTestInstance {
         this.testClassWrapper = testClassWrapper;
         this.mockApplicationContext = createMockApplicationContext(testClassWrapper.getConfigPath());
         this.mockApplicationContext.start();
-        this.classLoader = TestClassLoaderFactory.createTestClassLoader(mockApplicationContext);
+        this.classLoader = TestClassLoaderFactory.createTestClassLoader(mockApplicationContext, null, null);
         this.classLoader.initialize();
     }
 

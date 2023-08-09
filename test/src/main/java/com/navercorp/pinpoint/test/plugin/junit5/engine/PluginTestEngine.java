@@ -24,6 +24,7 @@ import com.navercorp.pinpoint.test.plugin.junit5.descriptor.PluginTestDescriptor
 import com.navercorp.pinpoint.test.plugin.junit5.descriptor.PluginTestMethodTestDescriptor;
 import com.navercorp.pinpoint.test.plugin.junit5.descriptor.PluginTestUnitTestDescriptor;
 import com.navercorp.pinpoint.test.plugin.junit5.engine.discovery.predicates.IsTestClassWithPinpointAgent;
+import com.navercorp.pinpoint.test.plugin.shared.PluginSharedInstance;
 import org.junit.jupiter.engine.config.CachingJupiterConfiguration;
 import org.junit.jupiter.engine.config.DefaultJupiterConfiguration;
 import org.junit.jupiter.engine.config.JupiterConfiguration;
@@ -42,6 +43,7 @@ import org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine;
 import org.junit.platform.engine.support.hierarchical.ThrowableCollector;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,8 +72,11 @@ public class PluginTestEngine extends HierarchicalTestEngine<JupiterEngineExecut
     public TestDescriptor discover(EngineDiscoveryRequest discoveryRequest, UniqueId uniqueId) {
         JupiterConfiguration configuration = new CachingJupiterConfiguration(new DefaultJupiterConfiguration(discoveryRequest.getConfigurationParameters()));
         JupiterEngineDescriptor engineDescriptor = new JupiterEngineDescriptor(uniqueId, configuration);
+
         new DiscoverySelectorResolver().resolveSelectors(discoveryRequest, engineDescriptor);
 
+        List<TestDescriptor> removedTestDescriptorList = new ArrayList<>();
+        List<TestDescriptor> pluginForkedTestDescriptorList = new ArrayList<>();
         for (TestDescriptor testDescriptor : engineDescriptor.getChildren()) {
             if (testDescriptor instanceof ClassTestDescriptor) {
                 final Class<?> testClass = ((ClassTestDescriptor) testDescriptor).getTestClass();
@@ -81,11 +86,14 @@ public class PluginTestEngine extends HierarchicalTestEngine<JupiterEngineExecut
                 }
 
                 final DefaultPluginTestSuite testSuite = new DefaultPluginTestSuite(((ClassTestDescriptor) testDescriptor).getTestClass());
+                final PluginSharedInstance sharedInstance = testSuite.getPluginSharedInstance();
                 final List<PluginTestInstance> testInstanceList = testSuite.getPluginTestInstanceList();
 
                 // Unit
-                final PluginTestUnitTestDescriptor pluginTestUnitTestDescriptor = new PluginTestUnitTestDescriptor(testDescriptor.getUniqueId(), ((ClassTestDescriptor) testDescriptor).getTestClass(), configuration);
-                switchTestDescriptor(testDescriptor, pluginTestUnitTestDescriptor);
+                final PluginTestUnitTestDescriptor pluginTestUnitTestDescriptor = new PluginTestUnitTestDescriptor(testDescriptor.getUniqueId(), ((ClassTestDescriptor) testDescriptor).getTestClass(), configuration, sharedInstance);
+                pluginForkedTestDescriptorList.add(pluginTestUnitTestDescriptor);
+                removedTestDescriptorList.add(testDescriptor);
+//                switchTestDescriptor(testDescriptor, pluginTestUnitTestDescriptor);
 
                 for (PluginTestInstance pluginTestInstance : testInstanceList) {
                     final String testId = pluginTestInstance.getTestId();
@@ -94,14 +102,26 @@ public class PluginTestEngine extends HierarchicalTestEngine<JupiterEngineExecut
                     pluginTestUnitTestDescriptor.addChild(pluginTestDependencyTestDescriptor);
                     // Class
                     final PluginTestClassTestDescriptor pluginTestClassTestDescriptor = toPluginTestClassTestDescriptor(configuration, pluginTestDependencyTestDescriptor, pluginTestInstance);
-                    pluginTestDependencyTestDescriptor.addChild(pluginTestClassTestDescriptor);
-                    for (TestDescriptor descriptor : testDescriptor.getChildren()) {
-                        if (descriptor instanceof TestMethodTestDescriptor) {
-                            final Method method = ((TestMethodTestDescriptor) descriptor).getTestMethod();
-                            final PluginTestMethodTestDescriptor pluginTestMethodTestDescriptor = toPluginTestMethodTestDescriptor(configuration, pluginTestClassTestDescriptor, pluginTestInstance, method);
-                            pluginTestClassTestDescriptor.addChild(pluginTestMethodTestDescriptor);
+                    if (pluginTestClassTestDescriptor != null) {
+                        pluginTestDependencyTestDescriptor.addChild(pluginTestClassTestDescriptor);
+                        for (TestDescriptor descriptor : testDescriptor.getChildren()) {
+                            if (descriptor instanceof TestMethodTestDescriptor) {
+                                final Method method = ((TestMethodTestDescriptor) descriptor).getTestMethod();
+                                final PluginTestMethodTestDescriptor pluginTestMethodTestDescriptor = toPluginTestMethodTestDescriptor(configuration, pluginTestClassTestDescriptor, pluginTestInstance, method);
+                                if (pluginTestMethodTestDescriptor != null) {
+                                    pluginTestClassTestDescriptor.addChild(pluginTestMethodTestDescriptor);
+                                }
+                            }
                         }
                     }
+                }
+
+                for (TestDescriptor removedTestDescriptor : removedTestDescriptorList) {
+                    removedTestDescriptor.removeFromHierarchy();
+                }
+
+                for (TestDescriptor addTestDescriptor : pluginForkedTestDescriptorList) {
+                    engineDescriptor.addChild(addTestDescriptor);
                 }
             }
         }
@@ -114,14 +134,24 @@ public class PluginTestEngine extends HierarchicalTestEngine<JupiterEngineExecut
     }
 
     private static PluginTestClassTestDescriptor toPluginTestClassTestDescriptor(JupiterConfiguration configuration, PluginTestDependencyTestDescriptor parentTestDescriptor, PluginTestInstance pluginTestInstance) {
-        final Class<?> testClass = pluginTestInstance.getTestClass();
-        return new PluginTestClassTestDescriptor(parentTestDescriptor.getUniqueId().append(ClassTestDescriptor.SEGMENT_TYPE, testClass.getName()), testClass, configuration, pluginTestInstance);
+        try {
+            final Class<?> testClass = pluginTestInstance.getTestClass();
+            return new PluginTestClassTestDescriptor(parentTestDescriptor.getUniqueId().append(ClassTestDescriptor.SEGMENT_TYPE, testClass.getName()), testClass, configuration, pluginTestInstance);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return null;
     }
 
     private static PluginTestMethodTestDescriptor toPluginTestMethodTestDescriptor(JupiterConfiguration configuration, PluginTestClassTestDescriptor parentTestDescriptor, PluginTestInstance pluginTestInstance, Method method) {
-        final Class<?> testClass = pluginTestInstance.getTestClass();
-        final Method testMethod = ReflectionUtils.findMethod(testClass, method.getName(), method.getParameterTypes()).orElseThrow(() -> new IllegalStateException("not found method"));
-        return new PluginTestMethodTestDescriptor(parentTestDescriptor.getUniqueId().append(TestMethodTestDescriptor.SEGMENT_TYPE, testMethod.getName()), testClass, testMethod, configuration, pluginTestInstance);
+        try {
+            final Class<?> testClass = pluginTestInstance.getTestClass();
+            final Method testMethod = ReflectionUtils.findMethod(testClass, method.getName(), method.getParameterTypes()).orElseThrow(() -> new IllegalStateException("not found method"));
+            return new PluginTestMethodTestDescriptor(parentTestDescriptor.getUniqueId().append(TestMethodTestDescriptor.SEGMENT_TYPE, testMethod.getName()), testClass, testMethod, configuration, pluginTestInstance);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return null;
     }
 
     private void switchTestDescriptor(TestDescriptor oldTestDescriptor, TestDescriptor newTestDescriptor) {

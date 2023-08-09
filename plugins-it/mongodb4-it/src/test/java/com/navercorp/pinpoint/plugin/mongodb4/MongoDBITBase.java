@@ -16,8 +16,8 @@
 
 package com.navercorp.pinpoint.plugin.mongodb4;
 
-import com.navercorp.pinpoint.pluginit.jdbc.DriverProperties;
-import com.navercorp.pinpoint.pluginit.jdbc.testcontainers.DatabaseContainers;
+import com.navercorp.pinpoint.it.plugin.jdbc.DriverProperties;
+import com.navercorp.pinpoint.it.plugin.jdbc.testcontainers.DatabaseContainers;
 import com.navercorp.pinpoint.test.plugin.shared.SharedTestBeforeAllResult;
 
 import java.util.Properties;

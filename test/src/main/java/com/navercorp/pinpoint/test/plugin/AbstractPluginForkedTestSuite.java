@@ -377,7 +377,7 @@ public abstract class AbstractPluginForkedTestSuite {
                 PluginTestContext context = new PluginTestContext(agentJar, profile,
                         configFile, logLocationConfig, requiredLibraries, mavenDependencyLibraries, repositoryUrls,
                         testClass, testClassLocation,
-                        jvmArguments, debug, ver, javaExe, importPluginIds);
+                        jvmArguments, debug, ver, javaExe, importPluginIds, null, true);
 
                 List<PluginForkedTestInstance> cases = createTestCases(context);
 

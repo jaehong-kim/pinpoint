@@ -16,7 +16,7 @@
 
 package com.navercorp.pinpoint.plugin.jdbc.mssql;
 
-import com.navercorp.pinpoint.pluginit.jdbc.AbstractJDBCDriverClass;
+import com.navercorp.pinpoint.it.plugin.jdbc.AbstractJDBCDriverClass;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;

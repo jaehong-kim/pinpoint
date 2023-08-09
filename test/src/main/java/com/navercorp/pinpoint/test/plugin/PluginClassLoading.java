@@ -80,8 +80,18 @@ public final class PluginClassLoading {
         return Arrays.asList(loggers);
     }
 
+    private static final String[] PLUGIN_DEPENDENCY = new String[]{
+            Paths.get("pinpoint", "commons").toString(),
+            Paths.get("pinpoint", "bootstrap").toString(),
+            Paths.get("pinpoint", "profiler").toString(),
+            Paths.get("pinpoint", "plugins").toString() + File.separator,
+            Paths.get("pinpoint", "plugins-loader").toString(),
+            Paths.get("pinpoint", "annotations").toString(),
+            Paths.get("pinpoint", "test").toString(),
+            Paths.get("pinpoint", "testcase").toString()
+    };
 
-
-
-
+    public static String[] getPluginCheckClassPath() {
+        return PLUGIN_DEPENDENCY;
+    }
 }

@@ -27,11 +27,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author emeroad
  */
 public class TestInterceptorRegistryBinder implements InterceptorRegistryBinder {
-    private static final InterceptorRegistryAdaptor interceptorRegistryAdaptor = new DefaultInterceptorRegistryAdaptor();
-
     private static final AtomicInteger LOCK_NUMBER = new AtomicInteger();
 
-    private static final String lock = "TestRegistry-" + LOCK_NUMBER.getAndIncrement();
+    private final InterceptorRegistryAdaptor interceptorRegistryAdaptor = new DefaultInterceptorRegistryAdaptor();
+
+    private final String lock = "TestRegistry-" + LOCK_NUMBER.getAndIncrement();
 
     @Override
     public void bind() {

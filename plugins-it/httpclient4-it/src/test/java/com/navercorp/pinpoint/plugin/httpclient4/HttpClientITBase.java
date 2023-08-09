@@ -16,7 +16,7 @@
 
 package com.navercorp.pinpoint.plugin.httpclient4;
 
-import com.navercorp.pinpoint.pluginit.utils.WebServer;
+import com.navercorp.pinpoint.it.plugin.utils.WebServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 

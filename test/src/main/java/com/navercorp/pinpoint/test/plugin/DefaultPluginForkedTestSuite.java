@@ -166,7 +166,7 @@ public class DefaultPluginForkedTestSuite extends AbstractPluginForkedTestSuite 
                 logger.info("Failed to resolve artifacts and dependencies. dependency={}", dependencyCase);
             }
 
-            final PluginTestInstance pluginTestInstance = pluginTestInstanceFactory.create(testId, libs, isOnSystemClassLoader());
+            final PluginTestInstance pluginTestInstance = pluginTestInstanceFactory.create(null, testId, null, libs, isOnSystemClassLoader());
             pluginTestInstanceList.add(pluginTestInstance);
         }
 

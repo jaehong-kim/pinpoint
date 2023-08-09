@@ -36,6 +36,7 @@ import com.navercorp.pinpoint.profiler.context.module.StatDataSender;
 import com.navercorp.pinpoint.profiler.metadata.MetaDataType;
 import com.navercorp.pinpoint.profiler.monitor.metric.MetricType;
 import com.navercorp.pinpoint.test.ListenableDataSender;
+import com.navercorp.pinpoint.test.OrderedSpanRecorder;
 import com.navercorp.pinpoint.test.TestTcpDataSender;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +59,8 @@ public class MockRpcModule extends PrivateModule {
         TypeLiteral<DataSender<SpanType>> spanDataSenderType = new TypeLiteral<DataSender<SpanType>>() {};
         Key<DataSender<SpanType>> spanDataSenderKey = Key.get(spanDataSenderType, SpanDataSender.class);
         final DataSender<SpanType> spanDataSender = new ListenableDataSender<>("SpanDataSender");
+        ListenableDataSender.Listener<SpanType> orderedSpanRecorder = new OrderedSpanRecorder();
+        ((ListenableDataSender)spanDataSender).setListener(orderedSpanRecorder);
         logger.debug("spanDataSender:{}", spanDataSender);
         bind(spanDataSenderKey).toInstance(spanDataSender);
         expose(spanDataSenderKey);

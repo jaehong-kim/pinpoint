@@ -32,9 +32,11 @@
         <module>plugins-it-utils</module>
         <module>plugins-it-jdbc-test</module>
         <module>activemq-it</module>
+        <module>activemq5-17-it</module>
         <module>cassandra-it</module>
         <module>cassandra4-it</module>
         <module>cxf-it</module>
+        <module>cxf3-6-it</module>
         <module>druid-it</module>
         <module>dubbo-it</module>
         <module>elasticsearch-it</module>

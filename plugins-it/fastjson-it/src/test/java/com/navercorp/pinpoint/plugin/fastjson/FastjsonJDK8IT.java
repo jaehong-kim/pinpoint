@@ -14,7 +14,7 @@
  */
 package com.navercorp.pinpoint.plugin.fastjson;
 
-import com.navercorp.pinpoint.pluginit.utils.AgentPath;
+import com.navercorp.pinpoint.it.plugin.utils.AgentPath;
 import com.navercorp.pinpoint.test.plugin.Dependency;
 import com.navercorp.pinpoint.test.plugin.JvmVersion;
 import com.navercorp.pinpoint.test.plugin.PinpointAgent;

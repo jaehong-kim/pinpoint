@@ -1,6 +1,6 @@
 package com.navercorp.pinpoint.plugin.jdbc.mssql;
 
-import com.navercorp.pinpoint.pluginit.jdbc.testcontainers.DatabaseContainers;
+import com.navercorp.pinpoint.it.plugin.jdbc.testcontainers.DatabaseContainers;
 import com.navercorp.pinpoint.test.plugin.shared.SharedTestLifeCycle;
 import org.junit.Assume;
 import org.slf4j.Logger;

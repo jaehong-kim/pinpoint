@@ -25,6 +25,9 @@ import com.navercorp.pinpoint.profiler.context.module.DefaultApplicationContext;
 import com.navercorp.pinpoint.profiler.context.module.ModuleFactory;
 import com.navercorp.pinpoint.profiler.interceptor.registry.InterceptorRegistryBinder;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.util.Collections;
@@ -43,13 +46,16 @@ public class MockApplicationContextFactory {
     }
 
     private ProfilerConfig loadProfilerConfig(String configPath) {
+        File file = new File(configPath);
+
         final ClassLoader classLoader = this.getClass().getClassLoader();
-        final InputStream resource = classLoader.getResourceAsStream(configPath);
-        if (resource == null) {
+        final InputStream resource;
+        try {
+            resource = new FileInputStream(file);
+            return ProfilerConfigLoader.load(resource);
+        } catch (FileNotFoundException e) {
             throw new RuntimeException("pinpoint.config not found. configPath:" + configPath);
         }
-
-        return ProfilerConfigLoader.load(resource);
     }
 
     public DefaultApplicationContext build(ProfilerConfig config) {

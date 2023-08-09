@@ -22,7 +22,7 @@ import com.navercorp.pinpoint.bootstrap.plugin.test.PluginTestVerifierHolder;
 import com.navercorp.pinpoint.common.trace.ServiceType;
 import com.navercorp.pinpoint.plugin.hystrix.commands.SayHelloCommand;
 import com.navercorp.pinpoint.plugin.hystrix.runners.HystrixCommandTestRunner;
-import com.navercorp.pinpoint.pluginit.utils.AgentPath;
+import com.navercorp.pinpoint.it.plugin.utils.AgentPath;
 import com.navercorp.pinpoint.test.plugin.Dependency;
 import com.navercorp.pinpoint.test.plugin.ImportPlugin;
 import com.navercorp.pinpoint.test.plugin.PinpointAgent;

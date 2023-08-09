@@ -16,7 +16,7 @@
 
 package com.navercorp.pinpoint.plugin.jdbc.mssql;
 
-import com.navercorp.pinpoint.pluginit.utils.LogUtils;
+import com.navercorp.pinpoint.it.plugin.utils.LogUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.testcontainers.containers.MSSQLServerContainer;

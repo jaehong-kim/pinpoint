@@ -39,19 +39,21 @@ public class PluginTestContext {
     private final String javaExecutable;
 
     private final List<String> importPluginIds;
+    private final List<String> pluginLibList;
+    private final boolean manageTraceObject;
 
     public PluginTestContext(String agentJar, String profile, String configFile, String logLocationConfig,
                              List<String> requiredLibraries, List<String> mavenDependencyLibraries, List<String> repositoryUrls,
                              Class<?> testClass, String testClassLocation, List<String> jvmArguments,
-                             boolean debug, List<String> importPluginIds) {
-        this(agentJar, profile, configFile, logLocationConfig, requiredLibraries, mavenDependencyLibraries, repositoryUrls, testClass, testClassLocation, jvmArguments, debug, -1, "", importPluginIds);
+                             boolean debug, List<String> importPluginIds, List<String> pluginLibList, boolean manageTraceObject) {
+        this(agentJar, profile, configFile, logLocationConfig, requiredLibraries, mavenDependencyLibraries, repositoryUrls, testClass, testClassLocation, jvmArguments, debug, -1, "", importPluginIds, pluginLibList, manageTraceObject);
     }
 
     public PluginTestContext(String agentJar, String profile, String configFile, String logLocationConfig,
                              List<String> requiredLibraries, List<String> mavenDependencyLibraries, List<String> repositoryUrls,
                              Class<?> testClass, String testClassLocation, List<String> jvmArguments,
                              boolean debug, int jvmVersion,
-                             String javaExecutable, List<String> importPluginIds) {
+                             String javaExecutable, List<String> importPluginIds, List<String> pluginLibList, boolean manageTraceObject) {
         this.agentJar = agentJar;
         this.profile = profile;
         this.configFile = configFile;
@@ -66,6 +68,8 @@ public class PluginTestContext {
         this.jvmVersion = jvmVersion;
         this.javaExecutable = javaExecutable;
         this.importPluginIds = importPluginIds;
+        this.pluginLibList = pluginLibList;
+        this.manageTraceObject = manageTraceObject;
     }
 
     public List<String> getRequiredLibraries() {
@@ -124,9 +128,17 @@ public class PluginTestContext {
         return importPluginIds;
     }
 
+    public List<String> getPluginLibList() {
+        return pluginLibList;
+    }
+
+    public boolean isManageTraceObject() {
+        return manageTraceObject;
+    }
+
     @Override
     public String toString() {
-        return "PinpointPluginTestContext{" +
+        return "PluginTestContext{" +
                 "agentJar='" + agentJar + '\'' +
                 ", profile='" + profile + '\'' +
                 ", configFile='" + configFile + '\'' +
@@ -141,6 +153,8 @@ public class PluginTestContext {
                 ", jvmVersion=" + jvmVersion +
                 ", javaExecutable='" + javaExecutable + '\'' +
                 ", importPluginIds=" + importPluginIds +
+                ", pluginLibList=" + pluginLibList +
+                ", manageTraceObject=" + manageTraceObject +
                 '}';
     }
 }

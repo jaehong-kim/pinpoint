@@ -16,8 +16,8 @@
 
 package com.navercorp.pinpoint.plugin.grpc;
 
-import com.navercorp.pinpoint.pluginit.utils.AgentPath;
-import com.navercorp.pinpoint.pluginit.utils.PluginITConstants;
+import com.navercorp.pinpoint.it.plugin.utils.AgentPath;
+import com.navercorp.pinpoint.it.plugin.utils.PluginITConstants;
 import com.navercorp.pinpoint.test.plugin.Dependency;
 import com.navercorp.pinpoint.test.plugin.ImportPlugin;
 import com.navercorp.pinpoint.test.plugin.JvmVersion;

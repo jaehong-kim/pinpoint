@@ -1,4 +1,4 @@
-namespace java com.navercorp.pinpoint.plugin.thrift.dto
+namespace java com.navercorp.pinpoint.it.plugin.thrift.dto
 
 service EchoService
 {

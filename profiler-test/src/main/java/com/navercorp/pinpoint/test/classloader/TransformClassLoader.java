@@ -18,9 +18,13 @@
 package com.navercorp.pinpoint.test.classloader;
 
 import com.navercorp.pinpoint.common.util.IOUtils;
+import com.navercorp.pinpoint.common.util.JvmUtils;
+import com.navercorp.pinpoint.common.util.JvmVersion;
 import com.navercorp.pinpoint.profiler.util.JavaAssistUtils;
 
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
@@ -36,7 +40,7 @@ import java.util.logging.Logger;
  *
  * @author Woonduk Kang(emeroad)
  */
-public class TransformClassLoader extends ClassLoader {
+public class TransformClassLoader extends URLClassLoader {
 
     static {
         registerAsParallelCapable();
@@ -56,6 +60,7 @@ public class TransformClassLoader extends ClassLoader {
     private Translator translator;
     private ProtectionDomain domain;
 
+    private String classLoaderName = getClass().getSimpleName();
     /**
      * Specifies the algorithm of class loading.
      * <p>
@@ -70,22 +75,21 @@ public class TransformClassLoader extends ClassLoader {
     public boolean doDelegation = true;
 
     /**
-     * Creates a new class loader.
-     */
-    public TransformClassLoader() {
-    }
-
-
-    /**
      * Creates a new class loader
      * using the specified parent class loader for delegation.
      *
      * @param parent the parent class loader.
      */
-    public TransformClassLoader(ClassLoader parent) {
-        super(parent);
+    public TransformClassLoader(URL[] urls, ClassLoader parent) {
+        super(urls, parent);
         init();
     }
+
+    public TransformClassLoader(URL[] urls) {
+        super(urls);
+        init();
+    }
+
 
     private void init() {
         translator = null;
@@ -96,7 +100,7 @@ public class TransformClassLoader extends ClassLoader {
     /**
      * Adds a translator, which is called whenever a class is loaded.
      *
-     * @param t  a translator.
+     * @param t a translator.
      */
     public void addTranslator(Translator t) {
         translator = t;
@@ -114,8 +118,7 @@ public class TransformClassLoader extends ClassLoader {
     public void delegateLoadingOf(String classname) {
         if (classname.endsWith(".")) {
             notDefinedPackages.add(classname);
-        }
-        else {
+        } else {
             notDefinedClass.add(classname);
         }
     }
@@ -139,16 +142,20 @@ public class TransformClassLoader extends ClassLoader {
 
         synchronized (getClassLoadingLock(name)) {
             Class<?> c = findLoadedClass(name);
+            System.out.println(classLoaderName + "-" + "findLoadedClass=" + c);
             if (c == null) {
                 c = loadClassByDelegation(name);
+                System.out.println(classLoaderName + "-" + "loadClassByDelegation=" + c);
             }
 
             if (c == null) {
                 c = findClass(name);
+                System.out.println(classLoaderName + "-" + "findClass=" + c);
             }
 
             if (c == null) {
                 c = delegateToParent(name);
+                System.out.println(classLoaderName + "-" + "delegateToParent=" + c);
             }
 
             if (resolve) {
@@ -209,8 +216,7 @@ public class TransformClassLoader extends ClassLoader {
                 this.logger.fine("defineClass:" + name);
             }
             return defineClass(name, classfile, 0, classfile.length, DEFAULT_DOMAIN);
-        }
-        else {
+        } else {
             if (logger.isLoggable(Level.FINE)) {
                 this.logger.fine("defineClass:" + name);
             }
@@ -240,15 +246,41 @@ public class TransformClassLoader extends ClassLoader {
     }
 
     private boolean isJdkPackage(String name) {
+        final JvmVersion version = JvmUtils.getVersion();
+        if (version.onOrAfter(JvmVersion.JAVA_9)) {
+            if (name.startsWith("javax.xml.bind")
+                    || name.startsWith("javax.annotation")) {
+                return false;
+            }
+        }
+
+        if (name.startsWith("javax.jms")
+                || name.startsWith("javax.ws")) {
+            return false;
+        }
         return name.startsWith("java.")
+                || name.startsWith("jdk.")
                 || name.startsWith("javax.")
                 || name.startsWith("sun.")
                 || name.startsWith("com.sun.")
                 || name.startsWith("org.w3c.")
-                || name.startsWith("org.xml.");
+                || name.startsWith("org.xml.")
+                || name.startsWith("org.apache.logging.")
+                || name.startsWith("org.slf4j");
     }
 
     private boolean notDelegated(String name) {
+        if (name.startsWith("com.navercorp.pinpoint.profiler.")
+                || name.startsWith("com.navercorp.pinpoint.bootstrap")
+    || name.startsWith("com.navercorp.pinpoint.plugin")
+        ) {
+            return false;
+        }
+
+        if (name.startsWith("org.junit.jupiter")) {
+            return true;
+        }
+
         if (notDefinedClass.contains(name)) {
             return true;
         }
@@ -270,4 +302,34 @@ public class TransformClassLoader extends ClassLoader {
             return findSystemClass(classname);
         }
     }
+
+    @Override
+    public URL getResource(String name) {
+        if (doDelegation) {
+            final String className = JavaAssistUtils.jvmNameToJavaName(name);
+            if (isJdkPackage(className) || notDelegated(className)) {
+                return super.getResource(name);
+            }
+        }
+
+        final URL url = findResource(name);
+        if (url != null) {
+            return url;
+        }
+        return super.getResource(name);
+    }
+
+//    @Override
+//    public Enumeration<URL> getResources(String name) throws IOException {
+//        if (doDelegation) {
+//            final String className = JavaAssistUtils.jvmNameToJavaName(name);
+//            if (isJdkPackage(className) || notDelegated(className)) {
+//                return super.getResources(name);
+//            }
+//        }
+//        Enumeration<URL>[] tmp = (Enumeration<URL>[]) new Enumeration<?>[2];
+//        tmp[0] = findResources(name);
+//        tmp[1] = super.getResources(name);
+//        return new CompoundEnumeration<>(tmp);
+//    }
 }

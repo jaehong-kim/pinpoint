@@ -15,9 +15,9 @@
  */
 package com.navercorp.pinpoint.plugin.log4j;
 
-import com.navercorp.pinpoint.pluginit.utils.AgentPath;
-import com.navercorp.pinpoint.pluginit.utils.PluginITConstants;
-import com.navercorp.pinpoint.pluginit.utils.StdoutRecorder;
+import com.navercorp.pinpoint.it.plugin.utils.AgentPath;
+import com.navercorp.pinpoint.it.plugin.utils.PluginITConstants;
+import com.navercorp.pinpoint.it.plugin.utils.StdoutRecorder;
 import com.navercorp.pinpoint.test.plugin.Dependency;
 import com.navercorp.pinpoint.test.plugin.ImportPlugin;
 import com.navercorp.pinpoint.test.plugin.PinpointAgent;

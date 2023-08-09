@@ -16,10 +16,10 @@
 
 package com.navercorp.pinpoint.plugin.jdbc;
 
-import com.navercorp.pinpoint.pluginit.jdbc.DriverManagerUtils;
-import com.navercorp.pinpoint.pluginit.jdbc.DriverProperties;
-import com.navercorp.pinpoint.pluginit.jdbc.JDBCDriverClass;
-import com.navercorp.pinpoint.pluginit.jdbc.testcontainers.DatabaseContainers;
+import com.navercorp.pinpoint.it.plugin.jdbc.DriverManagerUtils;
+import com.navercorp.pinpoint.it.plugin.jdbc.DriverProperties;
+import com.navercorp.pinpoint.it.plugin.jdbc.JDBCDriverClass;
+import com.navercorp.pinpoint.it.plugin.jdbc.testcontainers.DatabaseContainers;
 import com.navercorp.pinpoint.test.plugin.shared.SharedTestBeforeAllResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

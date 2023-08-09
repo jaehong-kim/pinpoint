@@ -1,7 +1,7 @@
 package com.navercorp.pinpoint.plugin.jdbc;
 
-import com.navercorp.pinpoint.pluginit.jdbc.testcontainers.DatabaseContainers;
-import com.navercorp.pinpoint.pluginit.utils.LogUtils;
+import com.navercorp.pinpoint.it.plugin.jdbc.testcontainers.DatabaseContainers;
+import com.navercorp.pinpoint.it.plugin.utils.LogUtils;
 import com.navercorp.pinpoint.test.plugin.shared.SharedTestLifeCycle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

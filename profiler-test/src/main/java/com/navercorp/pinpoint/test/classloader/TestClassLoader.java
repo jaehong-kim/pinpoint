@@ -33,6 +33,7 @@ import com.navercorp.pinpoint.profiler.plugin.MatchableClassFileTransformerDeleg
 import com.navercorp.pinpoint.profiler.plugin.PluginInstrumentContext;
 import com.navercorp.pinpoint.profiler.plugin.TransformCallbackProvider;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,7 +55,22 @@ public class TestClassLoader extends TransformClassLoader {
     private final ClassFileTransformerLoader classFileTransformerLoader;
     private final InstrumentContext instrumentContext;
 
-    public TestClassLoader(DefaultApplicationContext applicationContext) {
+    public TestClassLoader(DefaultApplicationContext applicationContext, URL[] urls) {
+        super(urls);
+        Objects.requireNonNull(applicationContext, "applicationContext");
+
+        this.applicationContext = applicationContext;
+        this.classFileTransformerLoader = new ClassFileTransformerLoader(applicationContext.getProfilerConfig(), applicationContext.getDynamicTransformTrigger());
+
+        ClassInjector classInjector = new DebugTransformerClassInjector();
+        this.instrumentContext = new PluginInstrumentContext(applicationContext.getProfilerConfig(), applicationContext.getInstrumentEngine(),
+                applicationContext.getDynamicTransformTrigger(), classInjector, classFileTransformerLoader);
+
+        this.delegateClass = new ArrayList<>();
+    }
+
+    public TestClassLoader(DefaultApplicationContext applicationContext, URL[] urls, ClassLoader parentClassLoader) {
+        super(urls, parentClassLoader);
         Objects.requireNonNull(applicationContext, "applicationContext");
 
         this.applicationContext = applicationContext;

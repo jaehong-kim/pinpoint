@@ -16,9 +16,7 @@
 
 package com.navercorp.pinpoint.test.plugin;
 
-import com.navercorp.pinpoint.bootstrap.plugin.test.PluginTestVerifier;
-import com.navercorp.pinpoint.bootstrap.plugin.test.PluginTestVerifierHolder;
-import com.navercorp.pinpoint.profiler.interceptor.registry.InterceptorRegistryBinder;
+import com.navercorp.pinpoint.test.plugin.classloader.PluginAgentClassLoader;
 import com.navercorp.pinpoint.test.plugin.shared.ThreadFactory;
 
 import java.util.concurrent.Callable;
@@ -28,20 +26,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class DefaultPluginTestInstance implements PluginTestInstance {
+
     private String id;
+    private PluginAgentClassLoader pluginAgentClassLoader;
     private ClassLoader classLoader;
     private Class<?> testClass;
-    private PluginTestVerifier pluginTestVerifier;
-    private InterceptorRegistryBinder interceptorRegistryBinder;
+
+    private boolean manageTraceObject;
+    private PluginTestInstanceCallback callback;
 
     private ExecutorService executorService;
 
-    public DefaultPluginTestInstance(String id, ClassLoader classLoader, Class<?> testClass, PluginTestVerifier pluginTestVerifier, InterceptorRegistryBinder interceptorRegistryBinder) {
+    public DefaultPluginTestInstance(String id, PluginAgentClassLoader pluginAgentClassLoader, ClassLoader classLoader, Class<?> testClass, boolean manageTraceObject, PluginTestInstanceCallback callback) {
         this.id = id;
+        this.pluginAgentClassLoader = pluginAgentClassLoader;
         this.classLoader = classLoader;
         this.testClass = testClass;
-        this.pluginTestVerifier = pluginTestVerifier;
-        this.interceptorRegistryBinder = interceptorRegistryBinder;
+        this.manageTraceObject = manageTraceObject;
+        this.callback = callback;
 
         final String threadName = id + "-Thread";
         final ThreadFactory threadFactory = new ThreadFactory(threadName, this.classLoader);
@@ -63,32 +65,15 @@ public class DefaultPluginTestInstance implements PluginTestInstance {
         return this.testClass;
     }
 
-    @Override
-    public PluginTestVerifier getPluginVerifier() {
-        return this.pluginTestVerifier;
-    }
-
-    public InterceptorRegistryBinder getInterceptorRegistryBinder() {
-        return interceptorRegistryBinder;
-    }
-
     public <T> T execute(final Callable<T> callable, boolean verify) {
         Callable<T> task = new Callable<T>() {
             @Override
             public T call() throws Exception {
                 try {
-                    interceptorRegistryBinder.bind();
-                    if (verify) {
-                        PluginTestVerifierHolder.setInstance(pluginTestVerifier);
-                        pluginTestVerifier.initialize(true);
-                    }
+                    callback.before(verify, manageTraceObject);
                     return callable.call();
                 } finally {
-                    interceptorRegistryBinder.unbind();
-                    if (verify) {
-                        pluginTestVerifier.cleanUp(true);
-                        PluginTestVerifierHolder.setInstance(null);
-                    }
+                    callback.after(verify, manageTraceObject);
                 }
             }
         };

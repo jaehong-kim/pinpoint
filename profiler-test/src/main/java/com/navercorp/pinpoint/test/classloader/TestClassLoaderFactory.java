@@ -21,6 +21,8 @@ import com.navercorp.pinpoint.profiler.context.module.DefaultApplicationContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.URL;
+
 /**
  * @author hyungil.jeong
  */
@@ -28,8 +30,9 @@ public class TestClassLoaderFactory {
 
     private static final Logger LOGGER = LogManager.getLogger(TestClassLoaderFactory.class);
 
-    public static TestClassLoader createTestClassLoader(DefaultApplicationContext applicationContext) {
-        final TestClassLoader testClassLoader = new TestClassLoader(applicationContext);
+    public static TestClassLoader createTestClassLoader(DefaultApplicationContext applicationContext, URL[] urls, ClassLoader parentClassLoader) {
+//        final TestClassLoader testClassLoader = new TestClassLoader(applicationContext, urls, parentClassLoader);
+        final TestClassLoader testClassLoader = new TestClassLoader(applicationContext, urls);
         return testClassLoader;
     }
 

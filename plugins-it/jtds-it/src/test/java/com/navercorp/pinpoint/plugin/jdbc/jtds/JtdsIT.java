@@ -16,15 +16,15 @@
 package com.navercorp.pinpoint.plugin.jdbc.jtds;
 
 import com.navercorp.pinpoint.bootstrap.plugin.jdbc.JdbcUrlParserV2;
-import com.navercorp.pinpoint.pluginit.jdbc.DataBaseTestCase;
-import com.navercorp.pinpoint.pluginit.jdbc.DefaultJDBCApi;
-import com.navercorp.pinpoint.pluginit.jdbc.DriverProperties;
-import com.navercorp.pinpoint.pluginit.jdbc.JDBCApi;
-import com.navercorp.pinpoint.pluginit.jdbc.JDBCDriverClass;
-import com.navercorp.pinpoint.pluginit.jdbc.JDBCTestConstants;
-import com.navercorp.pinpoint.pluginit.jdbc.testcontainers.DatabaseContainers;
-import com.navercorp.pinpoint.pluginit.utils.AgentPath;
-import com.navercorp.pinpoint.pluginit.utils.TestcontainersOption;
+import com.navercorp.pinpoint.it.plugin.jdbc.DataBaseTestCase;
+import com.navercorp.pinpoint.it.plugin.jdbc.DefaultJDBCApi;
+import com.navercorp.pinpoint.it.plugin.jdbc.DriverProperties;
+import com.navercorp.pinpoint.it.plugin.jdbc.JDBCApi;
+import com.navercorp.pinpoint.it.plugin.jdbc.JDBCDriverClass;
+import com.navercorp.pinpoint.it.plugin.jdbc.JDBCTestConstants;
+import com.navercorp.pinpoint.it.plugin.jdbc.testcontainers.DatabaseContainers;
+import com.navercorp.pinpoint.it.plugin.utils.AgentPath;
+import com.navercorp.pinpoint.it.plugin.utils.TestcontainersOption;
 import com.navercorp.pinpoint.test.plugin.Dependency;
 import com.navercorp.pinpoint.test.plugin.ImportPlugin;
 import com.navercorp.pinpoint.test.plugin.PinpointAgent;

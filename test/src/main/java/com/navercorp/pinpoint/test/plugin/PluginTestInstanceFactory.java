@@ -16,16 +16,14 @@
 
 package com.navercorp.pinpoint.test.plugin;
 
-import com.navercorp.pinpoint.bootstrap.plugin.test.PluginTestVerifier;
-import com.navercorp.pinpoint.profiler.context.module.DefaultApplicationContext;
-import com.navercorp.pinpoint.profiler.interceptor.registry.InterceptorRegistryBinder;
-import com.navercorp.pinpoint.test.MockApplicationContextFactory;
-import com.navercorp.pinpoint.test.PluginVerifierExternalAdaptor;
-import com.navercorp.pinpoint.test.classloader.TestClassLoader;
-import com.navercorp.pinpoint.test.classloader.TestClassLoaderFactory;
+import com.navercorp.pinpoint.test.plugin.agent.PluginTestAgentStarter;
+import com.navercorp.pinpoint.test.plugin.classloader.PluginAgentClassLoader;
+import com.navercorp.pinpoint.test.plugin.classloader.PluginTestClassLoader;
 import com.navercorp.pinpoint.test.plugin.util.URLUtils;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,29 +36,38 @@ public class PluginTestInstanceFactory {
         this.context = context;
     }
 
-    public PluginTestInstance create(String testId, List<String> libs, boolean onSystemClassLoader) throws ClassNotFoundException {
+    public PluginTestInstance create(ClassLoader parentClassLoader, String testId, PluginAgentClassLoader agentClassLoader, List<String> libs, boolean onSystemClassLoader) throws ClassNotFoundException {
         final String id = testId + ":" + (onSystemClassLoader ? "system" : "child") + ":" + context.getJvmVersion();
-        final MockApplicationContextFactory factory = new MockApplicationContextFactory();
-        final DefaultApplicationContext applicationContext = factory.build(context.getConfigFile());
-//        final InterceptorRegistryBinder interceptorRegistryBinder = applicationContext.getInterceptorRegistryBinder();
-        final InterceptorRegistryBinder interceptorRegistryBinder = null;
-        final PluginTestVerifier pluginVerifier = new PluginVerifierExternalAdaptor(applicationContext);
 
+        final List<File> fileList = new ArrayList<>();
+//        for (String classPath : agentLibs) {
+//            File file = new File(classPath);
+//            fileList.add(file);
+//        }
+//        final URL[] agentUrls = URLUtils.fileToUrls(fileList);
+//        final PluginAgentClassLoader agentClassLoader = new PluginAgentClassLoader(agentUrls, Thread.currentThread().getContextClassLoader());
+
+        Thread thread = Thread.currentThread();
+        ClassLoader currentClassLoader = thread.getContextClassLoader();
         try {
-//            interceptorRegistryBinder.bind();
-            final List<File> fileList = new ArrayList<>();
+//            thread.setContextClassLoader(agentClassLoader);
+
+            PluginTestInstanceCallback instanceContext = startAgent(context.getConfigFile(), agentClassLoader);
+            fileList.clear();
             for (String classPath : getClassPath(libs, onSystemClassLoader)) {
                 File file = new File(classPath);
                 fileList.add(file);
             }
             final URL[] urls = URLUtils.fileToUrls(fileList);
-            final TestClassLoader classLoader = TestClassLoaderFactory.createTestClassLoader(applicationContext);
-            classLoader.initialize();
 
-            final Class<?> testClass = classLoader.loadClass(context.getTestClass().getName());
-            return new DefaultPluginTestInstance(id, classLoader, testClass, pluginVerifier, interceptorRegistryBinder);
+            PluginTestClassLoader testClassLoader = new PluginTestClassLoader(urls, parentClassLoader, instanceContext);
+            testClassLoader.setAgentClassLoader(agentClassLoader);
+            agentClassLoader.setTestClassLoader(testClassLoader);
+
+            final Class<?> testClass = testClassLoader.loadClass(context.getTestClass().getName());
+            return new DefaultPluginTestInstance(id, agentClassLoader, testClassLoader, testClass, context.isManageTraceObject(), instanceContext);
         } finally {
-            interceptorRegistryBinder.unbind();
+            thread.setContextClassLoader(currentClassLoader);
         }
     }
 
@@ -69,5 +76,16 @@ public class PluginTestInstanceFactory {
         libList.addAll(libs);
         libList.add(context.getTestClassLocation());
         return libList;
+    }
+
+    PluginTestInstanceCallback startAgent(String configFile, ClassLoader classLoader) {
+        try {
+            Class<?> testClass = classLoader.loadClass(PluginTestAgentStarter.class.getName());
+            Constructor<?> constructor = testClass.getConstructor(String.class, ClassLoader.class);
+            Method method = testClass.getDeclaredMethod("getCallback");
+            return (PluginTestInstanceCallback) method.invoke(constructor.newInstance(configFile, classLoader));
+        } catch (Exception e) {
+            throw new RuntimeException("agent configFile=" + configFile + ", classLoader=" + classLoader, e);
+        }
     }
 }

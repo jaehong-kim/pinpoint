@@ -46,7 +46,7 @@ public abstract class AbstractPluginTestSuite {
     private final List<String> requiredLibraries;
     private final List<String> mavenDependencyLibraries;
     private final List<String> repositoryUrls;
-    private final String testClassLocation;
+    protected final String testClassLocation;
     private final String agentJar;
     private final String profile;
     private final String configFile;
@@ -56,6 +56,8 @@ public abstract class AbstractPluginTestSuite {
     private final boolean debug;
     private final Class<?> testClass;
     private final List<String> importPluginIds;
+    private final List<String> pluginLibList;
+    private final boolean manageTraceObject;
 
     protected abstract List<PluginTestInstance> createTestCases(PluginTestContext context) throws Exception;
 
@@ -83,10 +85,18 @@ public abstract class AbstractPluginTestSuite {
         ImportPlugin importPlugin = testClass.getAnnotation(ImportPlugin.class);
         this.importPluginIds = getImportPlugin(importPlugin);
 
+        this.manageTraceObject = !testClass.isAnnotationPresent(TraceObjectManagable.class);
+
         Repository repository = testClass.getAnnotation(Repository.class);
         this.repositoryUrls = getRepository(repository);
 
         List<String> libs = collectLibs(getClass().getClassLoader());
+
+        final LibraryFilter pluginLibraryFilter = new LibraryFilter(
+                LibraryFilter.createContainsMatcher(PluginClassLoading.getPluginCheckClassPath()));
+        this.pluginLibList = filterLibs(libs, pluginLibraryFilter);
+
+
 
         final LibraryFilter requiredLibraryFilter = new LibraryFilter(
                 LibraryFilter.createContainsMatcher(PluginClassLoading.getContainsCheckClassPath()),
@@ -212,7 +222,7 @@ public abstract class AbstractPluginTestSuite {
         if (StringUtils.isEmpty(classPath)) {
             return Collections.emptyList();
         }
-        final List<String> paths = Arrays.asList(classPath.split(":"));
+        final List<String> paths = Arrays.asList(classPath.split(";"));
         return normalizePaths(paths);
     }
 
@@ -327,10 +337,10 @@ public abstract class AbstractPluginTestSuite {
         }
     }
 
-
     private boolean isDebugMode() {
         return ManagementFactory.getRuntimeMXBean().getInputArguments().toString().contains("jdwp");
     }
+
 
     public List<PluginTestInstance> getPluginTestInstanceList() {
         List<PluginTestInstance> pluginTestInstanceList = new ArrayList<>();
@@ -339,7 +349,7 @@ public abstract class AbstractPluginTestSuite {
             PluginTestContext context = new PluginTestContext(agentJar, profile,
                     configFile, logLocationConfig, requiredLibraries, mavenDependencyLibraries, repositoryUrls,
                     testClass, testClassLocation,
-                    jvmArguments, debug, importPluginIds);
+                    jvmArguments, debug, importPluginIds, pluginLibList, manageTraceObject);
 
             pluginTestInstanceList.addAll(createTestCases(context));
         } catch (Exception e) {

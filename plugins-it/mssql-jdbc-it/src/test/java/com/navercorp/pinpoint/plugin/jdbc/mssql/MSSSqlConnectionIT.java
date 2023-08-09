@@ -18,8 +18,8 @@ package com.navercorp.pinpoint.plugin.jdbc.mssql;
 
 import com.navercorp.pinpoint.bootstrap.context.DatabaseInfo;
 import com.navercorp.pinpoint.bootstrap.plugin.jdbc.DatabaseInfoAccessor;
-import com.navercorp.pinpoint.pluginit.jdbc.DriverManagerUtils;
-import com.navercorp.pinpoint.pluginit.jdbc.JDBCDriverClass;
+import com.navercorp.pinpoint.it.plugin.jdbc.DriverManagerUtils;
+import com.navercorp.pinpoint.it.plugin.jdbc.JDBCDriverClass;
 import com.navercorp.pinpoint.profiler.context.SpanEvent;
 import com.navercorp.pinpoint.test.junit5.BasePinpointTest;
 import com.navercorp.pinpoint.test.junit5.JunitAgentConfigPath;

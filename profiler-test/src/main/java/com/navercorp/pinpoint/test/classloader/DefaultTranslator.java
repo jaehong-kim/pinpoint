@@ -132,6 +132,4 @@ public class DefaultTranslator implements Translator {
             thread.setContextClassLoader(beforeClassLoader);
         }
     }
-
-
 }

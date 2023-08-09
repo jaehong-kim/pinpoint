@@ -16,7 +16,7 @@
 
 package com.navercorp.pinpoint.plugin.kafka;
 
-import com.navercorp.pinpoint.pluginit.utils.AgentPath;
+import com.navercorp.pinpoint.it.plugin.utils.AgentPath;
 import com.navercorp.pinpoint.test.plugin.Dependency;
 import com.navercorp.pinpoint.test.plugin.ImportPlugin;
 import com.navercorp.pinpoint.test.plugin.JvmVersion;
