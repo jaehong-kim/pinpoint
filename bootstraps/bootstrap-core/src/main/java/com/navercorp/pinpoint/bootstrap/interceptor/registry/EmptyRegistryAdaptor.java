@@ -31,12 +31,15 @@ public final class EmptyRegistryAdaptor implements InterceptorRegistryAdaptor {
     public EmptyRegistryAdaptor() {
     }
 
+    @Override
+    public int addInterceptor() {
+        return -1;
+    }
 
     @Override
     public int addInterceptor(Interceptor interceptor) {
         return -1;
     }
-
 
     public Interceptor getInterceptor(int key) {
         return LOGGING_INTERCEPTOR;

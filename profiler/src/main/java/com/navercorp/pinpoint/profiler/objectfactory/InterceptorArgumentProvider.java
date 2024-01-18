@@ -54,17 +54,16 @@ public class InterceptorArgumentProvider implements ArgumentProvider {
                                        CustomMetricRegistry customMetricRegistry,
                                        ApiMetaDataService apiMetaDataService,
                                        RequestRecorderFactory requestRecorderFactory,
-                                       InterceptorScope interceptorScope, InstrumentClass targetClass,
+                                       InterceptorScope interceptorScope,
+                                       InstrumentClass targetClass,
                                        InstrumentMethod targetMethod) {
         this.dataSourceMonitorRegistry = Objects.requireNonNull(dataSourceMonitorRegistry, "dataSourceMonitorRegistry");
         this.customMetricRegistry = Objects.requireNonNull(customMetricRegistry, "customMetricRegistry");
         this.apiMetaDataService = Objects.requireNonNull(apiMetaDataService, "apiMetaDataService");
-
         this.requestRecorderFactory = requestRecorderFactory;
         this.interceptorScope = interceptorScope;
         this.targetClass = targetClass;
         this.targetMethod = targetMethod;
-
     }
 
     @Override
@@ -74,13 +73,11 @@ public class InterceptorArgumentProvider implements ArgumentProvider {
         } else if (type == MethodDescriptor.class) {
             MethodDescriptor descriptor = targetMethod.getDescriptor();
             cacheApiIfAnnotationNotPresent(annotations, descriptor);
-
             return Option.withValue(descriptor);
         } else if (type == InstrumentMethod.class) {
             return Option.withValue(targetMethod);
         } else if (type == InterceptorScope.class) {
             Name annotation = TypeUtils.findAnnotation(annotations, Name.class);
-
             if (annotation == null) {
                 if (interceptorScope == null) {
                     throw new PinpointException("Scope parameter is not annotated with @Name and the target class is not associated with any Scope");

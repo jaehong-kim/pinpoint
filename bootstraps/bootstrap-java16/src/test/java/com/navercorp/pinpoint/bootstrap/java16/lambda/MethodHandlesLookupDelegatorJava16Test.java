@@ -20,12 +20,7 @@ import com.navercorp.pinpoint.bootstrap.instrument.lambda.LambdaBytecodeHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.lang.invoke.MethodHandles;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 class MethodHandlesLookupDelegatorJava16Test {
 

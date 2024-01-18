@@ -19,12 +19,13 @@ package com.navercorp.pinpoint.profiler.instrument;
 import com.google.inject.Provider;
 import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
 import com.navercorp.pinpoint.bootstrap.interceptor.Interceptor;
-import java.util.Objects;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinition;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinitionFactory;
 import com.navercorp.pinpoint.profiler.interceptor.registry.InterceptorRegistryBinder;
 import com.navercorp.pinpoint.profiler.metadata.ApiMetaDataService;
 import com.navercorp.pinpoint.profiler.objectfactory.ObjectBinderFactory;
+
+import java.util.Objects;
 
 
 /**
@@ -65,10 +66,14 @@ public class DefaultEngineComponent implements EngineComponent {
         return objectBinderFactory;
     }
 
-
     @Override
     public int addInterceptor(Interceptor interceptor) {
-        return  interceptorRegistryBinder.getInterceptorRegistryAdaptor().addInterceptor(interceptor);
+        return interceptorRegistryBinder.getInterceptorRegistryAdaptor().addInterceptor(interceptor);
+    }
+
+    @Override
+    public int addInterceptor() {
+        return interceptorRegistryBinder.getInterceptorRegistryAdaptor().addInterceptor();
     }
 
     @Override
@@ -76,6 +81,5 @@ public class DefaultEngineComponent implements EngineComponent {
         ApiMetaDataService apiMetaDataService = this.apiMetaDataServiceProvider.get();
         return apiMetaDataService.cacheApi(methodDescriptor);
     }
-
 }
 
