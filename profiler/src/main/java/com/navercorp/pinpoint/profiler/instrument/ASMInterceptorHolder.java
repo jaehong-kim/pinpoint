@@ -45,8 +45,8 @@ public class ASMInterceptorHolder {
         return InterceptorHolder.class.getName() + "__" + interceptorId;
     }
 
-    private String className;
-    private String innerClassName;
+    private final String className;
+    private final String innerClassName;
 
 
     public ASMInterceptorHolder(int interceptorId) {
@@ -81,11 +81,11 @@ public class ASMInterceptorHolder {
             final Method method = interceptorHolderClass.getDeclaredMethod("set", Supplier.class);
             method.invoke(null, interceptorLazyLoadingSupplier);
         } catch (NoSuchMethodException e) {
-            throw new InstrumentException("not found 'set' method, class=" + interceptorHolderClass.getName(), e);
+            throw new InstrumentException("not found 'set' method, className=" + interceptorHolderClass.getName(), e);
         } catch (IllegalAccessException e) {
-            throw new InstrumentException("access fail, class=" + interceptorHolderClass.getName(), e);
+            throw new InstrumentException("access fail, className=" + interceptorHolderClass.getName(), e);
         } catch (InvocationTargetException e) {
-            throw new InstrumentException("invocation fail, class=" + interceptorHolderClass.getName(), e);
+            throw new InstrumentException("invocation fail, className=" + interceptorHolderClass.getName(), e);
         }
     }
 

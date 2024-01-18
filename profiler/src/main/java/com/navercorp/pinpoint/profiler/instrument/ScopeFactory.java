@@ -31,7 +31,6 @@ public class ScopeFactory {
 
     public ScopeInfo newScopeInfo(InstrumentContext pluginContext, Class<?> interceptorClass, InterceptorScope scope, ExecutionPolicy policy) {
         if (scope == null) {
-            // TODO 필요한가 ? 삭제하자!!!
             final Scope scopeAnnotation = interceptorClass.getAnnotation(Scope.class);
             if (scopeAnnotation != null) {
                 return newScopeInfoByAnnotation(pluginContext, scopeAnnotation);
