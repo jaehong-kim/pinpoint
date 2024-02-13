@@ -14,7 +14,6 @@
  */
 package com.navercorp.pinpoint.profiler.objectfactory;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -63,9 +62,7 @@ public class StaticMethodResolver {
         
         for (Method method : candidates) {
             Class<?>[] types = method.getParameterTypes();
-            Annotation[][] annotations = method.getParameterAnnotations();
-
-            Object[] arguments = argumentsResolver.resolve(types, annotations);
+            Object[] arguments = argumentsResolver.resolve(types);
             
             if (arguments != null) {
                 this.resolvedMethod = method;

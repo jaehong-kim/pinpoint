@@ -17,6 +17,7 @@
 package com.navercorp.pinpoint.profiler.interceptor.factory;
 
 import com.navercorp.pinpoint.bootstrap.config.ProfilerConfig;
+import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
 import com.navercorp.pinpoint.bootstrap.context.TraceContext;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentClass;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentContext;
@@ -111,8 +112,12 @@ public class AnnotatedInterceptorFactory implements InterceptorFactory {
         Objects.requireNonNull(scopeInfo, "scopeInfo");
 
         final InterceptorScope interceptorScope = scopeInfo.getInterceptorScope();
+        MethodDescriptor methodDescriptor = null;
+        if (targetMethod != null) {
+            methodDescriptor = targetMethod.getDescriptor();
+        }
         InterceptorArgumentProvider interceptorArgumentProvider = new InterceptorArgumentProvider(dataSourceMonitorRegistry,
-                customMetricRegistry, apiMetaDataService, requestRecorderFactory, interceptorScope, target, targetMethod);
+                customMetricRegistry, apiMetaDataService, requestRecorderFactory, interceptorScope, methodDescriptor);
 
         AutoBindingObjectFactory factory = new AutoBindingObjectFactory(profilerConfig, traceContext, pluginContext, interceptorClass.getClassLoader());
         Interceptor interceptor = (Interceptor) factory.createInstance(interceptorClass, providedArguments, interceptorArgumentProvider);

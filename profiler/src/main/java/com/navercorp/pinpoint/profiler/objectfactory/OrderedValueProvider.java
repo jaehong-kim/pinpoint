@@ -14,12 +14,10 @@
  */
 package com.navercorp.pinpoint.profiler.objectfactory;
 
-import java.lang.annotation.Annotation;
-
 import com.navercorp.pinpoint.bootstrap.plugin.ObjectFactory;
 import com.navercorp.pinpoint.profiler.util.TypeUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Jongho Moon
@@ -45,7 +43,7 @@ public class OrderedValueProvider implements JudgingParameterResolver {
     }
 
     @Override
-    public Option get(int index, Class<?> type, Annotation[] annotations) {
+    public Option get(int index, Class<?> type) {
         if (this.index >= values.length) {
             return Option.empty();
         }

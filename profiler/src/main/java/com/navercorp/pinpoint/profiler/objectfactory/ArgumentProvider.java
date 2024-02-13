@@ -14,12 +14,10 @@
  */
 package com.navercorp.pinpoint.profiler.objectfactory;
 
-import java.lang.annotation.Annotation;
-
 /**
  * @author Jongho Moon
  *
  */
 public interface ArgumentProvider {
-    Option get(int index, Class<?> type, Annotation[] annotations);
+    Option get(int index, Class<?> type);
 }

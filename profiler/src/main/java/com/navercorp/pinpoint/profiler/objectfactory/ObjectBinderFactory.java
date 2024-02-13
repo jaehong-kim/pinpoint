@@ -16,9 +16,9 @@
 
 package com.navercorp.pinpoint.profiler.objectfactory;
 
+import com.google.inject.Provider;
 import com.navercorp.pinpoint.bootstrap.config.ProfilerConfig;
 import com.navercorp.pinpoint.bootstrap.context.TraceContext;
-import com.navercorp.pinpoint.bootstrap.instrument.InstrumentClass;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentContext;
 import com.navercorp.pinpoint.bootstrap.plugin.RequestRecorderFactory;
 import com.navercorp.pinpoint.bootstrap.plugin.monitor.DataSourceMonitorRegistry;
@@ -30,8 +30,6 @@ import com.navercorp.pinpoint.profiler.context.monitor.metric.CustomMetricRegist
 import com.navercorp.pinpoint.profiler.interceptor.factory.AnnotatedInterceptorFactory;
 import com.navercorp.pinpoint.profiler.interceptor.factory.ExceptionHandlerFactory;
 import com.navercorp.pinpoint.profiler.metadata.ApiMetaDataService;
-
-import com.google.inject.Provider;
 
 import java.util.Objects;
 
@@ -74,12 +72,6 @@ public class ObjectBinderFactory {
     public AutoBindingObjectFactory newAutoBindingObjectFactory(InstrumentContext pluginContext, ClassLoader classLoader, ArgumentProvider... argumentProviders) {
         final TraceContext traceContext = this.traceContextProvider.get();
         return new AutoBindingObjectFactory(profilerConfig, traceContext, pluginContext, classLoader, argumentProviders);
-    }
-
-
-    public InterceptorArgumentProvider newInterceptorArgumentProvider(InstrumentClass instrumentClass) {
-        ApiMetaDataService apiMetaDataService = this.apiMetaDataServiceProvider.get();
-        return new InterceptorArgumentProvider(dataSourceMonitorRegistry, customMetricRegistry, apiMetaDataService, requestRecorderFactory, instrumentClass);
     }
 
     public AnnotatedInterceptorFactory newAnnotatedInterceptorFactory(InstrumentContext pluginContext) {

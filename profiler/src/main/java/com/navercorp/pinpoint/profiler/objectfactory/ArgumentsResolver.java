@@ -14,7 +14,6 @@
  */
 package com.navercorp.pinpoint.profiler.objectfactory;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
@@ -29,7 +28,7 @@ public class ArgumentsResolver {
         this.parameterResolvers = parameterResolvers;
     }
 
-    public Object[] resolve(Class<?>[] types, Annotation[][] annotations) {
+    public Object[] resolve(Class<?>[] types) {
         int length = types.length;
         Object[] arguments = new Object[length];
         
@@ -42,7 +41,7 @@ public class ArgumentsResolver {
         outer:
         for (int i = 0; i < length; i++) {
             for (ArgumentProvider resolver : parameterResolvers) {
-                Option resolved = resolver.get(i, types[i], annotations[i]);
+                Option resolved = resolver.get(i, types[i]);
                 
                 if (resolved.hasValue()) {
                     arguments[i] = resolved.getValue();

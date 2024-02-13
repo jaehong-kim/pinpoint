@@ -18,7 +18,6 @@ package com.navercorp.pinpoint.profiler.objectfactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -48,9 +47,7 @@ public class ConstructorResolver {
         
         for (Constructor<?> constructor : constructors) {
             final Class<?>[] parameterTypes = constructor.getParameterTypes();
-            final Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
-
-            Object[] resolvedArguments = argumentsResolver.resolve(parameterTypes, parameterAnnotations);
+            Object[] resolvedArguments = argumentsResolver.resolve(parameterTypes);
             
             if (resolvedArguments != null) {
                 this.resolvedConstructor = constructor;

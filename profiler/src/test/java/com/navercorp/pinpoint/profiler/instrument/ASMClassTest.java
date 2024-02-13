@@ -27,7 +27,6 @@ import com.navercorp.pinpoint.bootstrap.plugin.RequestRecorderFactory;
 import com.navercorp.pinpoint.profiler.context.monitor.DataSourceMonitorRegistryService;
 import com.navercorp.pinpoint.profiler.context.monitor.metric.CustomMetricRegistryService;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinitionFactory;
-import com.navercorp.pinpoint.profiler.instrument.mock.BaseAnnotationInterceptor;
 import com.navercorp.pinpoint.profiler.instrument.mock.BaseGetter;
 import com.navercorp.pinpoint.profiler.instrument.mock.BaseSetter;
 import com.navercorp.pinpoint.profiler.instrument.mock.accessor.IntAccessor;
@@ -635,12 +634,6 @@ public class ASMClassTest {
         clazz = getClass("com.navercorp.pinpoint.profiler.instrument.mock.FieldClass");
         clazz.addSetter(FieldTransientIntSetter.class, "transientInt");
         assertNotNull(clazz.getDeclaredMethod("_$PINPOINT$_setTransientInt", "int"));
-    }
-
-    @Test
-    public void addInterceptor() throws Exception {
-        ASMClass clazz = getClass("com.navercorp.pinpoint.profiler.instrument.mock.BaseClass");
-        clazz.addInterceptor(BaseAnnotationInterceptor.class);
     }
 
     @Test

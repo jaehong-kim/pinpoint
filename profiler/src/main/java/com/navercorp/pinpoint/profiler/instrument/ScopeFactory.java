@@ -17,7 +17,6 @@
 package com.navercorp.pinpoint.profiler.instrument;
 
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentContext;
-import com.navercorp.pinpoint.bootstrap.interceptor.annotation.Scope;
 import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExecutionPolicy;
 import com.navercorp.pinpoint.bootstrap.interceptor.scope.InterceptorScope;
 
@@ -30,23 +29,8 @@ public class ScopeFactory {
     }
 
     public ScopeInfo newScopeInfo(InstrumentContext pluginContext, Class<?> interceptorClass, InterceptorScope scope, ExecutionPolicy policy) {
-        if (scope == null) {
-            final Scope scopeAnnotation = interceptorClass.getAnnotation(Scope.class);
-            if (scopeAnnotation != null) {
-                return newScopeInfoByAnnotation(pluginContext, scopeAnnotation);
-            }
-        }
         policy = getExecutionPolicy(scope, policy);
-
         return new ScopeInfo(scope, policy);
-    }
-
-    private ScopeInfo newScopeInfoByAnnotation(InstrumentContext pluginContext, Scope scope) {
-        final String scopeName = scope.value();
-        final InterceptorScope interceptorScope = pluginContext.getInterceptorScope(scopeName);
-
-        final ExecutionPolicy policy = scope.executionPolicy();
-        return new ScopeInfo(interceptorScope, policy);
     }
 
     private ExecutionPolicy getExecutionPolicy(InterceptorScope scope, ExecutionPolicy policy) {
@@ -57,5 +41,4 @@ public class ScopeFactory {
         }
         return policy;
     }
-
 }
