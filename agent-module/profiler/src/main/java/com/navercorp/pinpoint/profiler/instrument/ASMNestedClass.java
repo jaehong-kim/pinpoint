@@ -24,10 +24,10 @@ import com.navercorp.pinpoint.bootstrap.instrument.MethodFilter;
 import com.navercorp.pinpoint.bootstrap.interceptor.Interceptor;
 import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExecutionPolicy;
 import com.navercorp.pinpoint.bootstrap.interceptor.scope.InterceptorScope;
+import java.util.Objects;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author jaehong.kim
@@ -162,19 +162,6 @@ public class ASMNestedClass implements InstrumentClass {
         // nothing.
     }
 
-
-    @Override
-    public int addInterceptor(Class<? extends Interceptor> interceptorClass) throws InstrumentException {
-        Objects.requireNonNull(interceptorClass, "interceptorClass");
-        return 0;
-    }
-
-    @Override
-    public int addInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs) throws InstrumentException {
-        Objects.requireNonNull(interceptorClass, "interceptorClass");
-        return 0;
-    }
-
     @Override
     public int addInterceptor(MethodFilter filter, Class<? extends Interceptor> interceptorClass) throws InstrumentException {
         Objects.requireNonNull(filter, "filter");
@@ -187,70 +174,6 @@ public class ASMNestedClass implements InstrumentClass {
         Objects.requireNonNull(filter, "filter");
         Objects.requireNonNull(interceptorClass, "interceptorClass");
         Objects.requireNonNull(constructorArgs, "constructorArgs");
-        return 0;
-    }
-
-    @Override
-    public int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, String scopeName) throws InstrumentException {
-        Objects.requireNonNull(interceptorClass, "interceptorClass");
-        Objects.requireNonNull(constructorArgs, "constructorArgs");
-        Objects.requireNonNull(scopeName, "scopeName");
-        return 0;
-    }
-
-    @Override
-    public int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, InterceptorScope scope) throws InstrumentException {
-        Objects.requireNonNull(interceptorClass, "interceptorClass");
-        Objects.requireNonNull(constructorArgs, "constructorArgs");
-        Objects.requireNonNull(scope, "scope");
-        return 0;
-    }
-
-    @Override
-    public int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, String scopeName, ExecutionPolicy executionPolicy) throws InstrumentException {
-        Objects.requireNonNull(interceptorClass, "interceptorClass");
-        Objects.requireNonNull(constructorArgs, "constructorArgs");
-        Objects.requireNonNull(scopeName, "scopeName");
-        Objects.requireNonNull(executionPolicy, "executionPolicy");
-        return 0;
-    }
-
-    @Override
-    public int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, InterceptorScope scope, ExecutionPolicy executionPolicy) throws InstrumentException {
-        Objects.requireNonNull(interceptorClass, "interceptorClass");
-        Objects.requireNonNull(constructorArgs, "constructorArgs");
-        Objects.requireNonNull(scope, "scope");
-        Objects.requireNonNull(executionPolicy, "executionPolicy");
-        return 0;
-    }
-
-    @Override
-    public int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, String scopeName) throws InstrumentException {
-        Objects.requireNonNull(interceptorClass, "interceptorClass");
-        Objects.requireNonNull(scopeName, "scopeName");
-        return 0;
-    }
-
-    @Override
-    public int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, InterceptorScope scope) throws InstrumentException {
-        Objects.requireNonNull(interceptorClass, "interceptorClass");
-        Objects.requireNonNull(scope, "scope");
-        return 0;
-    }
-
-    @Override
-    public int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, String scopeName, ExecutionPolicy executionPolicy) throws InstrumentException {
-        Objects.requireNonNull(interceptorClass, "interceptorClass");
-        Objects.requireNonNull(scopeName, "scopeName");
-        Objects.requireNonNull(executionPolicy, "executionPolicy");
-        return 0;
-    }
-
-    @Override
-    public int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, InterceptorScope scope, ExecutionPolicy executionPolicy) throws InstrumentException {
-        Objects.requireNonNull(interceptorClass, "interceptorClass");
-        Objects.requireNonNull(scope, "scope");
-        Objects.requireNonNull(executionPolicy, "executionPolicy");
         return 0;
     }
 

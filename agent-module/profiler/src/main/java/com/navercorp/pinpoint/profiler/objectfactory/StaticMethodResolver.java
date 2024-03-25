@@ -3,9 +3,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,6 @@
  */
 package com.navercorp.pinpoint.profiler.objectfactory;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -29,28 +28,28 @@ public class StaticMethodResolver {
     private final Class<?> type;
     private final String methodName;
     private final ArgumentsResolver argumentsResolver;
-    
+
     private Method resolvedMethod;
     private Object[] resolvedArguments;
-    
+
     public StaticMethodResolver(Class<?> type, String methodName, ArgumentsResolver argumentsResolver) {
         this.type = type;
         this.methodName = methodName;
         this.argumentsResolver = argumentsResolver;
     }
-    
+
     private List<Method> getCandidates() {
         List<Method> result = new ArrayList<>();
-        
+
         for (Method method : type.getMethods()) {
             if (!Modifier.isStatic(method.getModifiers())) {
                 continue;
             }
-            
+
             if (!method.getName().equals(methodName)) {
                 continue;
             }
-            
+
             result.add(method);
         }
 
@@ -60,13 +59,11 @@ public class StaticMethodResolver {
 
     public boolean resolve() {
         List<Method> candidates = getCandidates();
-        
+
         for (Method method : candidates) {
             Class<?>[] types = method.getParameterTypes();
-            Annotation[][] annotations = method.getParameterAnnotations();
+            Object[] arguments = argumentsResolver.resolve(types);
 
-            Object[] arguments = argumentsResolver.resolve(types, annotations);
-            
             if (arguments != null) {
                 this.resolvedMethod = method;
                 this.resolvedArguments = arguments;
@@ -74,7 +71,7 @@ public class StaticMethodResolver {
                 return true;
             }
         }
-        
+
         return false;
     }
 

@@ -16,8 +16,6 @@ public final class DefaultInterceptorRegistryAdaptor implements InterceptorRegis
 
     private final AtomicInteger id = new AtomicInteger(0);
 
-    private final WeakAtomicReferenceArray<Interceptor> index;
-
     public DefaultInterceptorRegistryAdaptor() {
         this(DEFAULT_MAX);
     }
@@ -27,22 +25,21 @@ public final class DefaultInterceptorRegistryAdaptor implements InterceptorRegis
             throw new IllegalArgumentException("negative maxRegistrySize:" + maxRegistrySize);
         }
         this.registrySize = maxRegistrySize;
-        this.index = new WeakAtomicReferenceArray<Interceptor>(maxRegistrySize, Interceptor.class);
     }
 
 
     @Override
-    public int addInterceptor(Interceptor interceptor) {
-        if (interceptor == null) {
-            return -1;
-        }
-
+    public int addInterceptor() {
         final int newId = nextId();
         if (newId >= registrySize) {
-            throw new IndexOutOfBoundsException("Interceptor registry size exceeded. Check the \"profiler.interceptorregistry.size\" setting. size=" + index.length() + " id=" + id);
+            throw new IndexOutOfBoundsException("Interceptor registry size exceeded. Check the \"profiler.interceptorregistry.size\" setting. id=" + id);
         }
-        index.set(newId, interceptor);
         return newId;
+    }
+
+    @Override
+    public int addInterceptor(Interceptor interceptor) {
+        return -1;
     }
 
     private int nextId() {
@@ -50,22 +47,10 @@ public final class DefaultInterceptorRegistryAdaptor implements InterceptorRegis
     }
 
     public Interceptor getInterceptor(int key) {
-        final Interceptor interceptor = this.index.get(key);
-        if (interceptor == null) {
-            return LOGGING_INTERCEPTOR;
-        } else {
-            return interceptor;
-        }
+        return null;
     }
 
     @Override
     public void clear() {
-        if (this.index != null) {
-            int length = index.length();
-            for (int i = 0; i < length; i++) {
-                Interceptor interceptor = index.get(0);
-                interceptor = null;
-            }
-        }
     }
 }

@@ -3,9 +3,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,12 @@ import com.navercorp.pinpoint.bootstrap.context.TraceContext;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentContext;
 import com.navercorp.pinpoint.bootstrap.instrument.Instrumentor;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentorDelegate;
-import com.navercorp.pinpoint.bootstrap.interceptor.annotation.Name;
 import com.navercorp.pinpoint.bootstrap.interceptor.scope.InterceptorScope;
-import com.navercorp.pinpoint.exception.PinpointException;
-import com.navercorp.pinpoint.profiler.util.TypeUtils;
 
-import java.lang.annotation.Annotation;
 import java.util.Objects;
 
 /**
  * @author Jongho Moon
- *
  */
 public class ProfilerPluginArgumentProvider implements ArgumentProvider {
     private final ProfilerConfig profilerConfig;
@@ -44,7 +39,7 @@ public class ProfilerPluginArgumentProvider implements ArgumentProvider {
     }
 
     @Override
-    public Option get(int index, Class<?> type, Annotation[] annotations) {
+    public Option get(int index, Class<?> type) {
         if (type == Trace.class) {
             return Option.withValue(traceContext.currentTraceObject());
         } else if (type == TraceContext.class) {
@@ -53,21 +48,9 @@ public class ProfilerPluginArgumentProvider implements ArgumentProvider {
             final InstrumentorDelegate delegate = new InstrumentorDelegate(profilerConfig, pluginContext);
             return Option.withValue(delegate);
         } else if (type == InterceptorScope.class) {
-            Name annotation = TypeUtils.findAnnotation(annotations, Name.class);
-            
-            if (annotation == null) {
-                return Option.empty();
-            }
-            
-            InterceptorScope scope = pluginContext.getInterceptorScope(annotation.value());
-            
-            if (scope == null) {
-                throw new PinpointException("No such Scope: " + annotation.value());
-            }
-            
-            return Option.withValue(scope);
+            return Option.empty();
         }
-        
+
         return Option.empty();
     }
 }

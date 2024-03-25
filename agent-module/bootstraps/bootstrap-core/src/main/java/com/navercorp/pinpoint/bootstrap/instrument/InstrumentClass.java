@@ -35,7 +35,7 @@ public interface InstrumentClass {
     String getSuperClass();
 
     String[] getInterfaces();
-    
+
     InstrumentMethod getConstructor(String... parameterTypes);
 
     List<InstrumentMethod> getDeclaredConstructors();
@@ -49,26 +49,26 @@ public interface InstrumentClass {
     @Deprecated
     InstrumentMethod getLambdaMethod(String... parameterTypes);
 
-    List<InstrumentClass> getNestedClasses(ClassFilter filter);    
-    
+    List<InstrumentClass> getNestedClasses(ClassFilter filter);
+
     ClassLoader getClassLoader();
 
 
     boolean isInterceptable();
-    
+
     boolean hasConstructor(String... parameterTypes);
 
     boolean hasDeclaredMethod(String methodName, String... parameterTypes);
-    
+
     boolean hasMethod(String methodName, String... parameterTypes);
-    
+
     boolean hasEnclosingMethod(String methodName, String... parameterTypes);
-    
+
     boolean hasField(String name, String type);
-    
+
     boolean hasField(String name);
 
-    
+
     void weave(String adviceClassName) throws InstrumentException;
 
 
@@ -86,35 +86,9 @@ public interface InstrumentClass {
 
 
     //------------- Plugin V2 API ------------------
-    int addInterceptor(Class<? extends Interceptor> interceptorClass) throws InstrumentException;
-
-
-    int addInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs) throws InstrumentException;
-
-
     int addInterceptor(MethodFilter filter, Class<? extends Interceptor> interceptorClass) throws InstrumentException;
 
     int addInterceptor(MethodFilter filter, Class<? extends Interceptor> interceptorClass, Object[] constructorArgs) throws InstrumentException;
-
-    int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, String scopeName) throws InstrumentException;
-
-    int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, InterceptorScope scope) throws InstrumentException;
-
-
-    int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, String scopeName, ExecutionPolicy executionPolicy) throws InstrumentException;
-
-    int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, InterceptorScope scope, ExecutionPolicy executionPolicy) throws InstrumentException;
-
-
-    int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, String scopeName) throws InstrumentException;
-
-    int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, InterceptorScope interceptorScope) throws InstrumentException;
-
-
-    int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, String scopeName, ExecutionPolicy executionPolicy) throws InstrumentException;
-
-    int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, InterceptorScope interceptorScope, ExecutionPolicy executionPolicy) throws InstrumentException;
-
 
     int addScopedInterceptor(MethodFilter filter, Class<? extends Interceptor> interceptorClass, String scopeName, ExecutionPolicy executionPolicy) throws InstrumentException;
 
@@ -129,6 +103,6 @@ public interface InstrumentClass {
      * If class already have method, this method throw exception. 
      */
     InstrumentMethod addDelegatorMethod(String methodName, String... paramTypes) throws InstrumentException;
-    
+
     byte[] toBytecode() throws InstrumentException;
 }

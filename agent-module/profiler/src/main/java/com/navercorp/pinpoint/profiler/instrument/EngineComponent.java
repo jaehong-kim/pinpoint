@@ -32,7 +32,10 @@ public interface EngineComponent {
 
     ObjectBinderFactory getObjectBinderFactory();
 
+    @Deprecated
     int addInterceptor(Interceptor interceptor);
+
+    int addInterceptor();
 
     int cacheApi(MethodDescriptor methodDescriptor);
 }
