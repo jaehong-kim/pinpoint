@@ -39,6 +39,18 @@ public class ScopeInfo {
         return executionPolicy;
     }
 
+    public String getId() {
+        StringBuilder builder = new StringBuilder();
+        if (interceptorScope != null) {
+            builder.append(interceptorScope.getClass().getName());
+            builder.append(Integer.toHexString(interceptorScope.hashCode()));
+        }
+        if (executionPolicy != null) {
+            builder.append(executionPolicy.name());
+        }
+        return builder.toString();
+    }
+
     @Override
     public String toString() {
         return "ScopeInfo{" +

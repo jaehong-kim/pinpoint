@@ -17,12 +17,8 @@
 package com.navercorp.test.pinpoint.jdk8.interfaces;
 
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentContext;
-import com.navercorp.pinpoint.profiler.instrument.ASMClass;
-import com.navercorp.pinpoint.profiler.instrument.ASMClassNodeAdapter;
-import com.navercorp.pinpoint.profiler.instrument.ASMClassWriter;
-import com.navercorp.pinpoint.profiler.instrument.ASMFieldNodeAdapter;
-import com.navercorp.pinpoint.profiler.instrument.ASMMethodNodeAdapter;
-import com.navercorp.pinpoint.profiler.instrument.EngineComponent;
+import com.navercorp.pinpoint.bootstrap.instrument.InstrumentException;
+import com.navercorp.pinpoint.profiler.instrument.*;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinition;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinitionFactory;
 import com.navercorp.pinpoint.profiler.interceptor.registry.DefaultInterceptorRegistryBinder;
@@ -77,6 +73,8 @@ public class MethodInterfaceTest {
         logger.debug("Add interceptor interface={}, class={}", targetInterfaceName, targetClassName);
 
         final int interceptorId = interceptorRegistryBinder.getInterceptorRegistryAdaptor().addInterceptor(new SimpleInterceptor());
+
+
         final InterceptorDefinition interceptorDefinition = new InterceptorDefinitionFactory().createInterceptorDefinition(SimpleInterceptor.class);
         final List<String> methodNameList = Arrays.asList("currentTimeMillis", "foo");
         TestClassLoader classLoader = new TestClassLoader();
@@ -100,10 +98,17 @@ public class MethodInterfaceTest {
                     if (!methodNameList.contains(methodNode.name)) {
                         continue;
                     }
-                    methodNodeAdapter.addBeforeInterceptor(interceptorId, interceptorDefinition, 99);
-                    logger.debug("Add before interceptor in method={}", methodNode.name);
-                    methodNodeAdapter.addAfterInterceptor(interceptorId, interceptorDefinition, 99);
-                    logger.debug("Add after interceptor in method={}", methodNode.name);
+
+                    try {
+                        String interceptorId = ASMInterceptorHolder.create(classLoader, SimpleInterceptor.class, null, null, new SimpleInterceptor());
+                        methodNodeAdapter.addBeforeInterceptor(interceptorId, interceptorDefinition, 99);
+                        logger.debug("Add before interceptor in method={}", methodNode.name);
+                        methodNodeAdapter.addAfterInterceptor(interceptorId, interceptorDefinition, 99);
+                        logger.debug("Add after interceptor in method={}", methodNode.name);
+                    } catch (InstrumentException e) {
+                        throw new RuntimeException(e);
+                    }
+
                 }
             }
         });

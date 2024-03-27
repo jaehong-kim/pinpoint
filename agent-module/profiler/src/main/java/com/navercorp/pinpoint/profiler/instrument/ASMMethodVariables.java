@@ -207,7 +207,7 @@ public class ASMMethodVariables {
         }
     }
 
-    public boolean initInterceptorLocalVariables(final InsnList instructions, final int interceptorId, final InterceptorDefinition interceptorDefinition, final int apiId) {
+    public boolean initInterceptorLocalVariables(final InsnList instructions, final String interceptorId, final InterceptorDefinition interceptorDefinition, final int apiId) {
         if (this.initializedInterceptorLocalVariables) {
             return false;
         }
@@ -294,10 +294,10 @@ public class ASMMethodVariables {
     }
 
 
-    private void initInterceptorVar(final InsnList instructions, final int interceptorId) {
+    private void initInterceptorVar(final InsnList instructions, final String interceptorId) {
         assertInitializedInterceptorLocalVariables();
         this.interceptorVarIndex = addInterceptorLocalVariable("_$PINPOINT$_interceptor", "Lcom/navercorp/pinpoint/bootstrap/interceptor/Interceptor;");
-        final String className = ASMInterceptorHolder.getInterceptorHolderClassName(interceptorId);
+        final String className = interceptorId;
         instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, JavaAssistUtils.javaNameToJvmName(className), "get", "()" + Type.getDescriptor(Interceptor.class), false));
         storeVar(instructions, this.interceptorVarIndex);
         this.resultVarIndex = addInterceptorLocalVariable("_$PINPOINT$_result", "Ljava/lang/Object;");

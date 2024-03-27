@@ -61,7 +61,7 @@ public interface InstrumentMethod {
 
     int addScopedInterceptor(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, InterceptorScope interceptorScope, ExecutionPolicy executionPolicy) throws InstrumentException;
 
-
+    @Deprecated
     void addInterceptor(int interceptorId) throws InstrumentException;
 
     Class<? extends Interceptor> loadInterceptorClass(String interceptorClassName) throws InstrumentException;

@@ -241,7 +241,7 @@ public class ASMMethodNodeAdapter {
         }
     }
 
-    private void initInterceptorLocalVariables(final int interceptorId, final InterceptorDefinition interceptorDefinition, final int apiId) {
+    private void initInterceptorLocalVariables(final String interceptorId, final InterceptorDefinition interceptorDefinition, final int apiId) {
         final InsnList instructions = new InsnList();
         if (this.methodVariables.initInterceptorLocalVariables(instructions, interceptorId, interceptorDefinition, apiId)) {
             // if first time.
@@ -249,7 +249,7 @@ public class ASMMethodNodeAdapter {
         }
     }
 
-    public void addBeforeInterceptor(final int interceptorId, final InterceptorDefinition interceptorDefinition, final int apiId) {
+    public void addBeforeInterceptor(final String interceptorId, final InterceptorDefinition interceptorDefinition, final int apiId) {
         initInterceptorLocalVariables(interceptorId, interceptorDefinition, apiId);
 
         final InsnList instructions = new InsnList();
@@ -260,7 +260,7 @@ public class ASMMethodNodeAdapter {
         this.methodNode.instructions.insertBefore(this.methodVariables.getEnterInsnNode(), instructions);
     }
 
-    public void addAfterInterceptor(final int interceptorId, final InterceptorDefinition interceptorDefinition, final int apiId) {
+    public void addAfterInterceptor(final String interceptorId, final InterceptorDefinition interceptorDefinition, final int apiId) {
         initInterceptorLocalVariables(interceptorId, interceptorDefinition, apiId);
 
         // add try catch block.

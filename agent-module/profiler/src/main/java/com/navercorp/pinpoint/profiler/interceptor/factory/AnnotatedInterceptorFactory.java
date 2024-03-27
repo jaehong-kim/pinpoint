@@ -19,49 +19,9 @@ package com.navercorp.pinpoint.profiler.interceptor.factory;
 import com.navercorp.pinpoint.bootstrap.config.ProfilerConfig;
 import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
 import com.navercorp.pinpoint.bootstrap.context.TraceContext;
-import com.navercorp.pinpoint.bootstrap.instrument.InstrumentClass;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentContext;
-import com.navercorp.pinpoint.bootstrap.instrument.InstrumentMethod;
-import com.navercorp.pinpoint.bootstrap.interceptor.ApiIdAwareAroundInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor0;
-import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor1;
-import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor2;
-import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor3;
-import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor4;
-import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor5;
-import com.navercorp.pinpoint.bootstrap.interceptor.ExceptionHandleApiIdAwareAroundInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.ExceptionHandleAroundInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.ExceptionHandleAroundInterceptor0;
-import com.navercorp.pinpoint.bootstrap.interceptor.ExceptionHandleAroundInterceptor1;
-import com.navercorp.pinpoint.bootstrap.interceptor.ExceptionHandleAroundInterceptor2;
-import com.navercorp.pinpoint.bootstrap.interceptor.ExceptionHandleAroundInterceptor3;
-import com.navercorp.pinpoint.bootstrap.interceptor.ExceptionHandleAroundInterceptor4;
-import com.navercorp.pinpoint.bootstrap.interceptor.ExceptionHandleAroundInterceptor5;
-import com.navercorp.pinpoint.bootstrap.interceptor.ExceptionHandleStaticAroundInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.ExceptionHandler;
-import com.navercorp.pinpoint.bootstrap.interceptor.Interceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.StaticAroundInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExceptionHandleScopedApiIdAwareAroundInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExceptionHandleScopedInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExceptionHandleScopedInterceptor0;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExceptionHandleScopedInterceptor1;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExceptionHandleScopedInterceptor2;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExceptionHandleScopedInterceptor3;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExceptionHandleScopedInterceptor4;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExceptionHandleScopedInterceptor5;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExceptionHandleScopedStaticAroundInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ExecutionPolicy;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.InterceptorScope;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ScopedApiIdAwareAroundInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ScopedInterceptor;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ScopedInterceptor0;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ScopedInterceptor1;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ScopedInterceptor2;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ScopedInterceptor3;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ScopedInterceptor4;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ScopedInterceptor5;
-import com.navercorp.pinpoint.bootstrap.interceptor.scope.ScopedStaticAroundInterceptor;
+import com.navercorp.pinpoint.bootstrap.interceptor.*;
+import com.navercorp.pinpoint.bootstrap.interceptor.scope.*;
 import com.navercorp.pinpoint.bootstrap.plugin.RequestRecorderFactory;
 import com.navercorp.pinpoint.bootstrap.plugin.monitor.DataSourceMonitorRegistry;
 import com.navercorp.pinpoint.bootstrap.plugin.monitor.metric.CustomMetricRegistry;
@@ -107,15 +67,11 @@ public class AnnotatedInterceptorFactory implements InterceptorFactory {
     }
 
     @Override
-    public Interceptor newInterceptor(Class<?> interceptorClass, Object[] providedArguments, ScopeInfo scopeInfo, InstrumentClass target, InstrumentMethod targetMethod) {
+    public Interceptor newInterceptor(Class<?> interceptorClass, Object[] providedArguments, ScopeInfo scopeInfo, MethodDescriptor methodDescriptor) {
         Objects.requireNonNull(interceptorClass, "interceptorClass");
         Objects.requireNonNull(scopeInfo, "scopeInfo");
 
         final InterceptorScope interceptorScope = scopeInfo.getInterceptorScope();
-        MethodDescriptor methodDescriptor = null;
-        if (targetMethod != null) {
-            methodDescriptor = targetMethod.getDescriptor();
-        }
         InterceptorArgumentProvider interceptorArgumentProvider = new InterceptorArgumentProvider(dataSourceMonitorRegistry,
                 customMetricRegistry, apiMetaDataService, requestRecorderFactory, interceptorScope, methodDescriptor);
 

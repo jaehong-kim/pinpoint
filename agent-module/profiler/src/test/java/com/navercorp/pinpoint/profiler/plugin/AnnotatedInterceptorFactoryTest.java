@@ -97,7 +97,7 @@ public class AnnotatedInterceptorFactoryTest {
     public void test0() {
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor0.class, null, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor0.class, null, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor0.class, interceptor.getClass());
     }
@@ -109,7 +109,7 @@ public class AnnotatedInterceptorFactoryTest {
 
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor0.class, args, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor0.class, args, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor0.class, interceptor.getClass());
         assertEquals(args[0], getField(interceptor, "field0"));
@@ -122,7 +122,7 @@ public class AnnotatedInterceptorFactoryTest {
 
             AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
             final ScopeInfo scopeInfo = newEmptyScopeInfo();
-            factory.newInterceptor(TestInterceptor0.class, args, scopeInfo, instrumentClass, instrumentMethod);
+            factory.newInterceptor(TestInterceptor0.class, args, scopeInfo, descriptor);
         });
     }
 
@@ -132,7 +132,7 @@ public class AnnotatedInterceptorFactoryTest {
 
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor1.class, args, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor1.class, args, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor1.class, interceptor.getClass());
         assertEquals(args[0], getField(interceptor, "field0"));
@@ -147,7 +147,7 @@ public class AnnotatedInterceptorFactoryTest {
 
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor1.class, args, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor1.class, args, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor1.class, interceptor.getClass());
         assertEquals(args[3], getField(interceptor, "field0"));
@@ -162,7 +162,7 @@ public class AnnotatedInterceptorFactoryTest {
 
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor1.class, args, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor1.class, args, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor1.class, interceptor.getClass());
         assertEquals(args[2], getField(interceptor, "field0"));
@@ -177,7 +177,7 @@ public class AnnotatedInterceptorFactoryTest {
 
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor1.class, args, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor1.class, args, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor1.class, interceptor.getClass());
         assertEquals(args[3], getField(interceptor, "field0"));
@@ -191,7 +191,7 @@ public class AnnotatedInterceptorFactoryTest {
         Assertions.assertThrows(PinpointException.class, () -> {
             AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
             final ScopeInfo scopeInfo = newEmptyScopeInfo();
-            factory.newInterceptor(TestInterceptor1.class, null, scopeInfo, instrumentClass, instrumentMethod);
+            factory.newInterceptor(TestInterceptor1.class, null, scopeInfo, descriptor);
         });
     }
 
@@ -200,7 +200,7 @@ public class AnnotatedInterceptorFactoryTest {
         Assertions.assertThrows(PinpointException.class, () -> {
             AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
             final ScopeInfo scopeInfo = newEmptyScopeInfo();
-            factory.newInterceptor(TestInterceptor1.class, null, scopeInfo, instrumentClass, instrumentMethod);
+            factory.newInterceptor(TestInterceptor1.class, null, scopeInfo, descriptor);
         });
     }
 
@@ -210,7 +210,7 @@ public class AnnotatedInterceptorFactoryTest {
 
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor2.class, args, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor2.class, args, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor2.class, interceptor.getClass());
         assertEquals(args[0], getField(interceptor, "field0"));
@@ -230,7 +230,7 @@ public class AnnotatedInterceptorFactoryTest {
 
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor2.class, args, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor2.class, args, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor2.class, interceptor.getClass());
         assertEquals(args[0], getField(interceptor, "field0"));
@@ -250,7 +250,7 @@ public class AnnotatedInterceptorFactoryTest {
 
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor2.class, args, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor2.class, args, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor2.class, interceptor.getClass());
         assertEquals(args[0], getField(interceptor, "field0"));
@@ -268,7 +268,7 @@ public class AnnotatedInterceptorFactoryTest {
     public void test12() throws Exception {
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor2.class, null, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor2.class, null, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor2.class, interceptor.getClass());
         assertEquals(null, getField(interceptor, "field0"));
@@ -288,7 +288,7 @@ public class AnnotatedInterceptorFactoryTest {
 
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor2.class, args, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor2.class, args, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor2.class, interceptor.getClass());
         assertEquals(args[0], getField(interceptor, "field0"));
@@ -309,7 +309,7 @@ public class AnnotatedInterceptorFactoryTest {
 
         AnnotatedInterceptorFactory factory = newAnnotatedInterceptorFactory();
         final ScopeInfo scopeInfo = newEmptyScopeInfo();
-        Interceptor interceptor = factory.newInterceptor(TestInterceptor0.class, args, scopeInfo, instrumentClass, instrumentMethod);
+        Interceptor interceptor = factory.newInterceptor(TestInterceptor0.class, args, scopeInfo, descriptor);
 
         assertEquals(TestInterceptor0.class, interceptor.getClass());
         assertEquals(arg0, getField(interceptor, "field0"));

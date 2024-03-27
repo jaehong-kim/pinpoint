@@ -16,70 +16,95 @@
 
 package com.navercorp.pinpoint.profiler.instrument;
 
-import com.navercorp.pinpoint.bootstrap.instrument.InstrumentClass;
+import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentException;
-import com.navercorp.pinpoint.bootstrap.instrument.InstrumentMethod;
 import com.navercorp.pinpoint.bootstrap.interceptor.Interceptor;
 import com.navercorp.pinpoint.profiler.instrument.classloading.InterceptorDefineClassHelper;
-import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorHolder;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorLazyLoadingSupplier;
-import com.navercorp.pinpoint.profiler.interceptor.factory.AnnotatedInterceptorFactory;
+import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorSupplier;
+import com.navercorp.pinpoint.profiler.interceptor.factory.InterceptorFactory;
 import com.navercorp.pinpoint.profiler.util.JavaAssistUtils;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.*;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 public class ASMInterceptorHolder {
     private static final String INTERCEPTOR_HOLDER_CLASS = "com/navercorp/pinpoint/profiler/instrument/interceptor/InterceptorHolder.class";
     private static final String INTERCEPTOR_HOLDER_INNER_CLASS = "com/navercorp/pinpoint/profiler/instrument/interceptor/InterceptorHolder$LazyLoading.class";
 
-    public static String getInterceptorHolderClassName(int interceptorId) {
-        return InterceptorHolder.class.getName() + "__" + interceptorId;
-    }
-
+    private final Class<? extends Interceptor> interceptorClass;
+    private final Object[] constructorArgs;
+    private final ScopeInfo scopeInfo;
     private final String className;
     private final String innerClassName;
 
+    public ASMInterceptorHolder(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, ScopeInfo scopeInfo) {
+        this.interceptorClass = interceptorClass;
+        this.constructorArgs = constructorArgs;
+        this.scopeInfo = scopeInfo;
 
-    public ASMInterceptorHolder(int interceptorId) {
-        this.className = getInterceptorHolderClassName(interceptorId);
+        this.className = toClassName();
         this.innerClassName = this.className + "$LazyLoading";
     }
 
-    public Class<? extends Interceptor> loadInterceptorClass(ClassLoader classLoader) throws InstrumentException {
+    private String toClassName() {
+        final StringBuilder builder = new StringBuilder(interceptorClass.getName());
+        if (constructorArgs != null) {
+            builder.append("$$");
+            for (int i = 0; i < constructorArgs.length; i++) {
+                if (i != 0) {
+                    builder.append("$");
+                }
+                builder.append(Type.getType(constructorArgs[i].getClass()).getClassName());
+            }
+        }
+        if (scopeInfo != null) {
+            builder.append("$$");
+            builder.append(scopeInfo.getId());
+        }
+        return builder.toString();
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+
+    public Class<? extends Interceptor> loadInterceptorClass(ClassLoader classLoader) {
         try {
             final Class<?> clazz = classLoader.loadClass(className);
             final Method method = clazz.getDeclaredMethod("get");
             final Object o = method.invoke(null);
             if (o instanceof Interceptor) {
                 return (Class<? extends Interceptor>) o.getClass();
-            } else {
-                throw new InstrumentException("not found interceptor, className=" + className);
             }
-        } catch (ClassNotFoundException e) {
-            throw new InstrumentException("not found class, className=" + className, e);
-        } catch (InvocationTargetException e) {
-            throw new InstrumentException("invocation fail, className=" + className, e);
-        } catch (NoSuchMethodException e) {
-            throw new InstrumentException("not found 'get' method, className=" + className, e);
-        } catch (IllegalAccessException e) {
-            throw new InstrumentException("access fail, className=" + className, e);
+        } catch (Exception ignored) {
+            // ClassNotFoundException
+            // InvocationTargetException
+            // NoSuchMethodException
+            // IllegalAccessException
         }
+        return null;
     }
 
-    public void init(Class<?> interceptorHolderClass, AnnotatedInterceptorFactory factory, Class<?> interceptorClass, Object[] providedArguments, ScopeInfo scopeInfo, InstrumentClass targetClass, InstrumentMethod targetMethod) throws InstrumentException {
+    public void init(Class<?> interceptorHolderClass, InterceptorFactory factory, MethodDescriptor methodDescriptor) throws InstrumentException {
+        init(interceptorHolderClass, new InterceptorLazyLoadingSupplier(factory, interceptorClass, constructorArgs, scopeInfo, methodDescriptor));
+    }
+
+    public void init(Class<?> interceptorHolderClass, Interceptor interceptor) throws InstrumentException {
+        init(interceptorHolderClass, new InterceptorSupplier(interceptor));
+    }
+
+    private void init(Class<?> interceptorHolderClass, Supplier<Interceptor> supplier) throws InstrumentException {
         try {
-            final InterceptorLazyLoadingSupplier interceptorLazyLoadingSupplier = new InterceptorLazyLoadingSupplier(factory, interceptorClass, providedArguments, scopeInfo, targetClass, targetMethod);
             final Method method = interceptorHolderClass.getDeclaredMethod("set", Supplier.class);
-            method.invoke(null, interceptorLazyLoadingSupplier);
+            method.invoke(null, supplier);
         } catch (NoSuchMethodException e) {
             throw new InstrumentException("not found 'set' method, className=" + interceptorHolderClass.getName(), e);
         } catch (IllegalAccessException e) {
@@ -88,6 +113,7 @@ public class ASMInterceptorHolder {
             throw new InstrumentException("invocation fail, className=" + interceptorHolderClass.getName(), e);
         }
     }
+
 
     public Class<?> defineClass(ClassLoader classLoader) throws InstrumentException {
         final byte[] mainClassBytes = toMainClassByteArray();
@@ -129,6 +155,74 @@ public class ASMInterceptorHolder {
         ClassNode classNode = new ClassNode();
         classReader.accept(classNode, 0);
         return classNode;
+    }
+
+    public static String create(ClassLoader classLoader, Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, ScopeInfo scopeInfo, InterceptorFactory interceptorFactory, MethodDescriptor methodDescriptor) throws InstrumentException {
+        Builder builder = new Builder(classLoader, interceptorClass, constructorArgs, scopeInfo);
+        builder.interceptorFactory(interceptorFactory, methodDescriptor);
+        return builder.build();
+    }
+
+    public static String create(ClassLoader classLoader, Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, ScopeInfo scopeInfo, Interceptor interceptor) throws InstrumentException {
+        Builder builder = new Builder(classLoader, interceptorClass, constructorArgs, scopeInfo);
+        builder.interceptor(interceptor);
+        return builder.build();
+    }
+
+    static class Builder {
+
+        static AtomicInteger createCounter = new AtomicInteger();
+        static AtomicInteger findCounter = new AtomicInteger();
+
+        private final ClassLoader classLoader;
+        private final Class<? extends Interceptor> interceptorClass;
+        private final Object[] constructorArgs;
+        private final ScopeInfo scopeInfo;
+        private InterceptorFactory interceptorFactory;
+        private MethodDescriptor methodDescriptor;
+        private Interceptor interceptor;
+
+        public Builder(ClassLoader classLoader, Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, ScopeInfo scopeInfo) {
+            this.classLoader = Objects.requireNonNull(classLoader, "classLoader");
+            this.interceptorClass = Objects.requireNonNull(interceptorClass, "interceptorClass");
+            this.constructorArgs = constructorArgs;
+            this.scopeInfo = scopeInfo;
+        }
+
+        public Builder interceptorFactory(InterceptorFactory interceptorFactory, MethodDescriptor methodDescriptor) {
+            this.interceptorFactory = interceptorFactory;
+            this.methodDescriptor = methodDescriptor;
+            return this;
+        }
+
+        public Builder interceptor(Interceptor interceptor) {
+            this.interceptor = interceptor;
+            return this;
+        }
+
+        public String build() throws InstrumentException {
+            int totalCount = createCounter.incrementAndGet();
+            final ASMInterceptorHolder holder = new ASMInterceptorHolder(interceptorClass, constructorArgs, scopeInfo);
+            final Class<? extends Interceptor> interceptorHolderClass = holder.loadInterceptorClass(classLoader);
+            if (interceptorHolderClass != null) {
+                int skipCount = findCounter.incrementAndGet();
+                System.out.println("## FIND=" + holder.getClassName() + "---- total=" + totalCount + ", skip=" + skipCount);
+                return holder.getClassName();
+            }
+
+            final Class<?> clazz = holder.defineClass(classLoader);
+            // exception handling.
+            if (interceptor != null) {
+                holder.init(clazz, interceptor);
+            } else if (interceptorFactory != null) {
+                holder.init(clazz, interceptorFactory, methodDescriptor);
+            } else {
+                throw new InstrumentException("Either interceptor or interceptorFactory must be present.");
+            }
+
+            System.out.println("## INIT=" + holder.getClassName() + "---- total=" + totalCount);
+            return holder.getClassName();
+        }
     }
 
     class RenameClassAdapter extends ClassVisitor {

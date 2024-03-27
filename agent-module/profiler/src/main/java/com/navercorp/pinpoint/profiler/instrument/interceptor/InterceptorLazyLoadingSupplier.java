@@ -16,34 +16,31 @@
 
 package com.navercorp.pinpoint.profiler.instrument.interceptor;
 
-import com.navercorp.pinpoint.bootstrap.instrument.InstrumentClass;
-import com.navercorp.pinpoint.bootstrap.instrument.InstrumentMethod;
+import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
 import com.navercorp.pinpoint.bootstrap.interceptor.Interceptor;
 import com.navercorp.pinpoint.profiler.instrument.ScopeInfo;
-import com.navercorp.pinpoint.profiler.interceptor.factory.AnnotatedInterceptorFactory;
+import com.navercorp.pinpoint.profiler.interceptor.factory.InterceptorFactory;
 
 import java.util.function.Supplier;
 
 public class InterceptorLazyLoadingSupplier implements Supplier<Interceptor> {
-    private final AnnotatedInterceptorFactory factory;
+    private final InterceptorFactory factory;
     private final Class<?> interceptorClass;
     private final Object[] providedArguments;
     private final ScopeInfo scopeInfo;
-    private final InstrumentClass targetClass;
-    private final InstrumentMethod targetMethod;
+    private final MethodDescriptor methodDescriptor;
 
-    public InterceptorLazyLoadingSupplier(AnnotatedInterceptorFactory factory, Class<?> interceptorClass, Object[] providedArguments, ScopeInfo scopeInfo, InstrumentClass targetClass, InstrumentMethod targetMethod) {
+    public InterceptorLazyLoadingSupplier(InterceptorFactory factory, Class<?> interceptorClass, Object[] providedArguments, ScopeInfo scopeInfo, MethodDescriptor methodDescriptor) {
         this.factory = factory;
         this.interceptorClass = interceptorClass;
         this.providedArguments = providedArguments;
         this.scopeInfo = scopeInfo;
-        this.targetClass = targetClass;
-        this.targetMethod = targetMethod;
+        this.methodDescriptor = methodDescriptor;
     }
 
     @Override
     public Interceptor get() {
-        final Interceptor interceptor = factory.newInterceptor(interceptorClass, providedArguments, scopeInfo, targetClass, targetMethod);
+        final Interceptor interceptor = factory.newInterceptor(interceptorClass, providedArguments, scopeInfo, methodDescriptor);
         return interceptor;
     }
 }

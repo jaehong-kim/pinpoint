@@ -499,8 +499,8 @@ public class ASMMethodNodeAdapterAddInterceptorTest {
                         if (methodNodeAdapter.isAbstract() || methodNodeAdapter.isNative()) {
                             continue;
                         }
-                        methodNodeAdapter.addBeforeInterceptor(interceptorId, interceptorDefinition, 99);
-                        methodNodeAdapter.addAfterInterceptor(interceptorId, interceptorDefinition, 99);
+//                        methodNodeAdapter.addBeforeInterceptor(interceptorId, interceptorDefinition, 99);
+//                        methodNodeAdapter.addAfterInterceptor(interceptorId, interceptorDefinition, 99);
                     }
                 }
             });

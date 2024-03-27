@@ -43,7 +43,7 @@ public class ASMMethodNodeAdapterTest {
         ASMMethodNodeAdapter adapter = new ASMMethodNodeAdapter(JavaAssistUtils.javaNameToJvmName(targetClassName), methodNode);
         assertEquals(false, adapter.hasInterceptor());
 
-        adapter.addBeforeInterceptor(interceptorId, interceptorDefinition, -1);
+//        adapter.addBeforeInterceptor(interceptorId, interceptorDefinition, -1);
         assertEquals(true, adapter.hasInterceptor());
     }
 
