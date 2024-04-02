@@ -54,7 +54,7 @@ public class ScheduleResumeInterceptor implements AroundInterceptor {
     @Override
     public void before(Object target, Object[] args) {
         if (isDebug) {
-            logger.beforeInterceptor(target, descriptor.getClassName(), descriptor.getMethodName(), descriptor.getParameterDescriptor(), args);
+            logger.beforeInterceptor(target, args);
         }
 
         final Continuation continuation = getContinuation(args);
@@ -97,7 +97,7 @@ public class ScheduleResumeInterceptor implements AroundInterceptor {
     @Override
     public void after(Object target, Object[] args, Object result, Throwable throwable) {
         if (isDebug) {
-            logger.afterInterceptor(target, descriptor.getClassName(), descriptor.getMethodName(), descriptor.getParameterDescriptor(), args, result, throwable);
+            logger.afterInterceptor(target, args, result, throwable);
         }
 
         final Continuation continuation = getContinuation(args);

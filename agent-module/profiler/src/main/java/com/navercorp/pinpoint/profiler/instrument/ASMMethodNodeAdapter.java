@@ -18,13 +18,7 @@ package com.navercorp.pinpoint.profiler.instrument;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinition;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.AnnotationNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.LineNumberNode;
-import org.objectweb.asm.tree.LocalVariableNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -116,15 +110,7 @@ public class ASMMethodNodeAdapter {
     }
 
     public int getLineNumber() {
-        AbstractInsnNode node = this.methodNode.instructions.getFirst();
-        while (node != null) {
-            if (node.getType() == AbstractInsnNode.LINE) {
-                return ((LineNumberNode) node).line;
-            }
-            node = node.getNext();
-        }
-
-        return 0;
+        return this.methodVariables.getLineNumber();
     }
 
     public List<String> getExceptions() {

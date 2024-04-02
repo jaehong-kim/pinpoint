@@ -28,15 +28,7 @@ import com.navercorp.pinpoint.bootstrap.logging.PLogger;
 import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
 import com.navercorp.pinpoint.bootstrap.plugin.ProfilerPlugin;
 import com.navercorp.pinpoint.bootstrap.plugin.ProfilerPluginSetupContext;
-import com.navercorp.pinpoint.plugin.httpclient4.interceptor.BasicFutureFailedMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient4.interceptor.BasicFutureMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient4.interceptor.DefaultClientExchangeHandlerImplStartMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient4.interceptor.DefaultHttpRequestRetryHandlerRetryRequestMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient4.interceptor.HttpAsyncClientExecuteMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient4.interceptor.HttpClientConnectionManagerConnectMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient4.interceptor.HttpRequestExecutorDoSendRequestAndDoReceiveResponseMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient4.interceptor.HttpRequestExecutorExecuteMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient4.interceptor.ManagedClientConnectionOpenMethodInterceptor;
+import com.navercorp.pinpoint.plugin.httpclient4.interceptor.*;
 
 import java.security.ProtectionDomain;
 
@@ -101,12 +93,12 @@ public class HttpClient4Plugin implements ProfilerPlugin, TransformTemplateAware
 
             InstrumentMethod doSendRequest = target.getDeclaredMethod("doSendRequest", "org.apache.http.HttpRequest", "org.apache.http.HttpClientConnection", "org.apache.http.protocol.HttpContext");
             if (doSendRequest != null) {
-                doSendRequest.addScopedInterceptor(HttpRequestExecutorDoSendRequestAndDoReceiveResponseMethodInterceptor.class, HttpClient4Constants.HTTP_CLIENT4_SCOPE, ExecutionPolicy.ALWAYS);
+                doSendRequest.addScopedInterceptor(HttpRequestExecutorDoSendRequestMethodInterceptor.class, HttpClient4Constants.HTTP_CLIENT4_SCOPE, ExecutionPolicy.ALWAYS);
             }
 
             InstrumentMethod doReceiveResponse = target.getDeclaredMethod("doReceiveResponse", "org.apache.http.HttpRequest", "org.apache.http.HttpClientConnection", "org.apache.http.protocol.HttpContext");
             if (doReceiveResponse != null) {
-                doReceiveResponse.addScopedInterceptor(HttpRequestExecutorDoSendRequestAndDoReceiveResponseMethodInterceptor.class, HttpClient4Constants.HTTP_CLIENT4_SCOPE, ExecutionPolicy.ALWAYS);
+                doReceiveResponse.addScopedInterceptor(HttpRequestExecutorDoReceiveResponseMethodInterceptor.class, HttpClient4Constants.HTTP_CLIENT4_SCOPE, ExecutionPolicy.ALWAYS);
             }
 
             return target.toBytecode();

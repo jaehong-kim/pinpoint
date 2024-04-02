@@ -30,10 +30,11 @@ public class ASMBytecodeDisassemblerTest {
     public void dumpBytecode() {
 
         ClassLoader classLoader = ClassLoaderUtils.getDefaultClassLoader();
-        byte[] classFile = BytecodeUtils.getClassFile(classLoader, "java/lang/String");
+        byte[] classFile = BytecodeUtils.getClassFile(classLoader, "com/navercorp/pinpoint/profiler/instrument/mock/MethodDescriptorAwareInterceptor");
 
         ASMBytecodeDisassembler bytecodeDisassembler = new ASMBytecodeDisassembler();
         String result = bytecodeDisassembler.dumpBytecode(classFile);
+        System.out.println(result);
 
         bytecodeDisassembler = new ASMBytecodeDisassembler(0, 0);
         String result2 = bytecodeDisassembler.dumpBytecode(classFile);

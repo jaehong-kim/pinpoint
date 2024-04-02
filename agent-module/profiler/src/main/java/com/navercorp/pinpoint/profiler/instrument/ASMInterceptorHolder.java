@@ -20,8 +20,10 @@ import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentException;
 import com.navercorp.pinpoint.bootstrap.interceptor.Interceptor;
 import com.navercorp.pinpoint.profiler.instrument.classloading.InterceptorDefineClassHelper;
+import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinition;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorLazyLoadingSupplier;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorSupplier;
+import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorType;
 import com.navercorp.pinpoint.profiler.interceptor.factory.InterceptorFactory;
 import com.navercorp.pinpoint.profiler.util.JavaAssistUtils;
 import org.objectweb.asm.*;
@@ -38,14 +40,16 @@ public class ASMInterceptorHolder {
     private static final String INTERCEPTOR_HOLDER_CLASS = "com/navercorp/pinpoint/profiler/instrument/interceptor/InterceptorHolder.class";
     private static final String INTERCEPTOR_HOLDER_INNER_CLASS = "com/navercorp/pinpoint/profiler/instrument/interceptor/InterceptorHolder$LazyLoading.class";
 
-    private final Class<? extends Interceptor> interceptorClass;
+    private final MethodDescriptor methodDescriptor;
+    private final InterceptorDefinition interceptorDefinition;
     private final Object[] constructorArgs;
     private final ScopeInfo scopeInfo;
     private final String className;
     private final String innerClassName;
 
-    public ASMInterceptorHolder(Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, ScopeInfo scopeInfo) {
-        this.interceptorClass = interceptorClass;
+    public ASMInterceptorHolder(MethodDescriptor methodDescriptor, InterceptorDefinition interceptorDefinition, Object[] constructorArgs, ScopeInfo scopeInfo) {
+        this.methodDescriptor = methodDescriptor;
+        this.interceptorDefinition = interceptorDefinition;
         this.constructorArgs = constructorArgs;
         this.scopeInfo = scopeInfo;
 
@@ -54,7 +58,7 @@ public class ASMInterceptorHolder {
     }
 
     private String toClassName() {
-        final StringBuilder builder = new StringBuilder(interceptorClass.getName());
+        final StringBuilder builder = new StringBuilder(interceptorDefinition.getInterceptorClass().getName());
         if (constructorArgs != null) {
             builder.append("$$");
             for (int i = 0; i < constructorArgs.length; i++) {
@@ -68,13 +72,17 @@ public class ASMInterceptorHolder {
             builder.append("$$");
             builder.append(scopeInfo.getId());
         }
+
+        if (interceptorDefinition.getInterceptorType() != InterceptorType.API_ID_AWARE || interceptorDefinition.getInterceptorType() != InterceptorType.METHOD_DESC_AWARE) {
+            builder.append("$$");
+            builder.append(methodDescriptor.getApiDescriptor().replaceAll("[\\(\\) ]", "\\$"));
+        }
         return builder.toString();
     }
 
     public String getClassName() {
         return className;
     }
-
 
     public Class<? extends Interceptor> loadInterceptorClass(ClassLoader classLoader) {
         try {
@@ -94,7 +102,7 @@ public class ASMInterceptorHolder {
     }
 
     public void init(Class<?> interceptorHolderClass, InterceptorFactory factory, MethodDescriptor methodDescriptor) throws InstrumentException {
-        init(interceptorHolderClass, new InterceptorLazyLoadingSupplier(factory, interceptorClass, constructorArgs, scopeInfo, methodDescriptor));
+        init(interceptorHolderClass, new InterceptorLazyLoadingSupplier(factory, interceptorDefinition.getInterceptorClass(), constructorArgs, scopeInfo, methodDescriptor));
     }
 
     public void init(Class<?> interceptorHolderClass, Interceptor interceptor) throws InstrumentException {
@@ -157,14 +165,14 @@ public class ASMInterceptorHolder {
         return classNode;
     }
 
-    public static String create(ClassLoader classLoader, Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, ScopeInfo scopeInfo, InterceptorFactory interceptorFactory, MethodDescriptor methodDescriptor) throws InstrumentException {
-        Builder builder = new Builder(classLoader, interceptorClass, constructorArgs, scopeInfo);
-        builder.interceptorFactory(interceptorFactory, methodDescriptor);
+    public static String create(ClassLoader classLoader, MethodDescriptor methodDescriptor, InterceptorDefinition interceptorDefinition, Object[] constructorArgs, ScopeInfo scopeInfo, InterceptorFactory interceptorFactory) throws InstrumentException {
+        Builder builder = new Builder(classLoader, methodDescriptor, interceptorDefinition, constructorArgs, scopeInfo);
+        builder.interceptorFactory(interceptorFactory);
         return builder.build();
     }
 
-    public static String create(ClassLoader classLoader, Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, ScopeInfo scopeInfo, Interceptor interceptor) throws InstrumentException {
-        Builder builder = new Builder(classLoader, interceptorClass, constructorArgs, scopeInfo);
+    public static String create(ClassLoader classLoader, MethodDescriptor methodDescriptor, InterceptorDefinition interceptorDefinition, Object[] constructorArgs, ScopeInfo scopeInfo, Interceptor interceptor) throws InstrumentException {
+        Builder builder = new Builder(classLoader, methodDescriptor, interceptorDefinition, constructorArgs, scopeInfo);
         builder.interceptor(interceptor);
         return builder.build();
     }
@@ -175,23 +183,24 @@ public class ASMInterceptorHolder {
         static AtomicInteger findCounter = new AtomicInteger();
 
         private final ClassLoader classLoader;
-        private final Class<? extends Interceptor> interceptorClass;
+        private final MethodDescriptor methodDescriptor;
+        private InterceptorDefinition interceptorDefinition;
         private final Object[] constructorArgs;
         private final ScopeInfo scopeInfo;
         private InterceptorFactory interceptorFactory;
-        private MethodDescriptor methodDescriptor;
+
         private Interceptor interceptor;
 
-        public Builder(ClassLoader classLoader, Class<? extends Interceptor> interceptorClass, Object[] constructorArgs, ScopeInfo scopeInfo) {
+        public Builder(ClassLoader classLoader, MethodDescriptor methodDescriptor, InterceptorDefinition interceptorDefinition, Object[] constructorArgs, ScopeInfo scopeInfo) {
             this.classLoader = Objects.requireNonNull(classLoader, "classLoader");
-            this.interceptorClass = Objects.requireNonNull(interceptorClass, "interceptorClass");
+            this.methodDescriptor = Objects.requireNonNull(methodDescriptor, "methodDescriptor");
+            this.interceptorDefinition = Objects.requireNonNull(interceptorDefinition, "interceptorDefinition");
             this.constructorArgs = constructorArgs;
             this.scopeInfo = scopeInfo;
         }
 
-        public Builder interceptorFactory(InterceptorFactory interceptorFactory, MethodDescriptor methodDescriptor) {
+        public Builder interceptorFactory(InterceptorFactory interceptorFactory) {
             this.interceptorFactory = interceptorFactory;
-            this.methodDescriptor = methodDescriptor;
             return this;
         }
 
@@ -202,7 +211,7 @@ public class ASMInterceptorHolder {
 
         public String build() throws InstrumentException {
             int totalCount = createCounter.incrementAndGet();
-            final ASMInterceptorHolder holder = new ASMInterceptorHolder(interceptorClass, constructorArgs, scopeInfo);
+            final ASMInterceptorHolder holder = new ASMInterceptorHolder(methodDescriptor, interceptorDefinition, constructorArgs, scopeInfo);
             final Class<? extends Interceptor> interceptorHolderClass = holder.loadInterceptorClass(classLoader);
             if (interceptorHolderClass != null) {
                 int skipCount = findCounter.incrementAndGet();

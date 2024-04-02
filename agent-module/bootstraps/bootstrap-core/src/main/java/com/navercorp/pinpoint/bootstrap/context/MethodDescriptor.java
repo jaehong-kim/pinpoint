@@ -21,6 +21,7 @@ package com.navercorp.pinpoint.bootstrap.context;
  * @author jaehong.kim
  */
 public interface MethodDescriptor {
+
     String getMethodName();
 
     String getClassName();

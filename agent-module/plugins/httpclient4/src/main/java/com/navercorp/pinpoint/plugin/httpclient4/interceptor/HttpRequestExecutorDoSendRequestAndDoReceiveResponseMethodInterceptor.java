@@ -29,7 +29,7 @@ import com.navercorp.pinpoint.plugin.httpclient4.HttpCallContext;
 /**
  * @author jaehong.kim
  */
-public class HttpRequestExecutorDoSendRequestAndDoReceiveResponseMethodInterceptor implements AroundInterceptor {
+public abstract class HttpRequestExecutorDoSendRequestAndDoReceiveResponseMethodInterceptor implements AroundInterceptor {
 
     private final PLogger logger = PLoggerFactory.getLogger(this.getClass());
     private final boolean isDebug = logger.isDebugEnabled();
@@ -38,6 +38,9 @@ public class HttpRequestExecutorDoSendRequestAndDoReceiveResponseMethodIntercept
     private final MethodDescriptor methodDescriptor;
     private final InterceptorScope interceptorScope;
 
+    abstract void recordBegin(HttpCallContext httpCallContext);
+
+    abstract void recordEnd(HttpCallContext httpCallContext, Throwable throwable);
 
     public HttpRequestExecutorDoSendRequestAndDoReceiveResponseMethodInterceptor(TraceContext traceContext, MethodDescriptor methodDescriptor, InterceptorScope interceptorScope) {
         this.traceContext = traceContext;
@@ -60,11 +63,7 @@ public class HttpRequestExecutorDoSendRequestAndDoReceiveResponseMethodIntercept
         final Object attachment = getAttachment(invocation);
         if (attachment instanceof HttpCallContext) {
             HttpCallContext callContext = (HttpCallContext) attachment;
-            if (methodDescriptor.getMethodName().equals("doSendRequest")) {
-                callContext.setWriteBeginTime(System.currentTimeMillis());
-            } else {
-                callContext.setReadBeginTime(System.currentTimeMillis());
-            }
+            recordBegin(callContext);
             if(isDebug) {
                 logger.debug("Set call context {}", callContext);
             }
@@ -86,13 +85,7 @@ public class HttpRequestExecutorDoSendRequestAndDoReceiveResponseMethodIntercept
         final Object attachment = getAttachment(invocation);
         if (attachment instanceof HttpCallContext) {
             HttpCallContext callContext = (HttpCallContext) attachment;
-            if (methodDescriptor.getMethodName().equals("doSendRequest")) {
-                callContext.setWriteEndTime(System.currentTimeMillis());
-                callContext.setWriteFail(throwable != null);
-            } else {
-                callContext.setReadEndTime(System.currentTimeMillis());
-                callContext.setReadFail(throwable != null);
-            }
+            recordEnd(callContext, throwable);
             if (isDebug) {
                 logger.debug("Set call context {}", callContext);
             }

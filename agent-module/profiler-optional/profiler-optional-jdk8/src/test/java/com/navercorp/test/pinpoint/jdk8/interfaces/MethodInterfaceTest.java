@@ -16,8 +16,10 @@
 
 package com.navercorp.test.pinpoint.jdk8.interfaces;
 
+import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentContext;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentException;
+import com.navercorp.pinpoint.profiler.context.DefaultMethodDescriptor;
 import com.navercorp.pinpoint.profiler.instrument.*;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinition;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinitionFactory;
@@ -100,7 +102,8 @@ public class MethodInterfaceTest {
                     }
 
                     try {
-                        String interceptorId = ASMInterceptorHolder.create(classLoader, SimpleInterceptor.class, null, null, new SimpleInterceptor());
+                        MethodDescriptor methodDescriptor = new DefaultMethodDescriptor(classNode.name, methodNode.name, methodNodeAdapter.getParameterTypes(), methodNodeAdapter.getParameterNames(), methodNodeAdapter.getLineNumber());
+                        String interceptorId = ASMInterceptorHolder.create(classLoader, methodDescriptor, interceptorDefinition, null, null, new SimpleInterceptor());
                         methodNodeAdapter.addBeforeInterceptor(interceptorId, interceptorDefinition, 99);
                         logger.debug("Add before interceptor in method={}", methodNode.name);
                         methodNodeAdapter.addAfterInterceptor(interceptorId, interceptorDefinition, 99);

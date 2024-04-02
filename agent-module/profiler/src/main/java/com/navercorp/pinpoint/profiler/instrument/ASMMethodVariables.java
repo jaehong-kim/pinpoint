@@ -15,6 +15,8 @@
  */
 package com.navercorp.pinpoint.profiler.instrument;
 
+import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
+import com.navercorp.pinpoint.bootstrap.context.MethodDescriptorFactory;
 import com.navercorp.pinpoint.bootstrap.interceptor.Interceptor;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinition;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorType;
@@ -22,17 +24,7 @@ import com.navercorp.pinpoint.profiler.util.JavaAssistUtils;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.LocalVariableNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -58,6 +50,7 @@ public class ASMMethodVariables {
     private static final Type DOUBLE_TYPE = Type.getObjectType("java/lang/Double");
 
     private static final Type OBJECT_TYPE = Type.getObjectType("java/lang/Object");
+    private static final Type STRING_TYPE = Type.getObjectType("java/lang/String");
 
     private static final Comparator<LocalVariableNode> INDEX_COMPARATOR = new Comparator<LocalVariableNode>() {
         @Override
@@ -91,6 +84,10 @@ public class ASMMethodVariables {
     private int methodNameVarIndex;
     private int parameterDescriptionVarIndex;
     private int apiIdVarIndex;
+    private int parameterTypesVarIndex;
+    private int parameterVariableNamesVarIndex;
+    private int lineNumberVarIndex;
+    private int methodDescriptorVarIndex;
 
     private int resultVarIndex;
     private int throwableVarIndex;
@@ -165,6 +162,18 @@ public class ASMMethodVariables {
         }
 
         return names;
+    }
+
+    public int getLineNumber() {
+        AbstractInsnNode node = this.methodNode.instructions.getFirst();
+        while (node != null) {
+            if (node.getType() == AbstractInsnNode.LINE) {
+                return ((LineNumberNode) node).line;
+            }
+            node = node.getNext();
+        }
+
+        return 0;
     }
 
     public String getReturnType() {
@@ -266,6 +275,15 @@ public class ASMMethodVariables {
                     initArg4Var(instructions);
                 }
             }
+        } else if (interceptorType == InterceptorType.METHOD_DESC_AWARE) {
+            // Object target, String declaringClassInternalName, String methodName, String[] parameterTypes, String[] parameterVariableName, int lineNumber
+            initClassNameVar(instructions);
+            initMethodNameVar(instructions);
+            initParameterTypesVar(instructions);
+            initParameterVariableNamesVar(instructions);
+            initLineNumberVar(instructions);
+            initMethodDescriptorVar(instructions);
+            initArgsVar(instructions);
         }
 
         return true;
@@ -383,6 +401,39 @@ public class ASMMethodVariables {
         storeVar(instructions, this.arg4VarIndex);
     }
 
+    private void initParameterTypesVar(InsnList instructions) {
+        assertInitializedInterceptorLocalVariables();
+        this.parameterTypesVarIndex = addInterceptorLocalVariable("_$PINPOINT$_parameterTypes", "[Ljava/lang/String;");
+        loadStringArrayVar(instructions, getParameterTypes());
+        storeVar(instructions, this.parameterTypesVarIndex);
+    }
+
+    private void initParameterVariableNamesVar(InsnList instructions) {
+        assertInitializedInterceptorLocalVariables();
+        this.parameterVariableNamesVarIndex = addInterceptorLocalVariable("_$PINPOINT$_parameterVariableNames", "[Ljava/lang/String;");
+        loadStringArrayVar(instructions, getParameterNames());
+        storeVar(instructions, this.parameterVariableNamesVarIndex);
+    }
+
+    private void initLineNumberVar(InsnList instructions) {
+        assertInitializedInterceptorLocalVariables();
+        this.lineNumberVarIndex = addInterceptorLocalVariable("_$PINPOINT$_lineNumber", "I");
+        push(instructions, getLineNumber());
+        storeInt(instructions, this.lineNumberVarIndex);
+    }
+
+    private void initMethodDescriptorVar(InsnList instructions) {
+        assertInitializedInterceptorLocalVariables();
+        this.methodDescriptorVarIndex = addInterceptorLocalVariable("_$PINPOINT$_methodDescriptor", "Lcom/navercorp/pinpoint/bootstrap/context/MethodDescriptor;");
+        loadVar(instructions, this.classNameVarIndex);
+        loadVar(instructions, this.methodNameVarIndex);
+        loadVar(instructions, this.parameterTypesVarIndex);
+        loadVar(instructions, this.parameterVariableNamesVarIndex);
+        loadInt(instructions, this.lineNumberVarIndex);
+        instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Type.getInternalName(MethodDescriptorFactory.class), "get", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;I)" + Type.getDescriptor(MethodDescriptor.class), false));
+        storeVar(instructions, this.methodDescriptorVarIndex);
+    }
+
     int getInterceptorParameterCount(final InterceptorDefinition interceptorDefinition) {
         if (interceptorDefinition.getBeforeMethod() != null) {
             // skip this.
@@ -464,6 +515,10 @@ public class ASMMethodVariables {
             for (; i <= interceptorMethodParameterCount; i++) {
                 loadNull(instructions);
             }
+        } else if (interceptorType == InterceptorType.METHOD_DESC_AWARE) {
+            // Object target, MethodDescriptor methodDescriptor, Object[] args
+            loadVar(instructions, this.methodDescriptorVarIndex);
+            loadVar(instructions, this.argsVarIndex);
         }
 
         if (after) {
@@ -674,6 +729,30 @@ public class ASMMethodVariables {
     void invokeConstructor(final InsnList instructions, final Type type, final Method method) {
         String owner = type.getSort() == Type.ARRAY ? type.getDescriptor() : type.getInternalName();
         instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, owner, method.getName(), method.getDescriptor(), false));
+    }
+
+    void loadStringArrayVar(final InsnList instructions, String[] array) {
+        if (array == null || array.length == 0) {
+            // null.
+            loadNull(instructions);
+            return;
+        }
+
+        push(instructions, array.length);
+        // new array
+        newArray(instructions, STRING_TYPE);
+        for (int i = 0; i < array.length; i++) {
+            dup(instructions);
+            push(instructions, i);
+            // loadArg
+            loadString(instructions, array[i]);
+            // arrayStore
+            arrayStore(instructions, STRING_TYPE);
+        }
+    }
+
+    void loadString(final InsnList instructions, String value) {
+        instructions.add(new LdcInsnNode(value));
     }
 
 

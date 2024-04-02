@@ -243,6 +243,7 @@ public class ASMClassNodeAdapterTest {
                 classNodeAdapter.copyMethod(adapter);
             }
         });
+        testClassLoader.setTrace(true);
         Class<?> clazz = testClassLoader.loadClass(targetClassName);
         Method method = clazz.getDeclaredMethod("arg");
         method.invoke(clazz.newInstance());

@@ -27,11 +27,7 @@ import com.navercorp.pinpoint.bootstrap.logging.PLogger;
 import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
 import com.navercorp.pinpoint.bootstrap.plugin.ProfilerPlugin;
 import com.navercorp.pinpoint.bootstrap.plugin.ProfilerPluginSetupContext;
-import com.navercorp.pinpoint.plugin.httpclient3.interceptor.ExecuteInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient3.interceptor.HttpConnectionOpenMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient3.interceptor.HttpMethodBaseExecuteMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient3.interceptor.HttpMethodBaseRequestAndResponseMethodInterceptor;
-import com.navercorp.pinpoint.plugin.httpclient3.interceptor.RetryMethodInterceptor;
+import com.navercorp.pinpoint.plugin.httpclient3.interceptor.*;
 
 import java.security.ProtectionDomain;
 
@@ -158,12 +154,12 @@ public class HttpClient3Plugin implements ProfilerPlugin, TransformTemplateAware
             if (config.isIo()) {
                 final InstrumentMethod writeRequest = target.getDeclaredMethod("writeRequest", "org.apache.commons.httpclient.HttpState", "org.apache.commons.httpclient.HttpConnection");
                 if (writeRequest != null) {
-                    writeRequest.addScopedInterceptor(HttpMethodBaseRequestAndResponseMethodInterceptor.class, HttpClient3Constants.HTTP_CLIENT3_METHOD_BASE_SCOPE, ExecutionPolicy.ALWAYS);
+                    writeRequest.addScopedInterceptor(HttpMethodBaseWriteRequestMethodInterceptor.class, HttpClient3Constants.HTTP_CLIENT3_METHOD_BASE_SCOPE, ExecutionPolicy.ALWAYS);
                 }
 
                 final InstrumentMethod readResponse = target.getDeclaredMethod("readResponse", "org.apache.commons.httpclient.HttpState", "org.apache.commons.httpclient.HttpConnection");
                 if (readResponse != null) {
-                    readResponse.addScopedInterceptor(HttpMethodBaseRequestAndResponseMethodInterceptor.class, HttpClient3Constants.HTTP_CLIENT3_METHOD_BASE_SCOPE, ExecutionPolicy.ALWAYS);
+                    readResponse.addScopedInterceptor(HttpMethodBaseReadResponseMethodInterceptor.class, HttpClient3Constants.HTTP_CLIENT3_METHOD_BASE_SCOPE, ExecutionPolicy.ALWAYS);
                 }
             }
 

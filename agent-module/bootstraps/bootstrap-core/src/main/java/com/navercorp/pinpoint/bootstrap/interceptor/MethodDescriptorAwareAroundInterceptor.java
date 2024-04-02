@@ -1,11 +1,11 @@
 /*
- * Copyright 2014 NAVER Corp.
+ * Copyright 2024 NAVER Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.navercorp.pinpoint.profiler.instrument.interceptor;
+package com.navercorp.pinpoint.bootstrap.interceptor;
 
-/**
- * @author Woonduk Kang(emeroad)
- */
-public enum InterceptorType {
-    ARRAY_ARGS, STATIC, BASIC, API_ID_AWARE, METHOD_DESC_AWARE
+import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
+
+public interface MethodDescriptorAwareAroundInterceptor extends Interceptor {
+    void before(Object target, MethodDescriptor methodDescriptor, Object[] args);
+
+    void after(Object target, MethodDescriptor methodDescriptor, Object[] args, Object result, Throwable throwable);
 }

@@ -16,32 +16,18 @@
 
 package com.navercorp.pinpoint.plugin.jdk.http.interceptor;
 
-import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
-import com.navercorp.pinpoint.bootstrap.context.SpanEventRecorder;
-import com.navercorp.pinpoint.bootstrap.context.Trace;
-import com.navercorp.pinpoint.bootstrap.context.TraceContext;
-import com.navercorp.pinpoint.bootstrap.context.TraceId;
+import com.navercorp.pinpoint.bootstrap.context.*;
 import com.navercorp.pinpoint.bootstrap.context.scope.TraceScope;
 import com.navercorp.pinpoint.bootstrap.interceptor.AroundInterceptor;
 import com.navercorp.pinpoint.bootstrap.interceptor.scope.InterceptorScope;
 import com.navercorp.pinpoint.bootstrap.interceptor.scope.InterceptorScopeInvocation;
 import com.navercorp.pinpoint.bootstrap.logging.PLogger;
 import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
-import com.navercorp.pinpoint.bootstrap.plugin.request.ClientHeaderAdaptor;
-import com.navercorp.pinpoint.bootstrap.plugin.request.ClientRequestAdaptor;
-import com.navercorp.pinpoint.bootstrap.plugin.request.ClientRequestRecorder;
-import com.navercorp.pinpoint.bootstrap.plugin.request.DefaultRequestTraceWriter;
-import com.navercorp.pinpoint.bootstrap.plugin.request.RequestTraceWriter;
+import com.navercorp.pinpoint.bootstrap.plugin.request.*;
 import com.navercorp.pinpoint.bootstrap.plugin.response.ResponseHeaderRecorderFactory;
 import com.navercorp.pinpoint.bootstrap.plugin.response.ServerResponseHeaderRecorder;
 import com.navercorp.pinpoint.bootstrap.util.ScopeUtils;
-import com.navercorp.pinpoint.plugin.jdk.http.ConnectingGetter;
-import com.navercorp.pinpoint.plugin.jdk.http.HttpURLConnectionClientHeaderAdaptor;
-import com.navercorp.pinpoint.plugin.jdk.http.JdkHttpClientRequestAdaptor;
-import com.navercorp.pinpoint.plugin.jdk.http.JdkHttpClientResponseAdaptor;
-import com.navercorp.pinpoint.plugin.jdk.http.JdkHttpConstants;
-import com.navercorp.pinpoint.plugin.jdk.http.JdkHttpPlugin;
-import com.navercorp.pinpoint.plugin.jdk.http.JdkHttpPluginConfig;
+import com.navercorp.pinpoint.plugin.jdk.http.*;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -64,6 +50,12 @@ public abstract class AbstractHttpURLConnectionInterceptor implements AroundInte
     private final ServerResponseHeaderRecorder<HttpURLConnection> responseHeaderRecorder;
 
     private final RequestTraceWriter<HttpURLConnection> requestTraceWriter;
+
+    abstract boolean isInterceptingGetInputStream();
+
+    abstract boolean isInterceptingConnect();
+
+    abstract boolean isInterceptingHttps();
 
     public AbstractHttpURLConnectionInterceptor(TraceContext traceContext, MethodDescriptor descriptor, InterceptorScope scope) {
         this.traceContext = traceContext;
@@ -189,18 +181,6 @@ public abstract class AbstractHttpURLConnectionInterceptor implements AroundInte
             }
         }
         return null;
-    }
-
-    private boolean isInterceptingGetInputStream() {
-        return "getInputStream".contentEquals(this.descriptor.getMethodName());
-    }
-
-    private boolean isInterceptingConnect() {
-        return "connect".contentEquals(this.descriptor.getMethodName());
-    }
-
-    private boolean isInterceptingHttps() {
-        return JdkHttpPlugin.INTERCEPT_HTTPS_CLASS_NAME.contentEquals(this.descriptor.getClassName());
     }
 
     private boolean isRecordingResponse(Trace trace) {

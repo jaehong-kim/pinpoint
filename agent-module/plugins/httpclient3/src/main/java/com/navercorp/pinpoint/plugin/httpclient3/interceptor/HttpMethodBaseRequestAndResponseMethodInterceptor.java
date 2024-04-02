@@ -31,7 +31,7 @@ import java.util.Objects;
 /**
  * @author jaehong.kim
  */
-public class HttpMethodBaseRequestAndResponseMethodInterceptor implements AroundInterceptor {
+public abstract class HttpMethodBaseRequestAndResponseMethodInterceptor implements AroundInterceptor {
 
     private final PLogger logger = PLoggerFactory.getLogger(this.getClass());
     private final boolean isDebug = logger.isDebugEnabled();
@@ -40,17 +40,19 @@ public class HttpMethodBaseRequestAndResponseMethodInterceptor implements Around
     private final MethodDescriptor methodDescriptor;
     private final InterceptorScope interceptorScope;
 
+    abstract void recordBegin(HttpClient3CallContext callContext);
+    abstract void recordEnd(HttpClient3CallContext callContext, Throwable throwable);
 
     public HttpMethodBaseRequestAndResponseMethodInterceptor(TraceContext traceContext, MethodDescriptor methodDescriptor, InterceptorScope interceptorScope) {
         this.traceContext = Objects.requireNonNull(traceContext, "traceContext");
         this.methodDescriptor = Objects.requireNonNull(methodDescriptor, "methodDescriptor");
         this.interceptorScope = Objects.requireNonNull(interceptorScope, "interceptorScope");
     }
-    
+
     @Override
     public void before(Object target, Object[] args) {
         if (isDebug) {
-            logger.beforeInterceptor(target, methodDescriptor.getClassName(), methodDescriptor.getMethodName(), "", args);
+            logger.beforeInterceptor(target, args);
         }
 
         final Trace trace = traceContext.currentTraceObject();
@@ -62,11 +64,7 @@ public class HttpMethodBaseRequestAndResponseMethodInterceptor implements Around
         final Object attachment = getAttachment(invocation);
         if (attachment instanceof HttpClient3CallContext) {
             HttpClient3CallContext callContext = (HttpClient3CallContext) attachment;
-            if (methodDescriptor.getMethodName().equals("writeRequest")) {
-                callContext.setWriteBeginTime(System.currentTimeMillis());
-            } else {
-                callContext.setReadBeginTime(System.currentTimeMillis());
-            }
+            recordBegin(callContext);
             logger.debug("Set call context {}", callContext);
         }
     }
@@ -74,7 +72,7 @@ public class HttpMethodBaseRequestAndResponseMethodInterceptor implements Around
     @Override
     public void after(Object target, Object[] args, Object result, Throwable throwable) {
         if (isDebug) {
-            logger.afterInterceptor(target, methodDescriptor.getClassName(), methodDescriptor.getMethodName(), "", args, result, throwable);
+            logger.afterInterceptor(target, args);
         }
 
         final Trace trace = traceContext.currentTraceObject();
@@ -86,13 +84,7 @@ public class HttpMethodBaseRequestAndResponseMethodInterceptor implements Around
         final Object attachment = getAttachment(invocation);
         if (attachment instanceof HttpClient3CallContext) {
             HttpClient3CallContext callContext = (HttpClient3CallContext) attachment;
-            if (methodDescriptor.getMethodName().equals("writeRequest")) {
-                callContext.setWriteEndTime(System.currentTimeMillis());
-                callContext.setWriteFail(throwable != null);
-            } else {
-                callContext.setReadEndTime(System.currentTimeMillis());
-                callContext.setReadFail(throwable != null);
-            }
+            recordEnd(callContext, throwable);
             logger.debug("Set call context {}", callContext);
         }
     }
