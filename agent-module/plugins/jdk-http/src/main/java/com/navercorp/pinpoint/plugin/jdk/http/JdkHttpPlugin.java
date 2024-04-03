@@ -28,8 +28,7 @@ import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
 import com.navercorp.pinpoint.bootstrap.plugin.ProfilerPlugin;
 import com.navercorp.pinpoint.bootstrap.plugin.ProfilerPluginSetupContext;
 import com.navercorp.pinpoint.bootstrap.plugin.util.InstrumentUtils;
-import com.navercorp.pinpoint.plugin.jdk.http.interceptor.HttpURLConnectionInterceptor;
-import com.navercorp.pinpoint.plugin.jdk.http.interceptor.HttpsURLConnectionImplInterceptor;
+import com.navercorp.pinpoint.plugin.jdk.http.interceptor.*;
 
 import java.security.ProtectionDomain;
 
@@ -71,13 +70,13 @@ public class JdkHttpPlugin implements ProfilerPlugin, TransformTemplateAware {
             }
 
             final InstrumentMethod connectMethod = InstrumentUtils.findMethod(target, "connect");
-            connectMethod.addScopedInterceptor(HttpURLConnectionInterceptor.class, "HttpURLConnectionConnect", ExecutionPolicy.ALWAYS);
+            connectMethod.addScopedInterceptor(HttpURLConnectionConnectInterceptor.class, "HttpURLConnectionConnect", ExecutionPolicy.ALWAYS);
 
             final InstrumentMethod getInputStreamMethod = InstrumentUtils.findMethod(target, "getInputStream");
-            getInputStreamMethod.addScopedInterceptor(HttpURLConnectionInterceptor.class, "HttpURLConnectionInput", ExecutionPolicy.BOUNDARY);
+            getInputStreamMethod.addScopedInterceptor(HttpURLConnectionGetInputStreamInterceptor.class, "HttpURLConnectionInput", ExecutionPolicy.BOUNDARY);
 
             final InstrumentMethod getOutputStreamMethod = InstrumentUtils.findMethod(target, "getOutputStream");
-            getOutputStreamMethod.addScopedInterceptor(HttpURLConnectionInterceptor.class, "HttpURLConnectionOutput", ExecutionPolicy.BOUNDARY);
+            getOutputStreamMethod.addScopedInterceptor(HttpURLConnectionGetOutputStreamInterceptor.class, "HttpURLConnectionOutput", ExecutionPolicy.BOUNDARY);
 
             return target.toBytecode();
         }
@@ -92,13 +91,13 @@ public class JdkHttpPlugin implements ProfilerPlugin, TransformTemplateAware {
             target.addGetter(DelegateGetter.class, "delegate");
 
             final InstrumentMethod connectMethod = InstrumentUtils.findMethod(target, "connect");
-            connectMethod.addScopedInterceptor(HttpsURLConnectionImplInterceptor.class, "HttpURLConnectionConnect", ExecutionPolicy.ALWAYS);
+            connectMethod.addScopedInterceptor(HttpsURLConnectionImplConnectInterceptor.class, "HttpURLConnectionConnect", ExecutionPolicy.ALWAYS);
 
             final InstrumentMethod getInputStreamMethod = InstrumentUtils.findMethod(target, "getInputStream");
-            getInputStreamMethod.addScopedInterceptor(HttpsURLConnectionImplInterceptor.class, "HttpURLConnectionInput", ExecutionPolicy.BOUNDARY);
+            getInputStreamMethod.addScopedInterceptor(HttpsURLConnectionImplGetInputStreamInterceptor.class, "HttpURLConnectionInput", ExecutionPolicy.BOUNDARY);
 
             final InstrumentMethod getOutputStreamMethod = InstrumentUtils.findMethod(target, "getOutputStream");
-            getOutputStreamMethod.addScopedInterceptor(HttpsURLConnectionImplInterceptor.class, "HttpURLConnectionOutput", ExecutionPolicy.BOUNDARY);
+            getOutputStreamMethod.addScopedInterceptor(HttpsURLConnectionImplGetOutputStreamInterceptor.class, "HttpURLConnectionOutput", ExecutionPolicy.BOUNDARY);
 
             return target.toBytecode();
         }

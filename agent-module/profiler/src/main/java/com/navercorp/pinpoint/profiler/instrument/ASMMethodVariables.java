@@ -16,7 +16,7 @@
 package com.navercorp.pinpoint.profiler.instrument;
 
 import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
-import com.navercorp.pinpoint.bootstrap.context.MethodDescriptorFactory;
+import com.navercorp.pinpoint.bootstrap.context.MethodDescriptorHelper;
 import com.navercorp.pinpoint.bootstrap.interceptor.Interceptor;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinition;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorType;
@@ -87,6 +87,7 @@ public class ASMMethodVariables {
     private int parameterTypesVarIndex;
     private int parameterVariableNamesVarIndex;
     private int lineNumberVarIndex;
+    private int fullNameVarIndex;
     private int methodDescriptorVarIndex;
 
     private int resultVarIndex;
@@ -195,6 +196,20 @@ public class ASMMethodVariables {
         return false;
     }
 
+    public String getFullName() {
+        StringBuilder builder = new StringBuilder(256);
+        builder.append(JavaAssistUtils.jvmNameToJavaName(this.declaringClassInternalName));
+        builder.append('.');
+        builder.append(this.methodNode.name);
+        builder.append(this.methodNode.desc);
+        final int lineNumber = getLineNumber();
+        if (lineNumber != -1) {
+            builder.append(':');
+            builder.append(lineNumber);
+        }
+        return builder.toString();
+    }
+
     // new method only.
     public void initLocalVariables(final InsnList instructions) {
         // find enter & exit instruction.
@@ -276,12 +291,8 @@ public class ASMMethodVariables {
                 }
             }
         } else if (interceptorType == InterceptorType.METHOD_DESC_AWARE) {
-            // Object target, String declaringClassInternalName, String methodName, String[] parameterTypes, String[] parameterVariableName, int lineNumber
-            initClassNameVar(instructions);
-            initMethodNameVar(instructions);
-            initParameterTypesVar(instructions);
-            initParameterVariableNamesVar(instructions);
-            initLineNumberVar(instructions);
+            // Object target, MethodDescriptor methodDescriptor, Object[] args
+            initFullNameVar(instructions);
             initMethodDescriptorVar(instructions);
             initArgsVar(instructions);
         }
@@ -401,36 +412,18 @@ public class ASMMethodVariables {
         storeVar(instructions, this.arg4VarIndex);
     }
 
-    private void initParameterTypesVar(InsnList instructions) {
+    private void initFullNameVar(InsnList instructions) {
         assertInitializedInterceptorLocalVariables();
-        this.parameterTypesVarIndex = addInterceptorLocalVariable("_$PINPOINT$_parameterTypes", "[Ljava/lang/String;");
-        loadStringArrayVar(instructions, getParameterTypes());
-        storeVar(instructions, this.parameterTypesVarIndex);
-    }
-
-    private void initParameterVariableNamesVar(InsnList instructions) {
-        assertInitializedInterceptorLocalVariables();
-        this.parameterVariableNamesVarIndex = addInterceptorLocalVariable("_$PINPOINT$_parameterVariableNames", "[Ljava/lang/String;");
-        loadStringArrayVar(instructions, getParameterNames());
-        storeVar(instructions, this.parameterVariableNamesVarIndex);
-    }
-
-    private void initLineNumberVar(InsnList instructions) {
-        assertInitializedInterceptorLocalVariables();
-        this.lineNumberVarIndex = addInterceptorLocalVariable("_$PINPOINT$_lineNumber", "I");
-        push(instructions, getLineNumber());
-        storeInt(instructions, this.lineNumberVarIndex);
+        this.fullNameVarIndex = addInterceptorLocalVariable("_$PINPOINT$_fullName", "Ljava/lang/String;");
+        push(instructions, getFullName());
+        storeVar(instructions, this.fullNameVarIndex);
     }
 
     private void initMethodDescriptorVar(InsnList instructions) {
         assertInitializedInterceptorLocalVariables();
         this.methodDescriptorVarIndex = addInterceptorLocalVariable("_$PINPOINT$_methodDescriptor", "Lcom/navercorp/pinpoint/bootstrap/context/MethodDescriptor;");
-        loadVar(instructions, this.classNameVarIndex);
-        loadVar(instructions, this.methodNameVarIndex);
-        loadVar(instructions, this.parameterTypesVarIndex);
-        loadVar(instructions, this.parameterVariableNamesVarIndex);
-        loadInt(instructions, this.lineNumberVarIndex);
-        instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Type.getInternalName(MethodDescriptorFactory.class), "get", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;I)" + Type.getDescriptor(MethodDescriptor.class), false));
+        loadVar(instructions, this.fullNameVarIndex);
+        instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, Type.getInternalName(MethodDescriptorHelper.class), "fullName", "(Ljava/lang/String;)" + Type.getDescriptor(MethodDescriptor.class), false));
         storeVar(instructions, this.methodDescriptorVarIndex);
     }
 
@@ -730,31 +723,6 @@ public class ASMMethodVariables {
         String owner = type.getSort() == Type.ARRAY ? type.getDescriptor() : type.getInternalName();
         instructions.add(new MethodInsnNode(Opcodes.INVOKESPECIAL, owner, method.getName(), method.getDescriptor(), false));
     }
-
-    void loadStringArrayVar(final InsnList instructions, String[] array) {
-        if (array == null || array.length == 0) {
-            // null.
-            loadNull(instructions);
-            return;
-        }
-
-        push(instructions, array.length);
-        // new array
-        newArray(instructions, STRING_TYPE);
-        for (int i = 0; i < array.length; i++) {
-            dup(instructions);
-            push(instructions, i);
-            // loadArg
-            loadString(instructions, array[i]);
-            // arrayStore
-            arrayStore(instructions, STRING_TYPE);
-        }
-    }
-
-    void loadString(final InsnList instructions, String value) {
-        instructions.add(new LdcInsnNode(value));
-    }
-
 
     int addInterceptorLocalVariable(final String name, final String desc) {
         return addLocalVariable(name, desc, this.interceptorVariableStartLabelNode, this.interceptorVariableEndLabelNode);

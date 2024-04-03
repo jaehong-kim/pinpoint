@@ -17,7 +17,7 @@
 package com.navercorp.pinpoint.profiler.instrument.mock;
 
 import com.navercorp.pinpoint.bootstrap.context.MethodDescriptor;
-import com.navercorp.pinpoint.bootstrap.context.MethodDescriptorFactory;
+import com.navercorp.pinpoint.bootstrap.context.MethodDescriptorHelper;
 import com.navercorp.pinpoint.bootstrap.interceptor.MethodDescriptorAwareAroundInterceptor;
 
 public class MethodDescriptorAwareInterceptorClass implements MethodDescriptorAwareAroundInterceptor {
@@ -34,7 +34,7 @@ public class MethodDescriptorAwareInterceptorClass implements MethodDescriptorAw
         parameterNames[1] = "y";
         parameterNames[2] = "z";
 
-        MethodDescriptor methodDescriptor = MethodDescriptorFactory.get("foo", "bar", parameterTypes, parameterNames, 101);
+        MethodDescriptor methodDescriptor = MethodDescriptorHelper.fullName("foo");
         System.out.println(methodDescriptor);
     }
 

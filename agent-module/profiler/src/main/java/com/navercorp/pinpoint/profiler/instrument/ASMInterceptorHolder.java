@@ -23,15 +23,16 @@ import com.navercorp.pinpoint.profiler.instrument.classloading.InterceptorDefine
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorDefinition;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorLazyLoadingSupplier;
 import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorSupplier;
-import com.navercorp.pinpoint.profiler.instrument.interceptor.InterceptorType;
 import com.navercorp.pinpoint.profiler.interceptor.factory.InterceptorFactory;
 import com.navercorp.pinpoint.profiler.util.JavaAssistUtils;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -46,6 +47,8 @@ public class ASMInterceptorHolder {
     private final ScopeInfo scopeInfo;
     private final String className;
     private final String innerClassName;
+    private final AtomicInteger id = new AtomicInteger(0);
+    private boolean reusable = false;
 
     public ASMInterceptorHolder(MethodDescriptor methodDescriptor, InterceptorDefinition interceptorDefinition, Object[] constructorArgs, ScopeInfo scopeInfo) {
         this.methodDescriptor = methodDescriptor;
@@ -58,27 +61,38 @@ public class ASMInterceptorHolder {
     }
 
     private String toClassName() {
+        // interceptorClassName
         final StringBuilder builder = new StringBuilder(interceptorDefinition.getInterceptorClass().getName());
         if (constructorArgs != null) {
             builder.append("$$");
-            for (int i = 0; i < constructorArgs.length; i++) {
-                if (i != 0) {
-                    builder.append("$");
-                }
-                builder.append(Type.getType(constructorArgs[i].getClass()).getClassName());
-            }
+            builder.append(id.getAndIncrement());
+            return builder.toString();
         }
         if (scopeInfo != null) {
             builder.append("$$");
             builder.append(scopeInfo.getId());
         }
-
-        if (interceptorDefinition.getInterceptorType() != InterceptorType.API_ID_AWARE || interceptorDefinition.getInterceptorType() != InterceptorType.METHOD_DESC_AWARE) {
-            builder.append("$$");
-            builder.append(methodDescriptor.getApiDescriptor().replaceAll("[\\(\\) ]", "\\$"));
-        }
         return builder.toString();
     }
+
+    private boolean isResuable(Class<? extends Interceptor> interceptorClass) {
+        final Constructor<?>[] constructors = type.getConstructors();
+        for (Constructor<?> constructor : constructors) {
+            final Class<?>[] parameterTypes = constructor.getParameterTypes();
+
+
+            Object[] resolvedArguments = argumentsResolver.resolve(parameterTypes);
+
+            if (resolvedArguments != null) {
+                this.resolvedConstructor = constructor;
+                this.resolvedArguments = resolvedArguments;
+
+                return true;
+            }
+        }
+
+    }
+
 
     public String getClassName() {
         return className;
