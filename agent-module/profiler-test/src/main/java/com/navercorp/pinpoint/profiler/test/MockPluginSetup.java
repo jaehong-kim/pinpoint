@@ -82,7 +82,7 @@ public class MockPluginSetup implements PluginSetup {
             final TransformTemplate transformTemplate = new TransformTemplate(context);
             ((TransformTemplateAware) plugin).setTransformTemplate(transformTemplate);
         } else if (plugin instanceof MatchableTransformTemplateAware) {
-            final MatchableTransformTemplate transformTemplate = new MatchableTransformTemplate(context);
+            final MatchableTransformTemplate transformTemplate = new MatchableTransformTemplate(context, null);
             ((MatchableTransformTemplateAware) plugin).setTransformTemplate(transformTemplate);
         }
     }
