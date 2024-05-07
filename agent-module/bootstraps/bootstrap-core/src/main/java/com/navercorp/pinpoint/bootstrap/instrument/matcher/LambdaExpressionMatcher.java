@@ -39,11 +39,6 @@ public class LambdaExpressionMatcher implements PackageBasedMatcher {
     }
 
     @Override
-    public int getOrder() {
-        return 0;
-    }
-
-    @Override
     public String toString() {
         return "LambdaExpressionMatcher{" +
                 "basePackageName='" + basePackageName + '\'' +

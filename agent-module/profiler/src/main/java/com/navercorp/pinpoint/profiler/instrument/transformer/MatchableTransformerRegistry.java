@@ -33,12 +33,12 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.SortedSet;
+import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -52,9 +52,9 @@ public class MatchableTransformerRegistry implements TransformerRegistry {
     private final DefaultTransformerRegistry defaultTransformerRegistry;
 
     // class matcher operand.
-    private final Map<String, SortedSet<IndexValue>> classNameBasedIndex = new HashMap<>(64);
+    private final Map<String, Set<IndexValue>> classNameBasedIndex = new HashMap<>(64);
     // package matcher operand.
-    private final Map<String, SortedSet<IndexValue>> packageNameBasedIndex;
+    private final Map<String, Set<IndexValue>> packageNameBasedIndex;
 
     private final TransformerMatcherExecutionPlanner executionPlanner = new TransformerMatcherExecutionPlanner();
     private final TransformerMatcher transformerMatcher;
@@ -118,27 +118,40 @@ public class MatchableTransformerRegistry implements TransformerRegistry {
     }
 
     private ClassFileTransformer findClassBasedTransformer(final ClassLoader classLoader, final String classInternalName, final ClassMetadataWrapper classMetadataWrapper) {
-//        SortedSet<IndexValue> indexValueSortedSet = this.classNameBasedIndex.get(classInternalName);
-//        if (indexValueSortedSet == null) {
-//            return null;
-//        }
-//
-//        for (IndexValue indexValue : indexValueSortedSet) {
-//            if (indexValue.operand instanceof ClassInternalNameMatcherOperand) {
-//                // single operand.
-//                return indexValue.transformer;
-//            }
-//            ClassFileTransformer transformer = match(classLoader, indexValue, classMetadataWrapper);
-//            if (transformer != null) {
-//                return transformer;
-//            }
-//        }
+        Set<IndexValue> indexValueSortedSet = this.classNameBasedIndex.get(classInternalName);
+        if (indexValueSortedSet == null) {
+            return null;
+        }
+
+        for (IndexValue indexValue : indexValueSortedSet) {
+            if (indexValue.operand instanceof ClassInternalNameMatcherOperand) {
+                // single operand.
+                return indexValue.transformer;
+            }
+            ClassFileTransformer transformer = match(classLoader, indexValue, classMetadataWrapper);
+            if (transformer != null) {
+                return transformer;
+            }
+        }
+
+        // nof found
+        for (IndexValue indexValue : indexValueSortedSet) {
+            if (indexValue.operand instanceof ClassInternalNameMatcherOperand) {
+                // single operand.
+                return indexValue.transformer;
+            }
+            ClassFileTransformer transformer = match(classLoader, indexValue, classMetadataWrapper);
+            if (transformer != null) {
+                return transformer;
+            }
+        }
+
 
         return null;
     }
 
     private ClassFileTransformer findPackageBasedTransformer(final ClassLoader classLoader, final String classInternalName, final ClassMetadataWrapper classMetadataWrapper) {
-        for (Map.Entry<String, SortedSet<IndexValue>> entry : this.packageNameBasedIndex.entrySet()) {
+        for (Map.Entry<String, Set<IndexValue>> entry : this.packageNameBasedIndex.entrySet()) {
             final String packageInternalName = entry.getKey();
             if (classInternalName.startsWith(packageInternalName)) {
                 for (IndexValue value : entry.getValue()) {
@@ -174,7 +187,7 @@ public class MatchableTransformerRegistry implements TransformerRegistry {
         }
         // class or package based.
         MatcherOperand matcherOperand = ((BasedMatcher) matcher).getMatcherOperand();
-        addIndex(matcher.getOrder(), matcherOperand, transformer);
+        addIndex(matcherOperand, transformer);
     }
 
     private List<MatchableClassFileTransformer> filterBaseMatcher(List<MatchableClassFileTransformer> matchableClassFileTransformerList) {
@@ -199,7 +212,7 @@ public class MatchableTransformerRegistry implements TransformerRegistry {
         return filter;
     }
 
-    private void addIndex(final int order, final MatcherOperand condition, final ClassFileTransformer transformer) {
+    private void addIndex(final MatcherOperand condition, final ClassFileTransformer transformer) {
         // find class or package matcher operand.
         final List<MatcherOperand> indexedMatcherOperands = executionPlanner.findIndex(condition);
         if (indexedMatcherOperands.isEmpty()) {
@@ -207,7 +220,7 @@ public class MatchableTransformerRegistry implements TransformerRegistry {
         }
 
         boolean indexed;
-        final IndexValue indexValue = new IndexValue(order, condition, transformer);
+        final IndexValue indexValue = new IndexValue(condition, transformer);
         for (MatcherOperand operand : indexedMatcherOperands) {
             if (operand instanceof ClassInternalNameMatcherOperand) {
                 ClassInternalNameMatcherOperand classInternalNameMatcherOperand = (ClassInternalNameMatcherOperand) operand;
@@ -227,10 +240,10 @@ public class MatchableTransformerRegistry implements TransformerRegistry {
         }
     }
 
-    private void addIndexData(final String key, final IndexValue indexValue, final Map<String, SortedSet<IndexValue>> index) {
-        SortedSet<IndexValue> indexValueSet = index.get(key);
+    private void addIndexData(final String key, final IndexValue indexValue, final Map<String, Set<IndexValue>> index) {
+        Set<IndexValue> indexValueSet = index.get(key);
         if (indexValueSet == null) {
-            indexValueSet = new ConcurrentSkipListSet<>();
+            indexValueSet = new HashSet<>();
             index.put(key, indexValueSet);
         }
         indexValueSet.add(indexValue);
@@ -240,10 +253,8 @@ public class MatchableTransformerRegistry implements TransformerRegistry {
         private final MatcherOperand operand;
         private final ClassFileTransformer transformer;
         private final AtomicLong accumulatorTimeMillis = new AtomicLong(0);
-        private final int order;
 
-        public IndexValue(final int order, final MatcherOperand operand, final ClassFileTransformer transformer) {
-            this.order = order;
+        public IndexValue(final MatcherOperand operand, final ClassFileTransformer transformer) {
             this.operand = operand;
             this.transformer = transformer;
         }

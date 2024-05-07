@@ -27,7 +27,6 @@ import java.util.List;
  */
 @InterfaceStability.Unstable
 public class DefaultMultiClassBasedMatcher implements MultiClassBasedMatcher {
-    private final int order;
     private final List<String> baseClassNames;
     private final MatcherOperand matcherOperand;
 
@@ -35,19 +34,10 @@ public class DefaultMultiClassBasedMatcher implements MultiClassBasedMatcher {
         this(baseClassNames, null);
     }
 
-    DefaultMultiClassBasedMatcher(int order, final List<String> baseClassNames) {
-        this(LOWEST_PRECEDENCE, baseClassNames, null);
-    }
-
     DefaultMultiClassBasedMatcher(final List<String> baseClassNames, final MatcherOperand additional) {
-        this(LOWEST_PRECEDENCE, baseClassNames, additional);
-    }
-
-    DefaultMultiClassBasedMatcher(int order, final List<String> baseClassNames, final MatcherOperand additional) {
         if (CollectionUtils.isEmpty(baseClassNames)) {
             throw new IllegalArgumentException("basePackageNames must not be empty");
         }
-        this.order = order;
         this.baseClassNames = baseClassNames;
         this.matcherOperand = getMatcherOperand(baseClassNames, additional);
     }
@@ -90,14 +80,8 @@ public class DefaultMultiClassBasedMatcher implements MultiClassBasedMatcher {
     }
 
     @Override
-    public int getOrder() {
-        return this.order;
-    }
-
-    @Override
     public String toString() {
         return "DefaultMultiClassBasedMatcher{" +
-                "order=" + order +
                 ", baseClassNames=" + baseClassNames +
                 ", matcherOperand=" + matcherOperand +
                 '}';

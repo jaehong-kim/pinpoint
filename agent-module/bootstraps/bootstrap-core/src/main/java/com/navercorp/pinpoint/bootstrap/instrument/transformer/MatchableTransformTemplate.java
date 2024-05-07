@@ -17,7 +17,6 @@ package com.navercorp.pinpoint.bootstrap.instrument.transformer;
 
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentContext;
 import com.navercorp.pinpoint.bootstrap.instrument.matcher.Matcher;
-import com.navercorp.pinpoint.bootstrap.instrument.matcher.TransformMatcherMetadata;
 import com.navercorp.pinpoint.common.annotations.InterfaceStability;
 
 import java.util.Objects;
@@ -27,11 +26,9 @@ import java.util.Objects;
  */
 @InterfaceStability.Unstable
 public class MatchableTransformTemplate extends TransformTemplate {
-    private final TransformMatcherMetadata transformMatcherMetadata;
 
-    public MatchableTransformTemplate(InstrumentContext instrumentContext, TransformMatcherMetadata transformMatcherMetadata) {
+    public MatchableTransformTemplate(InstrumentContext instrumentContext) {
         super(instrumentContext);
-        this.transformMatcherMetadata = transformMatcherMetadata;
     }
 
     public void transform(final Matcher matcher, TransformCallback transformCallback) {
@@ -53,7 +50,25 @@ public class MatchableTransformTemplate extends TransformTemplate {
         instrumentContext.addClassFileTransformer(matcher, transformCallbackName);
     }
 
-    public TransformMatcherMetadata getTransformMatcherMetadata() {
-        return this.transformMatcherMetadata;
+    public void transform(Matcher matcher, Class<? extends TransformCallback> transformCallbackClass, Object[] parameters, Class<?>[] parameterTypes) {
+        Objects.requireNonNull(matcher, "matcher");
+        Objects.requireNonNull(transformCallbackClass, "transformCallbackClass");
+
+        TransformCallbackChecker.validate(transformCallbackClass, parameterTypes);
+        if (ParameterUtils.hasNull(parameterTypes)) {
+            throw new IllegalArgumentException("null parameterType not supported");
+        }
+        ParameterUtils.checkParameterType(parameterTypes);
+
+        // release class reference
+        final String transformCallbackName = transformCallbackClass.getName();
+        final InstrumentContext instrumentContext = getInstrumentContext();
+        instrumentContext.addClassFileTransformer(matcher, transformCallbackName, parameters, parameterTypes);
+    }
+
+    public void transform(Matcher matcher, Class<? extends TransformCallback> transformCallbackClass, TransformCallbackParameters params) {
+        Object[] parameters = params.getParamValues();
+        Class<?>[] parameterTypes = params.getParamTypes();
+        this.transform(matcher, transformCallbackClass, parameters, parameterTypes);
     }
 }

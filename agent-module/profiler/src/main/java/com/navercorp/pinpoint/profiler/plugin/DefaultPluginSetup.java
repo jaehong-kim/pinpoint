@@ -19,14 +19,12 @@ package com.navercorp.pinpoint.profiler.plugin;
 import com.navercorp.pinpoint.bootstrap.config.ProfilerConfig;
 import com.navercorp.pinpoint.bootstrap.instrument.DynamicTransformTrigger;
 import com.navercorp.pinpoint.bootstrap.instrument.InstrumentContext;
-import com.navercorp.pinpoint.bootstrap.instrument.matcher.TransformMatcherMetadata;
 import com.navercorp.pinpoint.bootstrap.instrument.transformer.MatchableTransformTemplate;
 import com.navercorp.pinpoint.bootstrap.instrument.transformer.MatchableTransformTemplateAware;
 import com.navercorp.pinpoint.bootstrap.instrument.transformer.TransformTemplate;
 import com.navercorp.pinpoint.bootstrap.instrument.transformer.TransformTemplateAware;
 import com.navercorp.pinpoint.bootstrap.plugin.ProfilerPlugin;
 import com.navercorp.pinpoint.bootstrap.plugin.ProfilerPluginGlobalContext;
-import com.navercorp.pinpoint.loader.plugins.TransformMatcherMetadataProvider;
 import com.navercorp.pinpoint.profiler.instrument.GuardInstrumentContext;
 import com.navercorp.pinpoint.profiler.instrument.InstrumentEngine;
 import com.navercorp.pinpoint.profiler.instrument.classloading.ClassInjector;
@@ -87,9 +85,7 @@ public class DefaultPluginSetup implements PluginSetup {
                 logger.debug("{}.setTransformTemplate", plugin.getClass().getName());
             }
 
-            final TransformMatcherMetadataProvider pluginTransformMatcherMetadataProvider = new TransformMatcherMetadataProvider();
-            final TransformMatcherMetadata transformMatcherMetadata = pluginTransformMatcherMetadataProvider.getTransformMatcherMetadata(plugin);
-            final MatchableTransformTemplate transformTemplate = new MatchableTransformTemplate(guardInstrumentContext, transformMatcherMetadata);
+            final MatchableTransformTemplate transformTemplate = new MatchableTransformTemplate(guardInstrumentContext);
             ((MatchableTransformTemplateAware) plugin).setTransformTemplate(transformTemplate);
         }
         return guardInstrumentContext;

@@ -19,7 +19,6 @@ package com.navercorp.pinpoint.bootstrap.instrument.matcher.operand;
 import com.navercorp.pinpoint.bootstrap.util.AntPathMatcher;
 import com.navercorp.pinpoint.bootstrap.util.PathMatcher;
 import com.navercorp.pinpoint.bootstrap.util.RegexPathMatcher;
-import com.navercorp.pinpoint.common.annotations.InterfaceStability;
 import com.navercorp.pinpoint.common.util.CollectionUtils;
 
 import java.net.URL;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-@InterfaceStability.Unstable
 public class JarFileMatcherOperand extends AbstractMatcherOperand {
     static final String ANT_STYLE_PATTERN_PREFIX = "antstyle";
     static final String REGEX_PATTERN_PREFIX = "regex";
@@ -50,26 +48,24 @@ public class JarFileMatcherOperand extends AbstractMatcherOperand {
         final List<PathMatcher> pathMatchers = new ArrayList<>(patternStrings.size());
         for (String patternString : patternStrings) {
             final int prefixEnd = patternString.indexOf(":");
-            if (prefixEnd != -1) {
+            if (prefixEnd == -1) {
+                // default(ant style pattern)
+                pathMatchers.add(new AntPathMatcher(patternString, separator));
+            } else {
                 final String prefix = patternString.substring(0, prefixEnd).trim();
                 if (prefix.equals(ANT_STYLE_PATTERN_PREFIX)) {
                     final String trimmed = patternString.substring(prefixEnd + 1).trim();
                     if (!trimmed.isEmpty()) {
                         pathMatchers.add(new AntPathMatcher(trimmed, separator));
                     }
-                    continue;
                 } else if (prefix.equals(REGEX_PATTERN_PREFIX)) {
                     final String trimmed = patternString.substring(prefixEnd + 1).trim();
                     if (!trimmed.isEmpty()) {
                         final Pattern pattern = Pattern.compile(trimmed);
                         pathMatchers.add(new RegexPathMatcher(pattern));
                     }
-                    continue;
                 }
             }
-
-            final Pattern pattern = Pattern.compile(patternString);
-            pathMatchers.add(new RegexPathMatcher(pattern));
         }
 
         return pathMatchers;

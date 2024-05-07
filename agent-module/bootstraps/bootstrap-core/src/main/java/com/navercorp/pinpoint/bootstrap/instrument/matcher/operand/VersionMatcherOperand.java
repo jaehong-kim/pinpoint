@@ -18,46 +18,34 @@ package com.navercorp.pinpoint.bootstrap.instrument.matcher.operand;
 
 import com.navercorp.pinpoint.bootstrap.util.apache.MavenVersion;
 import com.navercorp.pinpoint.bootstrap.util.apache.MavenVersionRange;
+import com.navercorp.pinpoint.bootstrap.util.apache.MavenVersionSchemeSupport;
 import com.navercorp.pinpoint.common.annotations.InterfaceStability;
 import com.navercorp.pinpoint.common.util.ClassUtils;
 import sun.net.www.protocol.jar.URLJarFile;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.jar.Manifest;
 
 @InterfaceStability.Unstable
 public class VersionMatcherOperand extends AbstractMatcherOperand {
+    private static final ClassLoaderResolver CLASS_LOADER_RESOLVER = new ClassLoaderResolver();
+    private static final ManifestResolver MANIFEST_RESOLVER = new ManifestResolver();
+    private static final FileVersionResolver FILE_VERSION_RESOLVER = new FileVersionResolver();
+
     private final VersionRange versionRange;
-    private final List<Resolver> resolverList = new ArrayList<>();
     private final boolean forcedMatch;
 
-    public VersionMatcherOperand(List<String> versionRangeList, List<String> resolverList) {
-        this(versionRangeList, resolverList, Boolean.FALSE);
+    public VersionMatcherOperand(String range) {
+        this(range, Boolean.FALSE);
     }
 
-    public VersionMatcherOperand(List<String> versionRangeList, List<String> resolverList, boolean forcedMatch) {
-        Objects.requireNonNull(versionRangeList);
-        Objects.requireNonNull(resolverList);
+    public VersionMatcherOperand(String range, boolean forcedMatch) {
+        Objects.requireNonNull(range);
 
-        this.versionRange = new VersionRange(versionRangeList);
-        for (String resolver : resolverList) {
-            if (resolver.startsWith(FileVersionResolver.PREFIX)) {
-                this.resolverList.add(new FileVersionResolver());
-            } else if (resolver.startsWith(MetainfResolver.PREFIX)) {
-                final int startIndex = resolver.indexOf('=');
-                if (startIndex != -1) {
-                    final String trimmed = resolver.substring(startIndex + 1).trim();
-                    if (!trimmed.isEmpty()) {
-                        this.resolverList.add(new MetainfResolver(trimmed));
-                    }
-                }
-            } else if (resolver.startsWith(ClassLoaderResolver.PREFIX)) {
-                this.resolverList.add(new ClassLoaderResolver());
-            }
-        }
+        this.versionRange = new VersionRange(range);
         this.forcedMatch = forcedMatch;
     }
 
@@ -70,27 +58,18 @@ public class VersionMatcherOperand extends AbstractMatcherOperand {
         if (version != null) {
             return versionRange.match(version);
         }
-
         return false;
     }
 
     String resolveToVersion(final ClassLoader classLoader, final String classInternalName, final URL codeSourceLocation) {
-        String version = null;
-        for (Resolver resolver : this.resolverList) {
-            if (resolver instanceof FileVersionResolver) {
-                version = ((FileVersionResolver) resolver).toVersion(codeSourceLocation);
-            } else if (resolver instanceof MetainfResolver) {
-                version = ((MetainfResolver) resolver).toVersion(codeSourceLocation);
-            } else if (resolver instanceof ClassLoaderResolver) {
-                version = ((ClassLoaderResolver) resolver).toVersion(classInternalName, classLoader);
-            }
-
-            if (version != null) {
-                return version;
-            }
+        String version = CLASS_LOADER_RESOLVER.toVersion(classInternalName, classLoader);
+        if (version == null) {
+            version = MANIFEST_RESOLVER.toVersion(codeSourceLocation);
         }
-
-        return null;
+        if (version == null) {
+            version = FILE_VERSION_RESOLVER.toVersion(codeSourceLocation);
+        }
+        return version;
     }
 
     @Override
@@ -103,25 +82,16 @@ public class VersionMatcherOperand extends AbstractMatcherOperand {
         return false;
     }
 
-    @Override
-    public String toString() {
-        return "VersionMatcherOperand{" +
-                "versionRange=" + versionRange +
-                ", resolverList=" + resolverList +
-                '}';
-    }
-
     class VersionRange {
-        private List<MavenVersionRange> versionRangeList = new ArrayList<>();
+        private final List<MavenVersionRange> list;
 
-        public VersionRange(List<String> versionRangeList) {
-            for (String versionRange : versionRangeList) {
-                this.versionRangeList.add(new MavenVersionRange(versionRange));
-            }
+        public VersionRange(String range) {
+            MavenVersionSchemeSupport support = new MavenVersionSchemeSupport();
+            list = support.parseVersionConstraint(range);
         }
 
         public boolean match(final String version) {
-            for (MavenVersionRange range : versionRangeList) {
+            for (MavenVersionRange range : list) {
                 final MavenVersion mavenVersion = new MavenVersion(version);
                 if (range.containsVersion(mavenVersion)) {
                     return true;
@@ -134,7 +104,7 @@ public class VersionMatcherOperand extends AbstractMatcherOperand {
         @Override
         public String toString() {
             return "{" +
-                    "versionRangeList=" + versionRangeList +
+                    "versionRangeList=" + list +
                     '}';
         }
     }
@@ -142,8 +112,7 @@ public class VersionMatcherOperand extends AbstractMatcherOperand {
     interface Resolver {
     }
 
-    class ClassLoaderResolver implements Resolver {
-        static final String PREFIX = "classloader-package";
+    static class ClassLoaderResolver implements Resolver {
 
         public String toVersion(final String classInternalName, final ClassLoader classLoader) {
             final String className = ClassUtils.toName(classInternalName);
@@ -168,8 +137,7 @@ public class VersionMatcherOperand extends AbstractMatcherOperand {
         }
     }
 
-    class FileVersionResolver implements Resolver {
-        static final String PREFIX = "file-version";
+    static class FileVersionResolver implements Resolver {
 
         public String toVersion(final URL codeSourceLocation) {
             if (codeSourceLocation != null) {
@@ -188,32 +156,25 @@ public class VersionMatcherOperand extends AbstractMatcherOperand {
         }
     }
 
-    class MetainfResolver implements Resolver {
-        static final String PREFIX = "metainf";
-
-        private String fieldName;
-
-        public MetainfResolver(final String fieldName) {
-            this.fieldName = fieldName;
-        }
+    static class ManifestResolver implements Resolver {
+        static final String FIELD = "Implementation-Version";
 
         public String toVersion(final URL codeSourceLocation) {
             if (codeSourceLocation != null) {
                 try {
-                    URLJarFile jarFile = new URLJarFile(new File(codeSourceLocation.getFile()));
-                    return jarFile.getManifest().getMainAttributes().getValue(fieldName);
+                    String fileName = codeSourceLocation.getFile();
+                    if (fileName != null) {
+                        URLJarFile jarFile = new URLJarFile(new File(fileName));
+                        Manifest manifest = jarFile.getManifest();
+                        if (manifest != null) {
+                            return manifest.getMainAttributes().getValue(FIELD);
+                        }
+                    }
                 } catch (Exception ignored) {
                 }
             }
 
             return null;
-        }
-
-        @Override
-        public String toString() {
-            return "MetainfResolver{" +
-                    "fieldName='" + fieldName + '\'' +
-                    '}';
         }
     }
 }

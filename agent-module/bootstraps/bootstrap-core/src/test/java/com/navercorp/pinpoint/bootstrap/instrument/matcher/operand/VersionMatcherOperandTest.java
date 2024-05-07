@@ -21,10 +21,9 @@ import org.apache.logging.log4j.core.util.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VersionMatcherOperandTest {
@@ -35,10 +34,7 @@ public class VersionMatcherOperandTest {
         final ClassLoader classLoader = getClass().getClassLoader();
         final URL codeSourceLoaction = new URL("file::/local/pinpoint/plugins/pinpoint-activemq-client-plugin-1.0.0.jar");
 
-        List<String> versionRangeList = Arrays.asList("[1.0,2.0]", "[3.2.1]");
-        List<String> resolverList = Arrays.asList("file-version");
-
-        VersionMatcherOperand operand = new VersionMatcherOperand(versionRangeList, resolverList);
+        VersionMatcherOperand operand = new VersionMatcherOperand("[1.0,2.0],[3.2.1]");
         assertTrue(operand.match(classLoader, className, codeSourceLoaction));
     }
 
@@ -48,10 +44,7 @@ public class VersionMatcherOperandTest {
         final ClassLoader classLoader = getClass().getClassLoader();
         final URL codeSourceLoaction = new URL("file::/local/pinpoint/plugins/pinpoint-activemq-client-plugin.jar");
 
-        List<String> versionRangeList = Arrays.asList("[1.0,2.0]", "[3.2.1]");
-        List<String> resolverList = Arrays.asList("file-version");
-
-        VersionMatcherOperand operand = new VersionMatcherOperand(versionRangeList, resolverList);
+        VersionMatcherOperand operand = new VersionMatcherOperand("[1.0,2.0], [3.2.1]");
         assertFalse(operand.match(classLoader, className, codeSourceLoaction));
     }
 
@@ -62,10 +55,7 @@ public class VersionMatcherOperandTest {
         final ClassLoader classLoader = getClass().getClassLoader();
         final URL codeSourceLoaction = new URL("file::/undefine");
 
-        List<String> versionRangeList = Arrays.asList("[1.0,3.0]", "[4.1,4.max]");
-        List<String> resolverList = Arrays.asList("classloader-package");
-
-        VersionMatcherOperand operand = new VersionMatcherOperand(versionRangeList, resolverList);
+        VersionMatcherOperand operand = new VersionMatcherOperand("[1.0,3.0],[4.1,4.max]");
         assertTrue(operand.match(classLoader, classInternalName, codeSourceLoaction));
     }
 
@@ -76,10 +66,7 @@ public class VersionMatcherOperandTest {
         final ClassLoader classLoader = getClass().getClassLoader();
         final URL codeSourceLoaction = new URL("file::/undefine");
 
-        List<String> versionRangeList = Arrays.asList("[1.0,3.0]", "[4.1,4.max]");
-        List<String> resolverList = Arrays.asList("classloader-package");
-
-        VersionMatcherOperand operand = new VersionMatcherOperand(versionRangeList, resolverList);
+        VersionMatcherOperand operand = new VersionMatcherOperand("[1.0,3.0],[4.1,4.max]");
         assertFalse(operand.match(classLoader, classInternalName, codeSourceLoaction));
     }
 
@@ -90,39 +77,19 @@ public class VersionMatcherOperandTest {
         final ClassLoader classLoader = getClass().getClassLoader();
         final URL codeSourceLoaction = Assert.class.getProtectionDomain().getCodeSource().getLocation();
 
-        List<String> versionRangeList = Arrays.asList("[1.0,3.0]", "[4.1,4.max]");
-        List<String> resolverList = Arrays.asList("metainf=Implementation-Version");
-
-        VersionMatcherOperand operand = new VersionMatcherOperand(versionRangeList, resolverList);
-        assertTrue(operand.match(classLoader, className, codeSourceLoaction));
+        VersionMatcherOperand.ManifestResolver manifestResolver = new VersionMatcherOperand.ManifestResolver();
+        String version = manifestResolver.toVersion(codeSourceLoaction);
+        assertNotNull(version);
     }
 
     @Test
     public void matchMetainfInvalidField() throws Exception {
         // org.junit.Assert
-        final String className = Assert.class.getName();
+        final String className = String.class.getName();
         final ClassLoader classLoader = getClass().getClassLoader();
-        final URL codeSourceLoaction = Assert.class.getProtectionDomain().getCodeSource().getLocation();
 
-        List<String> versionRangeList = Arrays.asList("[1.0,3.0]", "[4.1,4.max]");
-        List<String> resolverList = Arrays.asList("metainf=Implementation-Title");
-
-        VersionMatcherOperand operand = new VersionMatcherOperand(versionRangeList, resolverList);
-        assertFalse(operand.match(classLoader, className, codeSourceLoaction));
-    }
-
-    @Test
-    public void matchMetainfNotFoundField() throws Exception {
-        // org.junit.Assert
-        final String className = Assert.class.getName();
-        final ClassLoader classLoader = getClass().getClassLoader();
-        final URL codeSourceLoaction = Assert.class.getProtectionDomain().getCodeSource().getLocation();
-
-        List<String> versionRangeList = Arrays.asList("[1.0,3.0]", "[4.1,4.max]");
-        List<String> resolverList = Arrays.asList("metainf=Not-Found");
-
-        VersionMatcherOperand operand = new VersionMatcherOperand(versionRangeList, resolverList);
-        assertFalse(operand.match(classLoader, className, codeSourceLoaction));
+        VersionMatcherOperand operand = new VersionMatcherOperand("[1.0,1.5]");
+        assertFalse(operand.match(classLoader, className, null));
     }
 
     @Test
@@ -132,10 +99,7 @@ public class VersionMatcherOperandTest {
         final ClassLoader classLoader = getClass().getClassLoader();
         final URL codeSourceLoaction = Assert.class.getProtectionDomain().getCodeSource().getLocation();
 
-        List<String> versionRangeList = Arrays.asList("[1.0,3.0]", "[4.1,4.max]");
-        List<String> resolverList = Arrays.asList("metainf=Unknown");
-
-        VersionMatcherOperand operand = new VersionMatcherOperand(versionRangeList, resolverList, Boolean.TRUE);
+        VersionMatcherOperand operand = new VersionMatcherOperand("[1.0,3.0],[4.1,4.max]", Boolean.TRUE);
         assertTrue(operand.match(classLoader, className, codeSourceLoaction));
     }
 }

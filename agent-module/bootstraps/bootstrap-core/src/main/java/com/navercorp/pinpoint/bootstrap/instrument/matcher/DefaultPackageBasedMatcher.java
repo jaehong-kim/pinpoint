@@ -27,7 +27,6 @@ import java.util.Objects;
  */
 @InterfaceStability.Unstable
 public class DefaultPackageBasedMatcher implements PackageBasedMatcher {
-    private final int order;
     private final String basePackageName;
     private final MatcherOperand matcherOperand;
 
@@ -35,20 +34,11 @@ public class DefaultPackageBasedMatcher implements PackageBasedMatcher {
         this(basePackageName, null);
     }
 
-    DefaultPackageBasedMatcher(int order, final String basePackageName) {
-        this(LOWEST_PRECEDENCE, basePackageName, null);
-    }
-
     DefaultPackageBasedMatcher(final String basePackageName, final MatcherOperand additional) {
-        this(LOWEST_PRECEDENCE, basePackageName, additional);
-    }
-
-    DefaultPackageBasedMatcher(int order, final String basePackageName, final MatcherOperand additional) {
         Objects.requireNonNull(basePackageName, "basePackageName");
         if (!StringUtils.hasText(basePackageName)) {
             throw new IllegalArgumentException("basePackageName must not be empty");
         }
-        this.order = order;
         this.basePackageName = basePackageName;
 
         MatcherOperand operand = new PackageInternalNameMatcherOperand(basePackageName);
@@ -70,14 +60,8 @@ public class DefaultPackageBasedMatcher implements PackageBasedMatcher {
     }
 
     @Override
-    public int getOrder() {
-        return this.order;
-    }
-
-    @Override
     public String toString() {
         return "DefaultPackageBasedMatcher{" +
-                "order=" + order +
                 ", basePackageName='" + basePackageName + '\'' +
                 ", matcherOperand=" + matcherOperand +
                 '}';

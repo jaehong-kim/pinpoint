@@ -24,16 +24,10 @@ import java.util.Objects;
  * @author emeroad
  */
 public class DefaultMultiClassNameMatcher implements MultiClassNameMatcher {
-    private final int order;
     private final List<String> classNameList;
 
     DefaultMultiClassNameMatcher(List<String> classNameMatcherList) {
-        this(LOWEST_PRECEDENCE, classNameMatcherList);
-    }
-
-    DefaultMultiClassNameMatcher(int order, List<String> classNameMatcherList) {
         Objects.requireNonNull(classNameMatcherList, "classNameMatcherList");
-        this.order = order;
         this.classNameList = Collections.unmodifiableList(classNameMatcherList);
     }
 
@@ -59,14 +53,8 @@ public class DefaultMultiClassNameMatcher implements MultiClassNameMatcher {
     }
 
     @Override
-    public int getOrder() {
-        return this.order;
-    }
-
-    @Override
     public String toString() {
         return "DefaultMultiClassNameMatcher{" +
-                "order=" + order +
                 ", classNameList=" + classNameList +
                 '}';
     }
