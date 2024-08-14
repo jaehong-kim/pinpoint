@@ -71,6 +71,8 @@ import static com.navercorp.pinpoint.common.trace.ServiceTypeProperty.TERMINAL;
  * <tr><td>1130</td><td>GRPC_SERVER</td></tr>
  * <tr><td>1140</td><td>REACTOR_NETTY</td></tr>
  * <tr><td>1141</td><td>REACTOR_NETTY_INTERNAL</td></tr>
+ * <tr><td>1160</td><td>KSTOR</td></tr>
+ * <tr><td>1161</td><td>KSTOR_INTERNAL</td></tr>
  *
  * <tr><td>1300</td><td>C_CPP</td></tr>
  * <tr><td>1301</td><td>C_CPP_METHOD</td></tr>

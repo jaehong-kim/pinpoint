@@ -35,7 +35,6 @@ public class NettyHttp1HandlerHandleRequestInterceptor implements ApiIdAwareArou
         if (isDebug) {
             logger.beforeInterceptor(target, args);
         }
-
     }
 
 

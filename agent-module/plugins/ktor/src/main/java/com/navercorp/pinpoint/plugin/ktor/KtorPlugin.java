@@ -56,7 +56,7 @@ public class KtorPlugin implements ProfilerPlugin, MatchableTransformTemplateAwa
 
             // flatMap(handler -> invokeHandler(exchange, handler))
             // flatMap(result -> handleResult(exchange, result))
-            InstrumentMethod handleRequestMethod = target.getConstructor("handleRequest", "io.netty.channel.ChannelHandlerContext", "io.netty.handler.codec.http.HttpRequest");
+            InstrumentMethod handleRequestMethod = target.getDeclaredMethod("handleRequest", "io.netty.channel.ChannelHandlerContext", "io.netty.handler.codec.http.HttpRequest");
             if (handleRequestMethod != null) {
                 handleRequestMethod.addInterceptor(NettyHttp1HandlerHandleRequestInterceptor.class);
             }
