@@ -15,10 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Validate commit messages
-        env:
-          COMMIT: ${{ github.event.workflow_run.head_commit.message }}
         run: |
-          echo "commit: ${COMMIT}"
           COMMIT_MESSAGE_HEADER=$(git log -1 --pretty=%B | head -n 1)
           echo "commit message header: ${COMMIT_MESSAGE_HEADER}"
           
