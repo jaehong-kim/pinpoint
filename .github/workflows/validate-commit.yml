@@ -16,6 +16,7 @@ jobs:
         env:
           COMMIT: ${{ github.event.workflow_run.head_commit.message }}
         run: |
+          echo "commit: ${COMMIT}"
           # Define the regex for Conventional Commits
           commit_regex='^\[#(noissue|[0-9]+?)\].*'
           error_msg="Commit message does not follow the Conventional Commits format:
@@ -27,6 +28,6 @@ jobs:
           # Validate each commit message
           if ! echo "${COMMIT}" | grep -Eq "$commit_regex"; then
             echo "$error_msg"
-            echo "Invalid commit message: $commit"
+            echo "Invalid commit message: ${COMMIT}"
             exit 1
           fi
