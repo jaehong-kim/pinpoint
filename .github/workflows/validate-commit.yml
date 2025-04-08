@@ -31,7 +31,7 @@ jobs:
             [#noissue] Update README.md"
 
           # Validate each commit message
-          if ! echo "${COMMIT}" | grep -Eq "$commit_regex"; then
+          if ! echo "${COMMIT_MESSAGE_HEADER}" | grep -Eq "$commit_regex"; then
             echo "$error_msg"
             echo "Invalid commit message: ${COMMIT}"
             exit 1
