@@ -17,6 +17,9 @@ jobs:
           COMMIT: ${{ github.event.workflow_run.head_commit.message }}
         run: |
           echo "commit: ${COMMIT}"
+          COMMIT_MESSAGE_HEADER=$(git log -1 --pretty=%B | head -n 1)
+          echo "commit message header: ${COMMIT_MESSAGE_HEADER}"
+          
           # Define the regex for Conventional Commits
           commit_regex='^\[#(noissue|[0-9]+?)\].*'
           error_msg="Commit message does not follow the Conventional Commits format:
