@@ -1,4 +1,4 @@
-package com.navercorp.pinpoint.collector.util;
+package com.navercorp.pinpoint.common.hbase.util;
 
 import com.navercorp.pinpoint.common.util.StringUtils;
 import org.apache.hadoop.hbase.client.Durability;

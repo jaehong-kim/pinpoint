@@ -5,7 +5,7 @@ import com.navercorp.pinpoint.collector.config.HbaseAsyncConfiguration;
 import com.navercorp.pinpoint.collector.config.SchedulerConfiguration;
 import com.navercorp.pinpoint.collector.dao.hbase.encode.ApplicationIndexRowKeyEncoderV1;
 import com.navercorp.pinpoint.collector.dao.hbase.encode.ApplicationIndexRowKeyEncoderV2;
-import com.navercorp.pinpoint.collector.util.DurabilityApplier;
+import com.navercorp.pinpoint.common.hbase.util.DurabilityApplier;
 import com.navercorp.pinpoint.common.hbase.config.DistributorConfiguration;
 import com.navercorp.pinpoint.common.hbase.config.HbaseNamespaceConfiguration;
 import com.navercorp.pinpoint.common.hbase.config.HbasePutWriterConfiguration;

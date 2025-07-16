@@ -17,7 +17,7 @@
 package com.navercorp.pinpoint.collector.dao.hbase;
 
 import com.navercorp.pinpoint.collector.dao.TraceDao;
-import com.navercorp.pinpoint.collector.util.DurabilityApplier;
+import com.navercorp.pinpoint.common.hbase.util.DurabilityApplier;
 import com.navercorp.pinpoint.common.hbase.HbaseColumnFamily;
 import com.navercorp.pinpoint.common.hbase.HbaseTables;
 import com.navercorp.pinpoint.common.hbase.TableNameProvider;

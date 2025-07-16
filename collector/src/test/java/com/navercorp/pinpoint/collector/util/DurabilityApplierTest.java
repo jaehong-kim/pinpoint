@@ -1,5 +1,6 @@
 package com.navercorp.pinpoint.collector.util;
 
+import com.navercorp.pinpoint.common.hbase.util.DurabilityApplier;
 import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Put;
 import org.junit.jupiter.api.Test;
