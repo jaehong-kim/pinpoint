@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.MySQLContainer;
 
-@Disabled
+import java.util.concurrent.TimeUnit;
+
 public class R2dbcMysqlTest {
     public static final String DATABASE_NAME = "test";
     public static final String USERNAME = "root";
@@ -63,5 +64,6 @@ public class R2dbcMysqlTest {
     @Test
     public void test() throws Exception {
         System.out.println("TEST");
+        TimeUnit.HOURS.sleep(8);
     }
 }
