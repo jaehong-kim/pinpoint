@@ -16,7 +16,7 @@ pinpoint:
       inspector:
         enabled: false
         hbase:
-          enabled: false
+          enabled: true
       otlpmetric:
         enabled: true
       heatmap:
