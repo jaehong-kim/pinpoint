@@ -122,6 +122,7 @@
         <module>feature-flag</module>
         <module>service-module</module>
         <module>hbase-uid-module</module>
+        <module>thirdparty</module>
     </modules>
 
     <properties>
