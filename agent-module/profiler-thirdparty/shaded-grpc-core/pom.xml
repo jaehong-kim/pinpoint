@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.navercorp.pinpoint</groupId>
-        <artifactId>pinpoint-thirdparty</artifactId>
+        <artifactId>pinpoint-profiler-thirdparty</artifactId>
         <version>3.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>pinpoint-shaded-grpc-core</artifactId>
+    <artifactId>pinpoint-profiler-shaded-grpc-core</artifactId>
     <packaging>jar</packaging>
-    <name>pinpoint-shaded-grpc-core</name>
+    <name>pinpoint-profiler-shaded-grpc-core</name>
 
     <dependencies>
         <dependency>
@@ -25,6 +25,11 @@
             <version>1.75.0</version>
             <scope>compile</scope>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.navercorp.pinpoint</groupId>-->
+<!--            <artifactId>pinpoint-shaded-grpc-api</artifactId>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -55,6 +60,11 @@
             <version>33.3.1-android</version>
             <scope>runtime</scope>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.navercorp.pinpoint</groupId>-->
+<!--            <artifactId>pinpoint-shaded-guava</artifactId>-->
+<!--            <scope>runtime</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>io.perfmark</groupId>
             <artifactId>perfmark-api</artifactId>

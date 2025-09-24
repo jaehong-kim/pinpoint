@@ -21,31 +21,18 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.navercorp.pinpoint</groupId>
-        <artifactId>pinpoint-thirdparty</artifactId>
+        <artifactId>pinpoint-profiler-thirdparty</artifactId>
         <version>3.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>pinpoint-shaded-grpc-api</artifactId>
+    <artifactId>pinpoint-profiler-shaded-protobuf-java</artifactId>
     <packaging>jar</packaging>
-    <name>pinpoint-shaded-grpc-api</name>
+    <name>pinpoint-profiler-shaded-protobuf-java</name>
 
     <dependencies>
         <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.errorprone</groupId>
-            <artifactId>error_prone_annotations</artifactId>
-            <version>2.30.0</version>
-            <scope>compile</scope>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
         </dependency>
     </dependencies>
 
@@ -69,12 +56,6 @@
                             </relocations>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>com.google.code.findbugs:jsr305</exclude>
-                                    <exclude>com.google.errorprone:error_prone_annotations</exclude>
-                                    <exclude>com.google.guava:guava</exclude>
-                                    <exclude>com.google.guava:failureaccess</exclude>
-                                    <exclude>org.checkerframework:checker-qual</exclude>
-                                    <exclude>com.google.j2objc:j2objc-annotations</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>

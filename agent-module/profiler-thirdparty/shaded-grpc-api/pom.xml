@@ -21,20 +21,43 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.navercorp.pinpoint</groupId>
-        <artifactId>pinpoint-thirdparty</artifactId>
+        <artifactId>pinpoint-profiler-thirdparty</artifactId>
         <version>3.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>pinpoint-shaded-grpc-netty</artifactId>
+    <artifactId>pinpoint-profiler-shaded-grpc-api</artifactId>
     <packaging>jar</packaging>
-    <name>pinpoint-shaded-grpc-netty</name>
+    <name>pinpoint-profiler-shaded-grpc-api</name>
 
     <dependencies>
         <dependency>
             <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty</artifactId>
+            <artifactId>grpc-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_annotations</artifactId>
+            <version>2.30.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.3.1-android</version>
+            <scope>runtime</scope>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.navercorp.pinpoint</groupId>-->
+<!--            <artifactId>pinpoint-shaded-guava</artifactId>-->
+<!--            <scope>runtime</scope>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -57,30 +80,12 @@
                             </relocations>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>io.grpc:grpc-api</exclude>
-                                    <exclude>com.google.code.findbugs</exclude>
-                                    <exclude>org.codehaus.mojo:animal-sniffer-annotations</exclude>
-                                    <exclude>io.netty:netty-codec-http2</exclude>
-                                    <exclude>io.netty:netty-common</exclude>
-                                    <exclude>io.netty:netty-buffer</exclude>
-                                    <exclude>io.netty:netty-transport</exclude>
-                                    <exclude>io.netty:netty-resolver</exclude>
-                                    <exclude>io.netty:netty-codec</exclude>
-                                    <exclude>io.netty:netty-handler</exclude>
-                                    <exclude>io.netty:netty-codec-http</exclude>
-                                    <exclude>io.grpc:grpc-core</exclude>
-                                    <exclude>com.google.code.gson:gson</exclude>
-                                    <exclude>com.google.android:annotations</exclude>
-                                    <exclude>io.grpc:grpc-context</exclude>
-                                    <exclude>io.netty:netty-handler-proxy</exclude>
+                                    <exclude>com.google.code.findbugs:jsr305</exclude>
+                                    <exclude>com.google.errorprone:error_prone_annotations</exclude>
                                     <exclude>com.google.guava:guava</exclude>
                                     <exclude>com.google.guava:failureaccess</exclude>
                                     <exclude>org.checkerframework:checker-qual</exclude>
                                     <exclude>com.google.j2objc:j2objc-annotations</exclude>
-                                    <exclude>com.google.errorprone:error_prone_annotations</exclude>
-                                    <exclude>io.perfmark:perfmark-api</exclude>
-                                    <exclude>io.netty:netty-transport-native-unix-common</exclude>
-                                    <exclude>io.grpc:grpc-util</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>

@@ -5,24 +5,28 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.navercorp.pinpoint</groupId>
-        <artifactId>pinpoint</artifactId>
+        <artifactId>pinpoint-agent-module</artifactId>
         <version>3.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>pinpoint-thirdparty</artifactId>
+    <artifactId>pinpoint-profiler-thirdparty</artifactId>
     <packaging>pom</packaging>
-    <description>pinpoint third party</description>
+    <description>pinpoint profiler third party</description>
 
     <properties>
         <rename.logging>com.navercorp.pinpoint.profiler.logging.jul</rename.logging>
     </properties>
 
     <modules>
-        <module>pinpoint-shaded-guava</module>
-        <module>pinpoint-shaded-guice</module>
-        <module>pinpoint-shaded-grpc-core</module>
-        <module>pinpoint-shaded-grpc-api</module>
-        <module>pinpoint-shaded-grpc-util</module>
-        <module>pinpoint-shaded-grpc-netty</module>
+        <module>shaded-guava</module>
+        <module>shaded-guice</module>
+        <module>shaded-grpc-core</module>
+        <module>shaded-grpc-api</module>
+        <module>shaded-grpc-util</module>
+        <module>shaded-grpc-netty</module>
+        <module>shaded-grpc-stub</module>
+        <module>shaded-grpc-protobuf</module>
+        <module>shaded-protobuf-java</module>
+        <module>shaded-caffeine</module>
     </modules>
 </project>

@@ -5,18 +5,31 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.navercorp.pinpoint</groupId>
-        <artifactId>pinpoint-thirdparty</artifactId>
+        <artifactId>pinpoint-profiler-thirdparty</artifactId>
         <version>3.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>pinpoint-shaded-grpc-util</artifactId>
+    <artifactId>pinpoint-profiler-shaded-caffeine</artifactId>
     <packaging>jar</packaging>
-    <name>pinpoint-shaded-grpc-util</name>
+    <name>pinpoint-profiler-shaded-caffeine</name>
 
     <dependencies>
         <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-util</artifactId>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>checker-qual</artifactId>
+            <version>3.10.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.errorprone</groupId>
+            <artifactId>error_prone_annotations</artifactId>
+            <version>2.5.1</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -40,20 +53,8 @@
                             </relocations>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>com.google.code.gson:gson</exclude>
-                                    <exclude>io.grpc:grpc-api</exclude>
-                                    <exclude>com.google.code.findbugs:jsr305</exclude>
-                                    <exclude>com.google.errorprone:error_prone_annotations</exclude>
-                                    <exclude>io.grpc:grpc-core</exclude>
-                                    <exclude>om.google.code.gson:gson</exclude>
-                                    <exclude>com.google.android:annotations</exclude>
-                                    <exclude>io.perfmark:perfmark-api</exclude>
-                                    <exclude>io.grpc:grpc-context</exclude>
-                                    <exclude>org.codehaus.mojo:animal-sniffer-annotations</exclude>
-                                    <exclude>com.google.guava:guava</exclude>
-                                    <exclude>com.google.guava:failureaccess</exclude>
                                     <exclude>org.checkerframework:checker-qual</exclude>
-                                    <exclude>com.google.j2objc:j2objc-annotations</exclude>
+                                    <exclude>com.google.errorprone:error_prone_annotations</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>
@@ -62,5 +63,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

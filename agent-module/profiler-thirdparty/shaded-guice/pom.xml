@@ -5,24 +5,33 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.navercorp.pinpoint</groupId>
-        <artifactId>pinpoint-thirdparty</artifactId>
+        <artifactId>pinpoint-profiler-thirdparty</artifactId>
         <version>3.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>pinpoint-shaded-guice</artifactId>
+    <artifactId>pinpoint-profiler-shaded-guice</artifactId>
     <packaging>jar</packaging>
-    <name>pinpoint-shaded-guice</name>
+    <name>pinpoint-profiler-shaded-guice</name>
 
     <dependencies>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
+
         <dependency>
             <groupId>jakarta.inject</groupId>
             <artifactId>jakarta.inject-api</artifactId>
             <version>2.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.navercorp.pinpoint</groupId>-->
+<!--            <artifactId>pinpoint-shaded-guava</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>aopalliance</groupId>
             <artifactId>aopalliance</artifactId>
