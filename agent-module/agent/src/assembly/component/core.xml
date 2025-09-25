@@ -67,6 +67,7 @@
                 <exclude>com.navercorp.pinpoint:pinpoint-profiler-test</exclude>
                 <exclude>com.navercorp.pinpoint:pinpoint-plugins-assembly</exclude>
                 <exclude>com.navercorp.pinpoint:pinpoint-agent-tools</exclude>
+
                 <exclude>com.google.inject:guice</exclude>
                 <exclude>com.google.guava:guava</exclude>
                 <exclude>io.grpc:grpc-api</exclude>
