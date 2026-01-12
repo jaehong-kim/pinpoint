@@ -79,17 +79,17 @@ pinpoint:
   modules:
     web:
       exceptiontrace:
-        enabled: true
+        enabled: false
       inspector:
-        enabled: true
+        enabled: false
       otlpmetric:
-        enabled: true
+        enabled: false
       heatmap:
-        enabled: true
+        enabled: false
       uristat:
-        enabled: true
+        enabled: false
       systemmetric:
-        enabled: true
+        enabled: false
     realtime:
       enabled: true
     uid:
