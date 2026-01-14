@@ -93,14 +93,14 @@ public class OtlpTraceSpanEventMapper {
         spanEventBoList.add(spanEventBo);
 
         for (Span.Event event : span.getEventsList()) {
-            SpanEventBo eventBo = map(spanStartTime, event);
+            SpanEventBo eventBo = map(spanStartTime, spanEventBo.getDepth(), event);
             spanEventBoList.add(eventBo);
         }
 
         return spanEventBoList;
     }
 
-    public SpanEventBo map(long startTime, Span.Event event) {
+    public SpanEventBo map(long startTime, int parentDepth, Span.Event event) {
         SpanEventBo spanEventBo = new SpanEventBo();
         spanEventBo.setVersion((byte) 1); // TODO
         spanEventBo.setSequence((short) 0);
@@ -123,12 +123,12 @@ public class OtlpTraceSpanEventMapper {
         annotationBoList.add(AnnotationBo.of(AnnotationKey.ARGS0.getCode(), event.getName()));
 
         spanEventBo.setAnnotationBoList(annotationBoList);
-        spanEventBo.setDepth(2);
+        spanEventBo.setDepth(parentDepth + 1);
 
         return spanEventBo;
     }
 
-    public SpanEventBo map(long startTime, Span.Link link) {
+    public SpanEventBo map(long startTime, int parentDepth, Span.Link link) {
         SpanEventBo spanEventBo = new SpanEventBo();
         spanEventBo.setVersion((byte) 1); // TODO
         spanEventBo.setSequence((short) 0);
@@ -147,7 +147,7 @@ public class OtlpTraceSpanEventMapper {
             annotationBoList.add(AnnotationBo.of(AnnotationKey.OPENTELEMETRY_ATTRIBUTE.getCode(), OtlpTraceMapperUtils.getAttributeAnnotationValue(link.getAttributesList())));
         }
         spanEventBo.setAnnotationBoList(annotationBoList);
-        spanEventBo.setDepth(2);
+        spanEventBo.setDepth(parentDepth + 1);
 
         return spanEventBo;
     }

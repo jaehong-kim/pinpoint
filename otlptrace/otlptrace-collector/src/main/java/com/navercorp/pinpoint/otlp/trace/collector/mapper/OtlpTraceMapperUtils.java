@@ -16,12 +16,15 @@
 
 package com.navercorp.pinpoint.otlp.trace.collector.mapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navercorp.pinpoint.common.buffer.ByteArrayUtils;
 import com.navercorp.pinpoint.common.util.ArrayUtils;
 import io.opentelemetry.proto.common.v1.AnyValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OtlpTraceMapperUtils {
     public static String getAgentId(List<KeyValue> attributesList) {
@@ -59,6 +62,12 @@ public class OtlpTraceMapperUtils {
     }
 
     public static String getAttributeAnnotationValue(List<KeyValue> keyValueList) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Map<String, Object> map = getAttributeToMap(keyValueList);
+        objectMapper.valueToS
+
+
         StringBuilder sb = new StringBuilder();
         for (KeyValue kv : keyValueList) {
             // TODO add filter
@@ -79,24 +88,32 @@ public class OtlpTraceMapperUtils {
         return sb.toString();
     }
 
-    public static String getKeyValue(KeyValue keyValue) {
+    static Map<String, Object> getAttributeToMap(List<KeyValue> keyValueList) {
+        Map<String, Object> map = new HashMap<>();
+        for (KeyValue kv : keyValueList) {
+            map.put(kv.getKey(), getKeyValue(kv));
+        }
+        return map;
+    }
+
+    static Object getKeyValue(KeyValue keyValue) {
         AnyValue anyValue = keyValue.getValue();
         if (anyValue.hasIntValue()) {
-            return keyValue.getKey() + " : " + anyValue.getIntValue();
+            return anyValue.getIntValue();
         } else if (anyValue.hasDoubleValue()) {
-            return keyValue.getKey() + " : " + anyValue.getDoubleValue();
+            return anyValue.getDoubleValue();
         } else if (anyValue.hasBoolValue()) {
-            return keyValue.getKey() + " : " + anyValue.getBoolValue();
+            return anyValue.getBoolValue();
         } else if (anyValue.hasStringValue()) {
-            return keyValue.getKey() + " : " + anyValue.getStringValue();
+            return anyValue.getStringValue();
         } else if (anyValue.hasArrayValue()) {
-            return keyValue.getKey() + " : " + anyValue.getArrayValue();
+            return anyValue.getArrayValue();
         } else if (anyValue.hasBytesValue()) {
-            return keyValue.getKey() + " : " + anyValue.getBytesValue();
+            return anyValue.getBytesValue();
         } else if (anyValue.hasKvlistValue()) {
-            return keyValue.getKey() + " : " + getAttributeAnnotationValue(anyValue.getKvlistValue().getValuesList());
+            return getAttributeToMap(anyValue.getKvlistValue().getValuesList());
         } else {
-            return keyValue.getKey() + " : " + anyValue.toString();
+            return anyValue;
         }
     }
 }

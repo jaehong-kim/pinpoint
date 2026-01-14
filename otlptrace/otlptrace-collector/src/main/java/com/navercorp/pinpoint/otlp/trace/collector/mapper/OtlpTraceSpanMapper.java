@@ -109,11 +109,11 @@ public class OtlpTraceSpanMapper {
 
         final List<SpanEventBo> spanEventBoList = new ArrayList<>();
         for (Span.Event event : span.getEventsList()) {
-            SpanEventBo eventBo = spanEventMapper.map(startTime, event);
+            SpanEventBo eventBo = spanEventMapper.map(startTime, 0, event);
             spanEventBoList.add(eventBo);
         }
         for (Span.Link link : span.getLinksList()) {
-            SpanEventBo eventBo = spanEventMapper.map(startTime, link);
+            SpanEventBo eventBo = spanEventMapper.map(startTime, 0, link);
             spanEventBoList.add(eventBo);
         }
 
