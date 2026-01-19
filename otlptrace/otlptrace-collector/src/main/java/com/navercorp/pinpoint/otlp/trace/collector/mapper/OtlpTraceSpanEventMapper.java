@@ -16,6 +16,7 @@
 
 package com.navercorp.pinpoint.otlp.trace.collector.mapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navercorp.pinpoint.common.buffer.ByteArrayUtils;
 import com.navercorp.pinpoint.common.plugin.util.HostAndPort;
 import com.navercorp.pinpoint.common.server.bo.AnnotationBo;
@@ -31,8 +32,10 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class OtlpTraceSpanEventMapper {
+    private ObjectMapper objectMapper;
 
-    public OtlpTraceSpanEventMapper() {
+    public OtlpTraceSpanEventMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     List<SpanEventBo> map(long spanStartTime, Span span) {
@@ -76,7 +79,7 @@ public class OtlpTraceSpanEventMapper {
         annotationBoList.add(AnnotationBo.of(AnnotationKey.OPENTELEMETRY_START_TIME.getCode(), span.getStartTimeUnixNano()));
         // attributes
         if (span.getAttributesCount() > 0) {
-            annotationBoList.add(AnnotationBo.of(AnnotationKey.OPENTELEMETRY_ATTRIBUTE.getCode(), OtlpTraceMapperUtils.getAttributeAnnotationValue(span.getAttributesList())));
+            OtlpTraceMapperUtils.addAttributesToAnnotation(objectMapper, span.getAttributesList(), annotationBoList);
         }
         // argument
         annotationBoList.add(AnnotationBo.of(AnnotationKey.ARGS0.getCode(), span.getName()));
@@ -117,7 +120,7 @@ public class OtlpTraceSpanEventMapper {
         annotationBoList.add(AnnotationBo.of(AnnotationKey.API.getCode(), OtlpTraceMapper.INTERNAL_METHOD_NAME));
         // attributes
         if (event.getAttributesCount() > 0) {
-            annotationBoList.add(AnnotationBo.of(AnnotationKey.OPENTELEMETRY_ATTRIBUTE.getCode(), OtlpTraceMapperUtils.getAttributeAnnotationValue(event.getAttributesList())));
+            OtlpTraceMapperUtils.addAttributesToAnnotation(objectMapper, event.getAttributesList(), annotationBoList);
         }
         // argument
         annotationBoList.add(AnnotationBo.of(AnnotationKey.ARGS0.getCode(), event.getName()));
@@ -127,6 +130,7 @@ public class OtlpTraceSpanEventMapper {
 
         return spanEventBo;
     }
+
 
     public SpanEventBo map(long startTime, int parentDepth, Span.Link link) {
         SpanEventBo spanEventBo = new SpanEventBo();
@@ -144,7 +148,7 @@ public class OtlpTraceSpanEventMapper {
         annotationBoList.add(AnnotationBo.of(AnnotationKey.OPENTELEMETRY_START_TIME.getCode(), TimeUnit.MILLISECONDS.toNanos(startTime)));
         // attributes
         if (link.getAttributesCount() > 0) {
-            annotationBoList.add(AnnotationBo.of(AnnotationKey.OPENTELEMETRY_ATTRIBUTE.getCode(), OtlpTraceMapperUtils.getAttributeAnnotationValue(link.getAttributesList())));
+            OtlpTraceMapperUtils.addAttributesToAnnotation(objectMapper, link.getAttributesList(), annotationBoList);
         }
         spanEventBo.setAnnotationBoList(annotationBoList);
         spanEventBo.setDepth(parentDepth + 1);
@@ -161,21 +165,21 @@ public class OtlpTraceSpanEventMapper {
     }
 
     boolean isDatabase(Span span) {
-        return span.getAttributesList().stream().anyMatch(kv -> kv.getKey().equals("db.system"));
+        return span.getAttributesList().stream().anyMatch(kv -> kv.getKey().equals(OtlpTraceConstants.ATTRIBUTE_KEY_DB_SYSTEM));
     }
 
     boolean isDatabaseExecuteQuery(Span span) {
-        return span.getAttributesList().stream().anyMatch(kv -> kv.getKey().equals("db.statement"));
+        return span.getAttributesList().stream().anyMatch(kv -> kv.getKey().equals(OtlpTraceConstants.ATTRIBUTE_KEY_DB_STATEMENT));
     }
 
     String getClientSpanDbStatement(Span span) {
-        return span.getAttributesList().stream().filter(kv -> kv.getKey().equals("db.statement")).findFirst().map(kv -> kv.getValue().getStringValue()).orElse(null);
+        return span.getAttributesList().stream().filter(kv -> kv.getKey().equals(OtlpTraceConstants.ATTRIBUTE_KEY_DB_STATEMENT)).findFirst().map(kv -> kv.getValue().getStringValue()).orElse(null);
     }
 
     String getClientSpanToEndPoint(Span span) {
-        final String serverAddress = span.getAttributesList().stream().filter(kv -> kv.getKey().equals("server.address")).findFirst().map(kv -> kv.getValue().getStringValue()).orElse(null);
+        final String serverAddress = span.getAttributesList().stream().filter(kv -> kv.getKey().equals(OtlpTraceConstants.ATTRIBUTE_KEY_SERVER_ADDRESS)).findFirst().map(kv -> kv.getValue().getStringValue()).orElse(null);
         if (serverAddress != null) {
-            final Long serverPort = span.getAttributesList().stream().filter(kv -> kv.getKey().equals("server.port")).findFirst().map(kv -> kv.getValue().getIntValue()).orElse(0L);
+            final Long serverPort = span.getAttributesList().stream().filter(kv -> kv.getKey().equals(OtlpTraceConstants.ATTRIBUTE_KEY_SERVER_PORT)).findFirst().map(kv -> kv.getValue().getIntValue()).orElse(0L);
             return HostAndPort.toHostAndPortString(serverAddress, serverPort.intValue(), 0);
         }
 
@@ -183,14 +187,14 @@ public class OtlpTraceSpanEventMapper {
     }
 
     String getClientSpanToDestinationId(Span span) {
-        final String dbName = span.getAttributesList().stream().filter(kv -> kv.getKey().equals("db.name")).findFirst().map(kv -> kv.getValue().getStringValue()).orElse(null);
+        final String dbName = span.getAttributesList().stream().filter(kv -> kv.getKey().equals(OtlpTraceConstants.ATTRIBUTE_KEY_DB_NAME)).findFirst().map(kv -> kv.getValue().getStringValue()).orElse(null);
         if (dbName != null) {
             return dbName;
         }
 
-        final String serverAddress = span.getAttributesList().stream().filter(kv -> kv.getKey().equals("server.address")).findFirst().map(kv -> kv.getValue().getStringValue()).orElse(null);
+        final String serverAddress = span.getAttributesList().stream().filter(kv -> kv.getKey().equals(OtlpTraceConstants.ATTRIBUTE_KEY_SERVER_ADDRESS)).findFirst().map(kv -> kv.getValue().getStringValue()).orElse(null);
         if (serverAddress != null) {
-            final Long serverPort = span.getAttributesList().stream().filter(kv -> kv.getKey().equals("server.port")).findFirst().map(kv -> kv.getValue().getIntValue()).orElse(0L);
+            final Long serverPort = span.getAttributesList().stream().filter(kv -> kv.getKey().equals(OtlpTraceConstants.ATTRIBUTE_KEY_SERVER_PORT)).findFirst().map(kv -> kv.getValue().getIntValue()).orElse(0L);
             return HostAndPort.toHostAndPortString(serverAddress, serverPort.intValue(), 0);
         }
 

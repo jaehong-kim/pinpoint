@@ -16,12 +16,17 @@
 
 package com.navercorp.pinpoint.otlp.trace.collector.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navercorp.pinpoint.common.buffer.ByteArrayUtils;
+import com.navercorp.pinpoint.common.server.bo.AnnotationBo;
+import com.navercorp.pinpoint.common.trace.AnnotationKey;
 import com.navercorp.pinpoint.common.util.ArrayUtils;
 import io.opentelemetry.proto.common.v1.AnyValue;
+import io.opentelemetry.proto.common.v1.ArrayValue;
 import io.opentelemetry.proto.common.v1.KeyValue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,43 +66,37 @@ public class OtlpTraceMapperUtils {
         return ByteArrayUtils.bytesToLong(bytes, 0);
     }
 
-    public static String getAttributeAnnotationValue(List<KeyValue> keyValueList) {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        Map<String, Object> map = getAttributeToMap(keyValueList);
-        objectMapper.valueToS
-
-
-        StringBuilder sb = new StringBuilder();
-        for (KeyValue kv : keyValueList) {
-            // TODO add filter
-            if (kv.getKey().equals("exception.stacktrace") || kv.getKey().equals("db.user")) {
-                continue;
+    public static void addAttributesToAnnotation(ObjectMapper objectMapper, List<KeyValue> keyValueList, List<AnnotationBo> annotationBoList) {
+        try {
+            final Map<String, Object> map = getAttributeToMap(keyValueList);
+            if (!map.isEmpty()) {
+                map.entrySet().removeIf(entry -> OtlpTraceConstants.FILTERED_ATTRIBUTE_KEY_MAP.containsKey(entry.getKey()));
+                final String value = objectMapper.writeValueAsString(map);
+                annotationBoList.add(AnnotationBo.of(AnnotationKey.OPENTELEMETRY_ATTRIBUTE.getCode(), value));
             }
-
-            if (sb.isEmpty()) {
-                sb.append("{ ");
-            } else {
-                sb.append(" , ");
-            }
-            sb.append(getKeyValue(kv));
+        } catch (JsonProcessingException e) {
+            annotationBoList.add(AnnotationBo.of(AnnotationKey.OPENTELEMETRY_ATTRIBUTE.getCode(), "json processing error"));
         }
-        if (!sb.isEmpty()) {
-            sb.append(" }");
-        }
-        return sb.toString();
     }
+
 
     static Map<String, Object> getAttributeToMap(List<KeyValue> keyValueList) {
         Map<String, Object> map = new HashMap<>();
         for (KeyValue kv : keyValueList) {
-            map.put(kv.getKey(), getKeyValue(kv));
+            map.put(kv.getKey(), getAttriubteValueToValue(kv.getValue()));
         }
         return map;
     }
 
-    static Object getKeyValue(KeyValue keyValue) {
-        AnyValue anyValue = keyValue.getValue();
+    static List<Object> getArrayValueToList(ArrayValue arrayValue) {
+        List<Object> list = new ArrayList<>(arrayValue.getValuesList());
+        for (AnyValue anyValue : arrayValue.getValuesList()) {
+            list.add(getAttriubteValueToValue(anyValue));
+        }
+        return list;
+    }
+
+    static Object getAttriubteValueToValue(AnyValue anyValue) {
         if (anyValue.hasIntValue()) {
             return anyValue.getIntValue();
         } else if (anyValue.hasDoubleValue()) {
@@ -107,7 +106,7 @@ public class OtlpTraceMapperUtils {
         } else if (anyValue.hasStringValue()) {
             return anyValue.getStringValue();
         } else if (anyValue.hasArrayValue()) {
-            return anyValue.getArrayValue();
+            return getArrayValueToList(anyValue.getArrayValue());
         } else if (anyValue.hasBytesValue()) {
             return anyValue.getBytesValue();
         } else if (anyValue.hasKvlistValue()) {
