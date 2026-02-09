@@ -25,6 +25,7 @@ import com.navercorp.pinpoint.common.server.trace.OtelServerTraceId;
 import com.navercorp.pinpoint.common.trace.AnnotationKey;
 import com.navercorp.pinpoint.common.trace.ServiceType;
 import com.navercorp.pinpoint.common.util.StringUtils;
+import com.navercorp.pinpoint.io.SpanVersion;
 import io.opentelemetry.proto.common.v1.KeyValue;
 import io.opentelemetry.proto.trace.v1.Span;
 import io.opentelemetry.proto.trace.v1.Status;
@@ -50,7 +51,7 @@ public class OtlpTraceSpanMapper {
         final List<AnnotationBo> annotationBoList = new ArrayList<>();
         SpanBo spanBo = new SpanBo();
 
-        spanBo.setVersion(1); // TODO ?
+        spanBo.setVersion(SpanVersion.TRACE_V2); // TODO ?
         final AgentIdAndName agentIdAndName = OtlpTraceMapperUtils.getAgentId(resourceAttributesList);
         spanBo.setAgentId(agentIdAndName.agentId());
         if (agentIdAndName.agentName() != null) {
@@ -108,6 +109,7 @@ public class OtlpTraceSpanMapper {
         if (span.getAttributesCount() > 0) {
             OtlpTraceMapperUtils.addAttributesToAnnotation(objectMapper, span.getAttributesList(), annotationBoList);
         }
+
         // event
         for (Span.Event event : span.getEventsList()) {
             OtlpTraceMapperUtils.addEventToAnnotation(objectMapper, event, annotationBoList);
