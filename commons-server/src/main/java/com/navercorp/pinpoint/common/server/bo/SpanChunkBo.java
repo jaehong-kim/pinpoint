@@ -26,6 +26,7 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Woonduk Kang(emeroad)
@@ -47,6 +48,8 @@ public class SpanChunkBo implements BasicSpan {
     private long agentStartTime;
 
     private ServerTraceId transactionId;
+
+    private TraceSourceType traceSourceType = TraceSourceType.PINPOINT;
 
     private long spanId;
     private String endPoint;
@@ -128,6 +131,16 @@ public class SpanChunkBo implements BasicSpan {
 
     public void setTransactionId(ServerTraceId transactionId) {
         this.transactionId = transactionId;
+    }
+
+    @Override
+    public TraceSourceType getTraceSourceType() {
+        return traceSourceType;
+    }
+
+    @Override
+    public void setTraceSourceType(TraceSourceType traceSourceType) {
+        this.traceSourceType = Objects.requireNonNull(traceSourceType, "traceSourceType");
     }
 
     @Override
@@ -221,6 +234,7 @@ public class SpanChunkBo implements BasicSpan {
                 ", serviceName='" + serviceName + '\'' +
                 ", agentStartTime=" + agentStartTime +
                 ", transactionId=" + transactionId +
+                ", traceSourceType=" + traceSourceType +
                 ", spanId=" + spanId +
                 ", endPoint='" + endPoint + '\'' +
                 ", applicationServiceType=" + applicationServiceType +
