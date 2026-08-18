@@ -23,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -40,10 +41,19 @@ public class BasicLoginService {
 
     private final JwtService jwtService;
 
+    private final boolean jwtCookieHttpOnly;
+
+    private final boolean jwtCookieSecure;
+
+    private final String jwtCookieSameSite;
+
     public BasicLoginService(BasicLoginProperties basicLoginProperties) {
         this.pinpointMemoryUserDetailsService = new PinpointMemoryUserDetailsService(basicLoginProperties);
 
         this.jwtService = new JwtService(basicLoginProperties);
+        this.jwtCookieHttpOnly = basicLoginProperties.isJwtCookieHttpOnly();
+        this.jwtCookieSecure = basicLoginProperties.isJwtCookieSecure();
+        this.jwtCookieSameSite = basicLoginProperties.getJwtCookieSameSite();
     }
 
     public UserDetails getUserDetails(Cookie[] cookies) {
@@ -62,15 +72,14 @@ public class BasicLoginService {
                     if (expirationDate.getTime() > System.currentTimeMillis()) {
                         String userId = jwtService.getUserId(pinpointJwtToken);
 
-                        UserDetails userDetails = pinpointMemoryUserDetailsService.loadUserByUsername(String.valueOf(userId));
-                        if (userDetails != null) {
-                            return userDetails;
-                        }
+                        return pinpointMemoryUserDetailsService.loadUserByUsername(String.valueOf(userId));
                     } else {
                         logger.warn("This token already expired.");
                     }
                 } catch (ExpiredJwtException e) {
                     logger.warn("This token already expired. message:{}", e.getMessage(), e);
+                } catch (UsernameNotFoundException e) {
+                    logger.warn("Could not find user for JWT token. message:{}", e.getMessage());
                 }
             }
         }
@@ -87,6 +96,11 @@ public class BasicLoginService {
         String token = jwtService.createToken(userDetails);
         Cookie cookie = new Cookie(BasicLoginConstants.PINPOINT_JWT_COOKIE_NAME, token);
         cookie.setPath("/");
+        cookie.setHttpOnly(jwtCookieHttpOnly);
+        cookie.setSecure(jwtCookieSecure);
+        if (jwtCookieSameSite != null && !jwtCookieSameSite.isBlank()) {
+            cookie.setAttribute("SameSite", jwtCookieSameSite);
+        }
 
         long maxAge = TimeUnit.MILLISECONDS.toSeconds(jwtService.getExpirationTimeMillis());
         cookie.setMaxAge((int) maxAge);

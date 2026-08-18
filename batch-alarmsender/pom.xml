@@ -5,7 +5,7 @@
     <parent>
         <artifactId>pinpoint</artifactId>
         <groupId>com.navercorp.pinpoint</groupId>
-        <version>3.1.1-SNAPSHOT</version>
+        <version>3.1.1-alpha1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -42,6 +42,14 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seancfoley</groupId>
+            <artifactId>ipaddress</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

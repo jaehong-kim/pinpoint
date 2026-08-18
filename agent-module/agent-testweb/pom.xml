@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.navercorp.pinpoint</groupId>
         <artifactId>pinpoint-agent-module</artifactId>
-        <version>3.1.1-SNAPSHOT</version>
+        <version>3.1.1-alpha1</version>
     </parent>
 
     <artifactId>pinpoint-agent-testweb</artifactId>
@@ -60,6 +60,7 @@
         <module>dubbo-plugin-testweb</module>
         <module>spring-cloud-gateway-plugin-testweb</module>
         <module>spring-webflux-plugin-testweb</module>
+        <module>spring-boot2-plugin-testweb</module>
         <module>jdk-http-plugin-testweb</module>
         <module>jdk-httpclient-plugin-testweb</module>
         <module>vertx-3-plugin-testweb</module>

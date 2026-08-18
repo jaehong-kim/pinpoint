@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.navercorp.pinpoint</groupId>
         <artifactId>pinpoint-agent-module</artifactId>
-        <version>3.1.1-SNAPSHOT</version>
+        <version>3.1.1-alpha1</version>
     </parent>
 
     <artifactId>pinpoint-plugins</artifactId>
@@ -33,6 +33,7 @@
         <module>bom</module>
         <module>assembly</module>
         <module>common-servlet</module>
+        <module>reactor-seam-support</module>
         <module>external</module>
 
         <module>httpclient3</module>

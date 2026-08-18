@@ -19,6 +19,7 @@ package com.navercorp.pinpoint.profiler.instrument.classloading;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -45,14 +46,18 @@ final class ReflectionDefineClass implements DefineClass {
         }
         try {
             return (Class<?>) DEFINE_CLASS.invoke(classLoader, name, bytes, 0, bytes.length);
+        } catch (InvocationTargetException e) {
+            // unwrap: the message of the LinkageError/ClassFormatError thrown by the VM is on the cause
+            final Throwable cause = e.getCause() != null ? e.getCause() : e;
+            throw handleDefineClassFail(classLoader, name, cause);
         } catch (ReflectiveOperationException e) {
             throw handleDefineClassFail(classLoader, name, e);
         }
     }
 
-    private RuntimeException handleDefineClassFail(ClassLoader classLoader, String className, Exception e) {
-        logger.warn("{} define fail cl:{} Caused by:{}", className, classLoader, e.getMessage(), e);
-        return new RuntimeException(className + " define fail Caused by:" + e.getMessage(), e);
+    private RuntimeException handleDefineClassFail(ClassLoader classLoader, String className, Throwable cause) {
+        logger.warn("{} define fail cl:{} Caused by:{}", className, classLoader, cause.getMessage(), cause);
+        return new RuntimeException(className + " define fail Caused by:" + cause.getMessage(), cause);
     }
 
 

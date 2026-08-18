@@ -218,13 +218,7 @@ public class ASMMethod implements InstrumentMethod {
 
     @Override
     public void addInterceptor(int interceptorId) throws InstrumentException {
-        InterceptorHolderIdGenerator interceptorHolderIdGenerator = engineComponent.getInterceptorHolderIdGenerator();
-        final boolean isBootstrapInterceptorHolder = interceptorHolderIdGenerator.isBootstrapInterceptorHolder(interceptorId);
-        if (isBootstrapInterceptorHolder) {
-            logger.warn("Invalid using for bootstrap interceptor. interceptorId:{}", interceptorId);
-        }
-
-        final ASMInterceptorHolder interceptorHolder = new ASMInterceptorHolder(interceptorId, isBootstrapInterceptorHolder);
+        final ASMInterceptorHolder interceptorHolder = new ASMInterceptorHolder(interceptorId);
         final Class<? extends Interceptor> interceptorClass = interceptorHolder.loadInterceptorClass(this.declaringClass.getClassLoader());
         addInterceptor0(interceptorClass, interceptorHolder);
     }
@@ -251,13 +245,8 @@ public class ASMMethod implements InstrumentMethod {
         return ASMInterceptorHolder.create(interceptorHolderIdGenerator, declaringClass.getClassLoader(), factory, interceptorClass, constructorArgs, scopeInfo, descriptor);
     }
 
-    private void addInterceptor0(Class<? extends Interceptor> interceptorClass, ASMInterceptorHolder interceptorHolder) {
+    private void addInterceptor0(Class<? extends Interceptor> interceptorClass, ASMInterceptorHolder interceptorHolder) throws InstrumentException {
         Objects.requireNonNull(interceptorClass, "interceptorClass");
-
-        if(interceptorHolder.isEmpty()) {
-            logger.warn("Skip adding interceptor. 'interceptorHolder empty' class={}, interceptor={}", this.declaringClass.getName(), interceptorClass.getName());
-            return;
-        }
 
         final InterceptorDefinition interceptorDefinition = this.engineComponent.createInterceptorDefinition(interceptorClass);
         final CaptureType captureType = interceptorDefinition.getCaptureType();
@@ -272,8 +261,16 @@ public class ASMMethod implements InstrumentMethod {
         }
 
         int apiId = 0;
-        if (interceptorDefinition.getInterceptorType() == InterceptorType.API_ID_AWARE) {
+        final InterceptorType interceptorType = interceptorDefinition.getInterceptorType();
+        if (interceptorType == InterceptorType.API_ID_AWARE || interceptorType == InterceptorType.ASYNC_CONTEXT_API_ID_AWARE) {
             apiId = this.engineComponent.cacheApi(this.descriptor);
+        }
+
+        if (interceptorType == InterceptorType.RESULT_REPLACE && !this.methodNode.hasObjectOrArrayReturnType()) {
+            // constructors and void/primitive returns have no reference return value to replace.
+            throw new InstrumentException("result-replace interceptor requires an object or array return type."
+                    + " class=" + this.declaringClass.getName() + ", method=" + this.methodNode.getName() + this.methodNode.getDesc()
+                    + ", interceptor=" + interceptorClass.getName());
         }
 
         // add before interceptor.
